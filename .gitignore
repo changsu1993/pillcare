@@ -71,3 +71,4 @@ coverage/
 # Temporary
 tmp/
 temp/
+.env

@@ -18,14 +18,34 @@ export type AuthStackParamList = {
 export type AuthScreenProps<T extends keyof AuthStackParamList> =
   StackScreenProps<AuthStackParamList, T>;
 
-// Parent Navigator
-export type ParentTabParamList = {
+// Parent Navigator - Now using Stack inside Tabs
+export type ParentStackParamList = {
   Home: undefined;
   Settings: undefined;
+  FullScreenReminder: {
+    medicationId: string;
+    scheduledTime: string;
+  };
+  Confirmation: {
+    medicationName: string;
+    takenAt: string;
+  };
+  SkipReason: {
+    medicationId: string;
+    scheduledTime: string;
+  };
+  MedicationDetail: {
+    medicationId: string;
+  };
 };
 
-export type ParentScreenProps<T extends keyof ParentTabParamList> =
-  BottomTabScreenProps<ParentTabParamList, T>;
+export type ParentTabParamList = {
+  HomeTab: undefined;
+  SettingsTab: undefined;
+};
+
+export type ParentScreenProps<T extends keyof ParentStackParamList> =
+  StackScreenProps<ParentStackParamList, T>;
 
 // Child Navigator
 export type ChildTabParamList = {

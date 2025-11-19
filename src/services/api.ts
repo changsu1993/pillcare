@@ -11,7 +11,13 @@ import {
   Medication,
   MedicationLog,
   FamilyConnection,
+  NotificationSchedule,
 } from '../types/database.types';
+import {
+  scheduleMedicationNotifications,
+  cancelMedicationNotifications,
+  rescheduleMedicationNotifications,
+} from './notifications';
 
 /**
  * =====================================
@@ -359,4 +365,120 @@ export const updateUserProfile = async (
 
   if (error) throw error;
   return data;
+};
+
+/**
+ * =====================================
+ * NOTIFICATION SCHEDULING API
+ * =====================================
+ */
+
+// 로컬 스토리지에 알림 스케줄 저장 (AsyncStorage 사용)
+// TODO: 향후 Supabase에 저장하여 여러 기기 간 동기화
+const notificationSchedules: Map<string, string[]> = new Map();
+
+/**
+ * 약 생성 시 알림 자동 예약
+ */
+export const createMedicationWithNotifications = async (
+  medication: Omit<Medication, 'id' | 'created_at'>
+): Promise<{ medication: Medication; notificationIds: string[] }> => {
+  // 1. 약 정보 저장
+  const savedMedication = await createMedication(medication);
+
+  // 2. 알림 예약
+  try {
+    const notificationIds = await scheduleMedicationNotifications(
+      savedMedication
+    );
+    notificationSchedules.set(savedMedication.id, notificationIds);
+
+    console.log(
+      `약 생성 및 알림 예약 완료: ${savedMedication.name} (${notificationIds.length}개 알림)`
+    );
+
+    return { medication: savedMedication, notificationIds };
+  } catch (error) {
+    console.error('알림 예약 실패:', error);
+    // 알림 예약 실패해도 약은 저장됨
+    return { medication: savedMedication, notificationIds: [] };
+  }
+};
+
+/**
+ * 약 업데이트 시 알림 재예약
+ */
+export const updateMedicationWithNotifications = async (
+  medicationId: string,
+  updates: Partial<Medication>
+): Promise<{ medication: Medication; notificationIds: string[] }> => {
+  // 1. 약 정보 업데이트
+  const updatedMedication = await updateMedication(medicationId, updates);
+
+  // 2. 기존 알림 취소 후 재예약
+  try {
+    const oldNotificationIds = notificationSchedules.get(medicationId) || [];
+    const newNotificationIds = await rescheduleMedicationNotifications(
+      updatedMedication,
+      oldNotificationIds
+    );
+    notificationSchedules.set(medicationId, newNotificationIds);
+
+    console.log(
+      `약 업데이트 및 알림 재예약 완료: ${updatedMedication.name} (${newNotificationIds.length}개 알림)`
+    );
+
+    return { medication: updatedMedication, notificationIds: newNotificationIds };
+  } catch (error) {
+    console.error('알림 재예약 실패:', error);
+    return { medication: updatedMedication, notificationIds: [] };
+  }
+};
+
+/**
+ * 약 삭제 시 알림 자동 취소
+ */
+export const deleteMedicationWithNotifications = async (
+  medicationId: string
+): Promise<void> => {
+  // 1. 알림 취소
+  try {
+    const notificationIds = notificationSchedules.get(medicationId) || [];
+    if (notificationIds.length > 0) {
+      await cancelMedicationNotifications(notificationIds);
+      notificationSchedules.delete(medicationId);
+      console.log(`약 삭제 및 알림 취소 완료: ${medicationId}`);
+    }
+  } catch (error) {
+    console.error('알림 취소 실패:', error);
+  }
+
+  // 2. 약 삭제 (soft delete)
+  await deleteMedication(medicationId);
+};
+
+/**
+ * 모든 활성 약에 대해 알림 일괄 예약
+ * (앱 재시작 시 또는 권한 허용 직후 사용)
+ */
+export const scheduleAllMedicationNotifications = async (): Promise<void> => {
+  try {
+    const medications = await getMedications();
+
+    for (const medication of medications) {
+      if (medication.active && medication.reminder_times.length > 0) {
+        const notificationIds = await scheduleMedicationNotifications(
+          medication
+        );
+        notificationSchedules.set(medication.id, notificationIds);
+      }
+    }
+
+    console.log(
+      `총 ${medications.length}개 약의 알림이 예약되었습니다.`
+    );
+  } catch (error) {
+    console.error('일괄 알림 예약 실패:', error);
+    throw error;
+  }
 };

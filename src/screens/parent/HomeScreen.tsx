@@ -22,17 +22,21 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getTodayLogs } from '../../services/api';
+import { ParentScreenProps } from '../../types/navigation.types';
+import { MedicationLog } from '../../types/database.types';
 
-export default function ParentHomeScreen() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [medications, setMedications] = useState([]);
-  const [error, setError] = useState(null);
+type Props = ParentScreenProps<'Home'>;
+
+const ParentHomeScreen: React.FC<Props> = () => {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [medications, setMedications] = useState<MedicationLog[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadTodayMedications();
   }, []);
 
-  const loadTodayMedications = async () => {
+  const loadTodayMedications = async (): Promise<void> => {
     try {
       setIsLoading(true);
       setError(null);
@@ -130,7 +134,7 @@ export default function ParentHomeScreen() {
       </ScrollView>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -233,3 +237,5 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
   },
 });
+
+export default ParentHomeScreen;

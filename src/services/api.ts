@@ -6,6 +6,12 @@
  */
 
 import { supabase } from './supabase';
+import {
+  User,
+  Medication,
+  MedicationLog,
+  FamilyConnection,
+} from '../types/database.types';
 
 /**
  * =====================================
@@ -15,9 +21,8 @@ import { supabase } from './supabase';
 
 /**
  * Get all active medications for current user
- * @returns {Promise<Array>} List of medications
  */
-export const getMedications = async () => {
+export const getMedications = async (): Promise<Medication[]> => {
   const { data, error } = await supabase
     .from('medications')
     .select('*')
@@ -30,10 +35,8 @@ export const getMedications = async () => {
 
 /**
  * Get a single medication by ID
- * @param {string} medicationId
- * @returns {Promise<Object>} Medication object
  */
-export const getMedication = async (medicationId) => {
+export const getMedication = async (medicationId: string): Promise<Medication> => {
   const { data, error } = await supabase
     .from('medications')
     .select('*')
@@ -46,10 +49,10 @@ export const getMedication = async (medicationId) => {
 
 /**
  * Create a new medication
- * @param {Object} medication - Medication data
- * @returns {Promise<Object>} Created medication
  */
-export const createMedication = async (medication) => {
+export const createMedication = async (
+  medication: Omit<Medication, 'id' | 'created_at'>
+): Promise<Medication> => {
   const { data, error } = await supabase
     .from('medications')
     .insert([medication])
@@ -62,11 +65,11 @@ export const createMedication = async (medication) => {
 
 /**
  * Update a medication
- * @param {string} medicationId
- * @param {Object} updates - Fields to update
- * @returns {Promise<Object>} Updated medication
  */
-export const updateMedication = async (medicationId, updates) => {
+export const updateMedication = async (
+  medicationId: string,
+  updates: Partial<Medication>
+): Promise<Medication> => {
   const { data, error } = await supabase
     .from('medications')
     .update(updates)
@@ -80,10 +83,8 @@ export const updateMedication = async (medicationId, updates) => {
 
 /**
  * Delete a medication (soft delete - sets active = false)
- * @param {string} medicationId
- * @returns {Promise<void>}
  */
-export const deleteMedication = async (medicationId) => {
+export const deleteMedication = async (medicationId: string): Promise<void> => {
   const { error } = await supabase
     .from('medications')
     .update({ active: false })
@@ -100,15 +101,15 @@ export const deleteMedication = async (medicationId) => {
 
 /**
  * Get medication logs for a specific date range
- * @param {string} medicationId - Optional, filter by medication
- * @param {Date} startDate
- * @param {Date} endDate
- * @returns {Promise<Array>} List of logs
  */
-export const getMedicationLogs = async (medicationId, startDate, endDate) => {
+export const getMedicationLogs = async (
+  medicationId: string | null,
+  startDate?: Date,
+  endDate?: Date
+): Promise<MedicationLog[]> => {
   let query = supabase
     .from('medication_logs')
-    .select('*, medications(name, dosage, color)')
+    .select('*, medications(name, dosage)')
     .order('scheduled_at', { ascending: false });
 
   if (medicationId) {
@@ -131,9 +132,8 @@ export const getMedicationLogs = async (medicationId, startDate, endDate) => {
 
 /**
  * Get today's medication logs
- * @returns {Promise<Array>} Today's logs
  */
-export const getTodayLogs = async () => {
+export const getTodayLogs = async (): Promise<MedicationLog[]> => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -145,22 +145,25 @@ export const getTodayLogs = async () => {
 
 /**
  * Log a medication as taken
- * @param {string} medicationId
- * @param {Date} scheduledAt
- * @param {Date} takenAt - When actually taken (default: now)
- * @returns {Promise<Object>} Created log
  */
-export const logMedicationTaken = async (medicationId, scheduledAt, takenAt = new Date()) => {
-  const { data, error} = await supabase
+export const logMedicationTaken = async (
+  medicationId: string,
+  scheduledAt: Date,
+  takenAt: Date = new Date()
+): Promise<MedicationLog> => {
+  const { data, error } = await supabase
     .from('medication_logs')
-    .upsert({
-      medication_id: medicationId,
-      scheduled_at: scheduledAt.toISOString(),
-      taken: true,
-      taken_at: takenAt.toISOString(),
-    }, {
-      onConflict: 'medication_id,scheduled_at',
-    })
+    .upsert(
+      {
+        medication_id: medicationId,
+        scheduled_at: scheduledAt.toISOString(),
+        taken: true,
+        taken_at: takenAt.toISOString(),
+      },
+      {
+        onConflict: 'medication_id,scheduled_at',
+      }
+    )
     .select()
     .single();
 
@@ -170,22 +173,25 @@ export const logMedicationTaken = async (medicationId, scheduledAt, takenAt = ne
 
 /**
  * Log a medication as missed/skipped
- * @param {string} medicationId
- * @param {Date} scheduledAt
- * @param {string} reason - Skip reason ('forgot', 'no_medication', 'felt_sick', 'at_hospital', 'other')
- * @returns {Promise<Object>} Created log
  */
-export const logMedicationMissed = async (medicationId, scheduledAt, reason = null) => {
+export const logMedicationMissed = async (
+  medicationId: string,
+  scheduledAt: Date,
+  reason: string | null = null
+): Promise<MedicationLog> => {
   const { data, error } = await supabase
     .from('medication_logs')
-    .upsert({
-      medication_id: medicationId,
-      scheduled_at: scheduledAt.toISOString(),
-      taken: false,
-      skipped_reason: reason,
-    }, {
-      onConflict: 'medication_id,scheduled_at',
-    })
+    .upsert(
+      {
+        medication_id: medicationId,
+        scheduled_at: scheduledAt.toISOString(),
+        taken: false,
+        skipped_reason: reason,
+      },
+      {
+        onConflict: 'medication_id,scheduled_at',
+      }
+    )
     .select()
     .single();
 
@@ -201,16 +207,17 @@ export const logMedicationMissed = async (medicationId, scheduledAt, reason = nu
 
 /**
  * Get all family connections for current user
- * @returns {Promise<Array>} List of connections
  */
-export const getFamilyConnections = async () => {
+export const getFamilyConnections = async (): Promise<FamilyConnection[]> => {
   const { data, error } = await supabase
     .from('family_connections')
-    .select(`
+    .select(
+      `
       *,
-      parent:parent_user_id(id, name, email, phone),
-      child:child_user_id(id, name, email, phone)
-    `)
+      parent:parent_id(id, name, email, phone_number),
+      child:child_id(id, name, email, phone_number)
+    `
+    )
     .eq('status', 'active');
 
   if (error) throw error;
@@ -219,16 +226,18 @@ export const getFamilyConnections = async () => {
 
 /**
  * Create a family connection invitation (child creates code)
- * @returns {Promise<Object>} Invitation with code
  */
-export const createFamilyInvitation = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
+export const createFamilyInvitation = async (): Promise<FamilyConnection> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) throw new Error('Not authenticated');
 
   // Call database function to generate unique code
-  const { data: code, error: codeError } = await supabase
-    .rpc('generate_invitation_code');
+  const { data: code, error: codeError } = await supabase.rpc(
+    'generate_invitation_code'
+  );
 
   if (codeError) throw codeError;
 
@@ -238,8 +247,8 @@ export const createFamilyInvitation = async () => {
   const { data, error } = await supabase
     .from('family_connections')
     .insert({
-      child_user_id: user.id,
-      parent_user_id: null, // Will be filled when parent accepts
+      child_id: user.id,
+      parent_id: null, // Will be filled when parent accepts
       invitation_code: code,
       invitation_expires_at: expiresAt.toISOString(),
       status: 'pending',
@@ -253,11 +262,13 @@ export const createFamilyInvitation = async () => {
 
 /**
  * Accept a family invitation (parent enters code)
- * @param {string} invitationCode - 6-digit code
- * @returns {Promise<Object>} Accepted connection
  */
-export const acceptFamilyInvitation = async (invitationCode) => {
-  const { data: { user } } = await supabase.auth.getUser();
+export const acceptFamilyInvitation = async (
+  invitationCode: string
+): Promise<FamilyConnection> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) throw new Error('Not authenticated');
 
@@ -276,7 +287,7 @@ export const acceptFamilyInvitation = async (invitationCode) => {
   const { data, error } = await supabase
     .from('family_connections')
     .update({
-      parent_user_id: user.id,
+      parent_id: user.id,
       status: 'active',
     })
     .eq('id', invitation.id)
@@ -289,10 +300,10 @@ export const acceptFamilyInvitation = async (invitationCode) => {
 
 /**
  * Remove a family connection
- * @param {string} connectionId
- * @returns {Promise<void>}
  */
-export const removeFamilyConnection = async (connectionId) => {
+export const removeFamilyConnection = async (
+  connectionId: string
+): Promise<void> => {
   const { error } = await supabase
     .from('family_connections')
     .update({ status: 'inactive' })
@@ -309,10 +320,11 @@ export const removeFamilyConnection = async (connectionId) => {
 
 /**
  * Get current user profile
- * @returns {Promise<Object>} User profile
  */
-export const getUserProfile = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
+export const getUserProfile = async (): Promise<User> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) throw new Error('Not authenticated');
 
@@ -328,11 +340,13 @@ export const getUserProfile = async () => {
 
 /**
  * Update user profile
- * @param {Object} updates - Fields to update
- * @returns {Promise<Object>} Updated profile
  */
-export const updateUserProfile = async (updates) => {
-  const { data: { user } } = await supabase.auth.getUser();
+export const updateUserProfile = async (
+  updates: Partial<User>
+): Promise<User> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) throw new Error('Not authenticated');
 

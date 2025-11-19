@@ -14,30 +14,35 @@
 
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-// Screens (placeholders for now)
-import ChildTimelineScreen from '../screens/child/TimelineScreen';
-// import ChildRecordsScreen from '../screens/child/RecordsScreen';
-// import ChildSettingsScreen from '../screens/child/SettingsScreen';
+// Types
+import { ChildTabParamList } from '../types/navigation.types';
 
-const Tab = createBottomTabNavigator();
+// Screens
+import ChildTimelineScreen from '../screens/child/TimelineScreen';
+
+const Tab = createBottomTabNavigator<ChildTabParamList>();
 
 // Placeholder screens
-const PlaceholderRecords = () => (
-  <Text style={{ fontSize: 18, textAlign: 'center', marginTop: 100 }}>
-    복약 기록 화면 (준비 중)
-  </Text>
+const PlaceholderRecords: React.FC = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Text style={{ fontSize: 18, textAlign: 'center' }}>
+      복약 기록 화면 (준비 중)
+    </Text>
+  </View>
 );
 
-const PlaceholderSettings = () => (
-  <Text style={{ fontSize: 18, textAlign: 'center', marginTop: 100 }}>
-    설정 화면 (준비 중)
-  </Text>
+const PlaceholderSettings: React.FC = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Text style={{ fontSize: 18, textAlign: 'center' }}>
+      설정 화면 (준비 중)
+    </Text>
+  </View>
 );
 
-export default function ChildNavigator() {
+const ChildNavigator: React.FC = () => {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -99,4 +104,6 @@ export default function ChildNavigator() {
       />
     </Tab.Navigator>
   );
-}
+};
+
+export default ChildNavigator;

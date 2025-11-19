@@ -13,23 +13,27 @@
 
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-// Screens (placeholders for now)
-import ParentHomeScreen from '../screens/parent/HomeScreen';
-// import ParentSettingsScreen from '../screens/parent/SettingsScreen';
+// Types
+import { ParentTabParamList } from '../types/navigation.types';
 
-const Tab = createBottomTabNavigator();
+// Screens
+import ParentHomeScreen from '../screens/parent/HomeScreen';
+
+const Tab = createBottomTabNavigator<ParentTabParamList>();
 
 // Placeholder for Settings screen
-const PlaceholderSettings = () => (
-  <Text style={{ fontSize: 24, textAlign: 'center', marginTop: 100 }}>
-    설정 화면 (준비 중)
-  </Text>
+const PlaceholderSettings: React.FC = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Text style={{ fontSize: 24, textAlign: 'center' }}>
+      설정 화면 (준비 중)
+    </Text>
+  </View>
 );
 
-export default function ParentNavigator() {
+const ParentNavigator: React.FC = () => {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -82,4 +86,6 @@ export default function ParentNavigator() {
       />
     </Tab.Navigator>
   );
-}
+};
+
+export default ParentNavigator;

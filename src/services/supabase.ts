@@ -8,7 +8,7 @@
 
 import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
@@ -40,21 +40,20 @@ export const supabase = createClient(
 
 /**
  * Get current authenticated user
- * @returns {Promise<Object|null>} User object or null
  */
-export const getCurrentUser = async () => {
+export const getCurrentUser = async (): Promise<User | null> => {
   const { data: { user } } = await supabase.auth.getUser();
   return user;
 };
 
 /**
  * Sign up with email and password
- * @param {string} email
- * @param {string} password
- * @param {Object} metadata - Additional user metadata
- * @returns {Promise<Object>} Auth response
  */
-export const signUp = async (email, password, metadata = {}) => {
+export const signUp = async (
+  email: string,
+  password: string,
+  metadata: Record<string, any> = {}
+) => {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -69,11 +68,8 @@ export const signUp = async (email, password, metadata = {}) => {
 
 /**
  * Sign in with email and password
- * @param {string} email
- * @param {string} password
- * @returns {Promise<Object>} Auth response
  */
-export const signIn = async (email, password) => {
+export const signIn = async (email: string, password: string) => {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -85,19 +81,18 @@ export const signIn = async (email, password) => {
 
 /**
  * Sign out current user
- * @returns {Promise<void>}
  */
-export const signOut = async () => {
+export const signOut = async (): Promise<void> => {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
 };
 
 /**
  * Listen to auth state changes
- * @param {Function} callback - Called when auth state changes
- * @returns {Object} Subscription object (call .unsubscribe() to stop listening)
  */
-export const onAuthStateChange = (callback) => {
+export const onAuthStateChange = (
+  callback: (event: AuthChangeEvent, session: Session | null) => void
+) => {
   return supabase.auth.onAuthStateChange(callback);
 };
 

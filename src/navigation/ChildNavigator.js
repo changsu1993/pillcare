@@ -15,6 +15,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 // Screens (placeholders for now)
 import ChildTimelineScreen from '../screens/child/TimelineScreen';
@@ -67,6 +68,9 @@ export default function ChildNavigator() {
           title: '부모님 복약 현황',
           tabBarLabel: '타임라인',
           headerShown: true,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="time-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -76,6 +80,9 @@ export default function ChildNavigator() {
           title: '복약 기록',
           tabBarLabel: '기록',
           headerShown: true,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="bar-chart-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -85,6 +92,9 @@ export default function ChildNavigator() {
           title: '설정',
           tabBarLabel: '설정',
           headerShown: true,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings-outline" size={size} color={color} />
+          ),
         }}
       />
     </Tab.Navigator>

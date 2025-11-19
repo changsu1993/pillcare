@@ -14,6 +14,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 // Screens (placeholders for now)
 import ParentHomeScreen from '../screens/parent/HomeScreen';
@@ -43,6 +44,9 @@ export default function ParentNavigator() {
         },
         tabBarActiveTintColor: '#22C55E', // Success green
         tabBarInactiveTintColor: '#9CA3AF', // Medium gray
+        tabBarIconStyle: {
+          marginTop: 4,
+        },
         headerStyle: {
           height: 64,
         },
@@ -59,6 +63,9 @@ export default function ParentNavigator() {
           title: '오늘의 약',
           tabBarLabel: '홈',
           headerShown: true,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="medical" size={size + 8} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -68,6 +75,9 @@ export default function ParentNavigator() {
           title: '설정',
           tabBarLabel: '설정',
           headerShown: true,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings" size={size + 8} color={color} />
+          ),
         }}
       />
     </Tab.Navigator>

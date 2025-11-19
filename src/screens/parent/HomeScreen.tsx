@@ -20,6 +20,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getTodayLogs, scheduleAllMedicationNotifications } from '../../services/api';
@@ -51,11 +52,17 @@ const ParentHomeScreen: React.FC<Props> = () => {
       setHasNotificationPermission(hasPermission);
 
       if (!hasPermission) {
-        // 권한이 없으면 안내 메시지 표시
+        // 권한이 없으면 안내 메시지 표시 및 설정으로 이동 옵션 제공
         Alert.alert(
           '알림 권한 필요',
-          '약 복용 알림을 받으려면 알림 권한이 필요합니다.\n\n설정 > PillCare > 알림에서 권한을 허용해주세요.',
-          [{ text: '확인' }]
+          '약 복용 알림을 받으려면 알림 권한이 필요합니다.',
+          [
+            { text: '나중에', style: 'cancel' },
+            {
+              text: '설정으로 이동',
+              onPress: () => Linking.openSettings(),
+            },
+          ]
         );
       } else {
         // 권한이 있으면 모든 약의 알림 예약
@@ -168,11 +175,14 @@ const ParentHomeScreen: React.FC<Props> = () => {
             <Text style={styles.permissionWarningText}>
               ⚠️ 알림 권한이 필요합니다
             </Text>
+            <Text style={styles.permissionWarningSubtext}>
+              약 복용 알림을 받으려면 설정에서 권한을 허용해주세요.
+            </Text>
             <TouchableOpacity
               style={styles.permissionButton}
-              onPress={checkNotificationPermissions}
+              onPress={() => Linking.openSettings()}
             >
-              <Text style={styles.permissionButtonText}>권한 요청</Text>
+              <Text style={styles.permissionButtonText}>설정으로 이동</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -349,11 +359,18 @@ const styles = StyleSheet.create({
     borderColor: '#F59E0B',
   },
   permissionWarningText: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '700',
     color: '#92400E',
-    marginBottom: 12,
+    marginBottom: 8,
     textAlign: 'center',
+  },
+  permissionWarningSubtext: {
+    fontSize: 16,
+    color: '#92400E',
+    marginBottom: 16,
+    textAlign: 'center',
+    lineHeight: 22,
   },
   permissionButton: {
     backgroundColor: '#F59E0B',

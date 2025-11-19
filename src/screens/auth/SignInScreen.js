@@ -18,7 +18,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { SafeAreaView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { signIn } from '../../services/supabase';
 
 export default function SignInScreen({ navigation }) {

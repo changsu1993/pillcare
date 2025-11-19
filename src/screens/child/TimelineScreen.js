@@ -19,9 +19,9 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  SafeAreaView,
   RefreshControl,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { getTodayLogs, getFamilyConnections } from '../../services/api';
 
 export default function ChildTimelineScreen() {

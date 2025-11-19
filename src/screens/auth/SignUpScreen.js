@@ -18,7 +18,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { SafeAreaView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { signUp } from '../../services/supabase';
 import { supabase } from '../../services/supabase';
 

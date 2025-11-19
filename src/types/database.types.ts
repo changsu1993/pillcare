@@ -75,3 +75,17 @@ export interface PaginatedResponse<T> {
   count: number;
   error: Error | null;
 }
+
+// Notification types
+export interface NotificationData {
+  medicationId: string;
+  medicationName: string;
+  dosage: string;
+  scheduledTime: string;
+  type: 'medication_reminder';
+}
+
+export interface NotificationSchedule {
+  medicationId: string;
+  notificationIds: string[];
+}

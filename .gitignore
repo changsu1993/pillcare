@@ -39,3 +39,35 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Database
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+data/*.db
+
+# Backend secrets
+backend/firebase/service-account.json
+backend/supabase/.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Testing
+coverage/
+.playwright/
+
+# MCP logs
+.claude/*.log
+
+# Temporary
+tmp/
+temp/

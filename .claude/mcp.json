@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "sqlite": {
+      "command": "mcp-server-sqlite",
+      "args": ["./data/pillcare.db"],
+      "env": {},
+      "description": "로컬 데이터베이스 관리 (복약 기록, 사용자 정보 등)"
+    },
+    "filesystem": {
+      "command": "mcp-server-filesystem",
+      "args": ["./"],
+      "env": {},
+      "description": "프로젝트 파일 시스템 접근"
+    },
+    "git": {
+      "command": "mcp-server-git",
+      "args": ["./"],
+      "env": {},
+      "description": "Git 버전 관리"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-playwright"],
+      "env": {},
+      "description": "자동화된 E2E 테스트"
+    }
+  }
+}

@@ -1,12 +1,18 @@
 {
   "name": "pillcare",
-  "version": "1.0.0",
+  "version": "0.1.0",
+  "description": "Medication and healthcare management for elderly parents",
   "main": "index.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "jest",
+    "test:e2e": "playwright test",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "setup-mcp": "./setup-mcp.sh"
   },
   "dependencies": {
     "expo": "~54.0.25",
@@ -14,5 +20,24 @@
     "react": "19.1.0",
     "react-native": "0.81.5"
   },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/react": "^18.2.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "healthcare",
+    "medication",
+    "elderly",
+    "react-native",
+    "expo"
+  ],
+  "author": "Park Changsu",
+  "license": "MIT",
   "private": true
 }

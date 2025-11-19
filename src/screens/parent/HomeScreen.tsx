@@ -152,13 +152,55 @@ const ParentHomeScreen: React.FC<Props> = () => {
   if (medications.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyEmoji}>✓</Text>
-          <Text style={styles.emptyText}>
-            오늘 드실 약이{'\n'}
-            없습니다
-          </Text>
-        </View>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* 알림 권한 경고 (권한이 없을 때만 표시) */}
+          {!hasNotificationPermission && (
+            <View style={styles.permissionWarning}>
+              <Text style={styles.permissionWarningText}>
+                ⚠️ 알림 권한이 필요합니다
+              </Text>
+              <Text style={styles.permissionWarningSubtext}>
+                약 복용 알림을 받으려면 설정에서 권한을 허용해주세요.
+              </Text>
+              <TouchableOpacity
+                style={styles.permissionButton}
+                onPress={() => Linking.openSettings()}
+              >
+                <Text style={styles.permissionButtonText}>설정으로 이동</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* 개발/테스트용 버튼 */}
+          <View style={styles.devContainer}>
+            <Text style={styles.devTitle}>개발자 도구</Text>
+            <View style={styles.devButtons}>
+              <TouchableOpacity
+                style={styles.devButton}
+                onPress={handleTestNotification}
+              >
+                <Text style={styles.devButtonText}>테스트 알림</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.devButton}
+                onPress={handleCheckScheduledNotifications}
+              >
+                <Text style={styles.devButtonText}>예약된 알림 확인</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyEmoji}>✓</Text>
+            <Text style={styles.emptyText}>
+              오늘 드실 약이{'\n'}
+              없습니다
+            </Text>
+          </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -187,26 +229,24 @@ const ParentHomeScreen: React.FC<Props> = () => {
           </View>
         )}
 
-        {/* 개발/테스트용 버튼 (MVP 이후 제거) */}
-        {__DEV__ && (
-          <View style={styles.devContainer}>
-            <Text style={styles.devTitle}>개발자 도구</Text>
-            <View style={styles.devButtons}>
-              <TouchableOpacity
-                style={styles.devButton}
-                onPress={handleTestNotification}
-              >
-                <Text style={styles.devButtonText}>테스트 알림</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.devButton}
-                onPress={handleCheckScheduledNotifications}
-              >
-                <Text style={styles.devButtonText}>예약된 알림 확인</Text>
-              </TouchableOpacity>
-            </View>
+        {/* 개발/테스트용 버튼 */}
+        <View style={styles.devContainer}>
+          <Text style={styles.devTitle}>개발자 도구</Text>
+          <View style={styles.devButtons}>
+            <TouchableOpacity
+              style={styles.devButton}
+              onPress={handleTestNotification}
+            >
+              <Text style={styles.devButtonText}>테스트 알림</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.devButton}
+              onPress={handleCheckScheduledNotifications}
+            >
+              <Text style={styles.devButtonText}>예약된 알림 확인</Text>
+            </TouchableOpacity>
           </View>
-        )}
+        </View>
 
         {/* Medication list */}
         {medications.map((med) => (
@@ -292,9 +332,9 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   emptyContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 60,
   },
   emptyEmoji: {
     fontSize: 80,

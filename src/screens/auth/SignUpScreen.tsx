@@ -20,7 +20,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { signUp } from '../../services/supabase';
-import { supabase } from '../../services/supabase';
 import { AuthScreenProps } from '../../types/navigation.types';
 import { UserRole } from '../../types/database.types';
 
@@ -56,29 +55,16 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
       setIsLoading(true);
 
       // Sign up with Supabase
+      // The database trigger will automatically create the user profile
       const data = await signUp(email.trim(), password, {
         name: name.trim(),
         phone: phone.trim(),
+        role: role, // Include role in metadata for trigger
       });
 
       if (!data?.user) {
         throw new Error('회원가입에 실패했습니다.');
       }
-
-      // Create user profile in users table
-      const { error: profileError } = await supabase
-        .from('users')
-        .insert([
-          {
-            id: data.user.id,
-            email: email.trim(),
-            name: name.trim(),
-            phone_number: phone.trim() || null,
-            role: role,
-          },
-        ]);
-
-      if (profileError) throw profileError;
 
       Alert.alert(
         '회원가입 완료',

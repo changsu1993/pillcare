@@ -10,10 +10,10 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
-// Screens (placeholders for now)
+// Screens
 import WelcomeScreen from '../screens/auth/WelcomeScreen';
-// import SignInScreen from '../screens/auth/SignInScreen';
-// import SignUpScreen from '../screens/auth/SignUpScreen';
+import SignInScreen from '../screens/auth/SignInScreen';
+import SignUpScreen from '../screens/auth/SignUpScreen';
 
 const Stack = createStackNavigator();
 
@@ -30,7 +30,16 @@ export default function AuthNavigator() {
         component={WelcomeScreen}
         options={{ title: 'PillCare에 오신 것을 환영합니다' }}
       />
-      {/* TODO: Add SignIn and SignUp screens */}
+      <Stack.Screen
+        name="SignIn"
+        component={SignInScreen}
+        options={{ title: '로그인' }}
+      />
+      <Stack.Screen
+        name="SignUp"
+        component={SignUpScreen}
+        options={{ title: '회원가입' }}
+      />
     </Stack.Navigator>
   );
 }

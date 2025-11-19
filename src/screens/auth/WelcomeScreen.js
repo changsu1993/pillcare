@@ -41,20 +41,14 @@ export default function WelcomeScreen({ navigation }) {
         <View style={styles.actions}>
           <TouchableOpacity
             style={[styles.button, styles.primaryButton]}
-            onPress={() => {
-              // TODO: Navigate to SignUp screen
-              console.log('Navigate to SignUp');
-            }}
+            onPress={() => navigation.navigate('SignUp')}
           >
             <Text style={styles.primaryButtonText}>시작하기</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.button, styles.secondaryButton]}
-            onPress={() => {
-              // TODO: Navigate to SignIn screen
-              console.log('Navigate to SignIn');
-            }}
+            onPress={() => navigation.navigate('SignIn')}
           >
             <Text style={styles.secondaryButtonText}>로그인</Text>
           </TouchableOpacity>

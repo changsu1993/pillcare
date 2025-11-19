@@ -13,8 +13,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AuthScreenProps } from '../../types/navigation.types';
 
-export default function WelcomeScreen({ navigation }) {
+type Props = AuthScreenProps<'Welcome'>;
+
+const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -56,7 +59,7 @@ export default function WelcomeScreen({ navigation }) {
       </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -126,3 +129,5 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
   },
 });
+
+export default WelcomeScreen;

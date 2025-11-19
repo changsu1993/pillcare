@@ -20,13 +20,16 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { signIn } from '../../services/supabase';
+import { AuthScreenProps } from '../../types/navigation.types';
 
-export default function SignInScreen({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+type Props = AuthScreenProps<'SignIn'>;
 
-  const handleSignIn = async () => {
+const SignInScreen: React.FC<Props> = ({ navigation }) => {
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const handleSignIn = async (): Promise<void> => {
     // Validation
     if (!email.trim() || !password.trim()) {
       Alert.alert('입력 오류', '이메일과 비밀번호를 입력해주세요.');
@@ -39,10 +42,11 @@ export default function SignInScreen({ navigation }) {
       // Navigation will be handled automatically by App.js auth state change
     } catch (error) {
       console.error('Sign in error:', error);
-      Alert.alert(
-        '로그인 실패',
-        error.message || '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.'
-      );
+      const errorMessage = error instanceof Error
+        ? error.message
+        : '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.';
+
+      Alert.alert('로그인 실패', errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -132,7 +136,7 @@ export default function SignInScreen({ navigation }) {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -223,3 +227,5 @@ const styles = StyleSheet.create({
     color: '#3B82F6',
   },
 });
+
+export default SignInScreen;

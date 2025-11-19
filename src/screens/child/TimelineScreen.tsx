@@ -23,19 +23,23 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getTodayLogs, getFamilyConnections } from '../../services/api';
+import { ChildScreenProps } from '../../types/navigation.types';
+import { MedicationLog, User } from '../../types/database.types';
 
-export default function ChildTimelineScreen() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [medications, setMedications] = useState([]);
-  const [parentInfo, setParentInfo] = useState(null);
-  const [error, setError] = useState(null);
+type Props = ChildScreenProps<'Timeline'>;
+
+const ChildTimelineScreen: React.FC<Props> = () => {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [medications, setMedications] = useState<MedicationLog[]>([]);
+  const [parentInfo, setParentInfo] = useState<User | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
   }, []);
 
-  const loadData = async () => {
+  const loadData = async (): Promise<void> => {
     try {
       setIsLoading(true);
       setError(null);
@@ -46,7 +50,7 @@ export default function ChildTimelineScreen() {
         getTodayLogs(),
       ]);
 
-      if (connections.length > 0) {
+      if (connections.length > 0 && connections[0].parent) {
         setParentInfo(connections[0].parent);
       }
 
@@ -59,13 +63,13 @@ export default function ChildTimelineScreen() {
     }
   };
 
-  const onRefresh = async () => {
+  const onRefresh = async (): Promise<void> => {
     setRefreshing(true);
     await loadData();
     setRefreshing(false);
   };
 
-  const calculateAdherence = () => {
+  const calculateAdherence = (): number => {
     if (medications.length === 0) return 0;
     const takenCount = medications.filter((m) => m.taken).length;
     return Math.round((takenCount / medications.length) * 100);
@@ -200,7 +204,7 @@ export default function ChildTimelineScreen() {
       </ScrollView>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -389,3 +393,5 @@ const styles = StyleSheet.create({
     color: '#22C55E',
   },
 });
+
+export default ChildTimelineScreen;

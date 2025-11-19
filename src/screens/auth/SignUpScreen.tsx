@@ -21,17 +21,21 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { signUp } from '../../services/supabase';
 import { supabase } from '../../services/supabase';
+import { AuthScreenProps } from '../../types/navigation.types';
+import { UserRole } from '../../types/database.types';
 
-export default function SignUpScreen({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [role, setRole] = useState('child'); // Default to 'child'
-  const [isLoading, setIsLoading] = useState(false);
+type Props = AuthScreenProps<'SignUp'>;
 
-  const handleSignUp = async () => {
+const SignUpScreen: React.FC<Props> = ({ navigation }) => {
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [phone, setPhone] = useState<string>('');
+  const [role, setRole] = useState<UserRole>('child'); // Default to 'child'
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const handleSignUp = async (): Promise<void> => {
     // Validation
     if (!email.trim() || !password || !name.trim()) {
       Alert.alert('입력 오류', '필수 항목을 모두 입력해주세요.');
@@ -52,12 +56,14 @@ export default function SignUpScreen({ navigation }) {
       setIsLoading(true);
 
       // Sign up with Supabase
-      const { data, error } = await signUp(email.trim(), password, {
+      const data = await signUp(email.trim(), password, {
         name: name.trim(),
         phone: phone.trim(),
       });
 
-      if (error) throw error;
+      if (!data?.user) {
+        throw new Error('회원가입에 실패했습니다.');
+      }
 
       // Create user profile in users table
       const { error: profileError } = await supabase
@@ -67,7 +73,7 @@ export default function SignUpScreen({ navigation }) {
             id: data.user.id,
             email: email.trim(),
             name: name.trim(),
-            phone: phone.trim() || null,
+            phone_number: phone.trim() || null,
             role: role,
           },
         ]);
@@ -86,10 +92,11 @@ export default function SignUpScreen({ navigation }) {
       );
     } catch (error) {
       console.error('Sign up error:', error);
-      Alert.alert(
-        '회원가입 실패',
-        error.message || '회원가입에 실패했습니다. 다시 시도해주세요.'
-      );
+      const errorMessage = error instanceof Error
+        ? error.message
+        : '회원가입에 실패했습니다. 다시 시도해주세요.';
+
+      Alert.alert('회원가입 실패', errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -264,7 +271,7 @@ export default function SignUpScreen({ navigation }) {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -381,3 +388,5 @@ const styles = StyleSheet.create({
     color: '#3B82F6',
   },
 });
+
+export default SignUpScreen;

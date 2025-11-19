@@ -10,14 +10,17 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
+// Types
+import { AuthStackParamList } from '../types/navigation.types';
+
 // Screens
 import WelcomeScreen from '../screens/auth/WelcomeScreen';
 import SignInScreen from '../screens/auth/SignInScreen';
 import SignUpScreen from '../screens/auth/SignUpScreen';
 
-const Stack = createStackNavigator();
+const Stack = createStackNavigator<AuthStackParamList>();
 
-export default function AuthNavigator() {
+const AuthNavigator: React.FC = () => {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -42,4 +45,6 @@ export default function AuthNavigator() {
       />
     </Stack.Navigator>
   );
-}
+};
+
+export default AuthNavigator;

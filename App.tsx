@@ -11,10 +11,14 @@ import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
+import { User } from '@supabase/supabase-js';
 
 // Services
 import { getCurrentUser, onAuthStateChange } from './src/services/supabase';
 import { getUserProfile } from './src/services/api';
+
+// Types
+import { UserRole } from './src/types/database.types';
 
 // Navigation
 import ParentNavigator from './src/navigation/ParentNavigator';
@@ -22,9 +26,9 @@ import ChildNavigator from './src/navigation/ChildNavigator';
 import AuthNavigator from './src/navigation/AuthNavigator';
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState(null);
-  const [userRole, setUserRole] = useState(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
 
   useEffect(() => {
     // Check initial auth state
@@ -65,10 +69,10 @@ export default function App() {
     }
   };
 
-  const loadUserRole = async (userId) => {
+  const loadUserRole = async (userId: string) => {
     try {
       const profile = await getUserProfile();
-      setUserRole(profile?.role);
+      setUserRole(profile?.role || null);
       console.log('User role:', profile?.role);
     } catch (error) {
       console.error('Error loading user role:', error);

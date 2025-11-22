@@ -19,11 +19,18 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getTodayLogs } from '../../services/api';
+import { getTodayLogs, scheduleAllMedicationNotifications } from '../../services/api';
 import { ParentScreenProps } from '../../types/navigation.types';
 import { MedicationLog } from '../../types/database.types';
+import {
+  requestNotificationPermissions,
+  sendTestNotification,
+  getAllScheduledNotifications,
+} from '../../services/notifications';
 
 type Props = ParentScreenProps<'Home'>;
 
@@ -31,10 +38,45 @@ const ParentHomeScreen: React.FC<Props> = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [medications, setMedications] = useState<MedicationLog[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [hasNotificationPermission, setHasNotificationPermission] =
+    useState<boolean>(false);
 
   useEffect(() => {
     loadTodayMedications();
+    checkNotificationPermissions();
   }, []);
+
+  const checkNotificationPermissions = async (): Promise<void> => {
+    try {
+      const hasPermission = await requestNotificationPermissions();
+      setHasNotificationPermission(hasPermission);
+
+      if (!hasPermission) {
+        // 권한이 없으면 안내 메시지 표시 및 설정으로 이동 옵션 제공
+        Alert.alert(
+          '알림 권한 필요',
+          '약 복용 알림을 받으려면 알림 권한이 필요합니다.',
+          [
+            { text: '나중에', style: 'cancel' },
+            {
+              text: '설정으로 이동',
+              onPress: () => Linking.openSettings(),
+            },
+          ]
+        );
+      } else {
+        // 권한이 있으면 모든 약의 알림 예약
+        try {
+          await scheduleAllMedicationNotifications();
+          console.log('모든 약의 알림이 예약되었습니다.');
+        } catch (error) {
+          console.error('알림 예약 실패:', error);
+        }
+      }
+    } catch (error) {
+      console.error('알림 권한 확인 실패:', error);
+    }
+  };
 
   const loadTodayMedications = async (): Promise<void> => {
     try {
@@ -47,6 +89,39 @@ const ParentHomeScreen: React.FC<Props> = () => {
       setError('복약 정보를 불러올 수 없습니다');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  /**
+   * 테스트 알림 전송 (개발/디버깅용)
+   */
+  const handleTestNotification = async (): Promise<void> => {
+    try {
+      await sendTestNotification();
+      Alert.alert('테스트 알림', '5초 후에 알림이 표시됩니다.', [
+        { text: '확인' },
+      ]);
+    } catch (error) {
+      console.error('테스트 알림 실패:', error);
+      Alert.alert('오류', '테스트 알림 전송에 실패했습니다.', [
+        { text: '확인' },
+      ]);
+    }
+  };
+
+  /**
+   * 예약된 알림 확인 (개발/디버깅용)
+   */
+  const handleCheckScheduledNotifications = async (): Promise<void> => {
+    try {
+      const notifications = await getAllScheduledNotifications();
+      Alert.alert(
+        '예약된 알림',
+        `현재 ${notifications.length}개의 알림이 예약되어 있습니다.`,
+        [{ text: '확인' }]
+      );
+    } catch (error) {
+      console.error('예약된 알림 확인 실패:', error);
     }
   };
 
@@ -77,13 +152,55 @@ const ParentHomeScreen: React.FC<Props> = () => {
   if (medications.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyEmoji}>✓</Text>
-          <Text style={styles.emptyText}>
-            오늘 드실 약이{'\n'}
-            없습니다
-          </Text>
-        </View>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* 알림 권한 경고 (권한이 없을 때만 표시) */}
+          {!hasNotificationPermission && (
+            <View style={styles.permissionWarning}>
+              <Text style={styles.permissionWarningText}>
+                ⚠️ 알림 권한이 필요합니다
+              </Text>
+              <Text style={styles.permissionWarningSubtext}>
+                약 복용 알림을 받으려면 설정에서 권한을 허용해주세요.
+              </Text>
+              <TouchableOpacity
+                style={styles.permissionButton}
+                onPress={() => Linking.openSettings()}
+              >
+                <Text style={styles.permissionButtonText}>설정으로 이동</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* 개발/테스트용 버튼 */}
+          <View style={styles.devContainer}>
+            <Text style={styles.devTitle}>개발자 도구</Text>
+            <View style={styles.devButtons}>
+              <TouchableOpacity
+                style={styles.devButton}
+                onPress={handleTestNotification}
+              >
+                <Text style={styles.devButtonText}>테스트 알림</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.devButton}
+                onPress={handleCheckScheduledNotifications}
+              >
+                <Text style={styles.devButtonText}>예약된 알림 확인</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyEmoji}>✓</Text>
+            <Text style={styles.emptyText}>
+              오늘 드실 약이{'\n'}
+              없습니다
+            </Text>
+          </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -94,6 +211,43 @@ const ParentHomeScreen: React.FC<Props> = () => {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
       >
+        {/* 알림 권한 경고 (권한이 없을 때만 표시) */}
+        {!hasNotificationPermission && (
+          <View style={styles.permissionWarning}>
+            <Text style={styles.permissionWarningText}>
+              ⚠️ 알림 권한이 필요합니다
+            </Text>
+            <Text style={styles.permissionWarningSubtext}>
+              약 복용 알림을 받으려면 설정에서 권한을 허용해주세요.
+            </Text>
+            <TouchableOpacity
+              style={styles.permissionButton}
+              onPress={() => Linking.openSettings()}
+            >
+              <Text style={styles.permissionButtonText}>설정으로 이동</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* 개발/테스트용 버튼 */}
+        <View style={styles.devContainer}>
+          <Text style={styles.devTitle}>개발자 도구</Text>
+          <View style={styles.devButtons}>
+            <TouchableOpacity
+              style={styles.devButton}
+              onPress={handleTestNotification}
+            >
+              <Text style={styles.devButtonText}>테스트 알림</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.devButton}
+              onPress={handleCheckScheduledNotifications}
+            >
+              <Text style={styles.devButtonText}>예약된 알림 확인</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Medication list */}
         {medications.map((med) => (
           <View
@@ -178,9 +332,9 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   emptyContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 60,
   },
   emptyEmoji: {
     fontSize: 80,
@@ -235,6 +389,70 @@ const styles = StyleSheet.create({
   scheduledTime: {
     fontSize: 20,
     color: '#9CA3AF',
+  },
+  permissionWarning: {
+    backgroundColor: '#FEF3C7',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: '#F59E0B',
+  },
+  permissionWarningText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#92400E',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  permissionWarningSubtext: {
+    fontSize: 16,
+    color: '#92400E',
+    marginBottom: 16,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  permissionButton: {
+    backgroundColor: '#F59E0B',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignSelf: 'center',
+  },
+  permissionButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  devContainer: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+  },
+  devTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6B7280',
+    marginBottom: 12,
+  },
+  devButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  devButton: {
+    flex: 1,
+    backgroundColor: '#3B82F6',
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  devButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });
 

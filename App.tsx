@@ -7,18 +7,23 @@
  * - Role-based routing (Parent vs Child app)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
 import { User } from '@supabase/supabase-js';
+import * as Notifications from 'expo-notifications';
 
 // Services
 import { getCurrentUser, onAuthStateChange } from './src/services/supabase';
 import { getUserProfile } from './src/services/api';
+import {
+  registerNotificationResponseListener,
+  registerForegroundNotificationListener,
+} from './src/services/notifications';
 
 // Types
-import { UserRole } from './src/types/database.types';
+import { UserRole, NotificationData } from './src/types/database.types';
 
 // Navigation
 import ParentNavigator from './src/navigation/ParentNavigator';
@@ -29,6 +34,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const navigationRef = useRef<NavigationContainerRef<any>>(null);
 
   useEffect(() => {
     // Check initial auth state
@@ -52,6 +58,85 @@ export default function App() {
       authListener?.data?.subscription?.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    // 알림 응답 리스너 (사용자가 알림을 탭했을 때)
+    const notificationResponseSubscription = registerNotificationResponseListener(
+      (response) => {
+        console.log('알림 응답:', response);
+        handleNotificationResponse(response);
+      }
+    );
+
+    // Foreground 알림 리스너 (앱이 열려있을 때 알림 수신)
+    const foregroundSubscription = registerForegroundNotificationListener(
+      (notification) => {
+        console.log('Foreground 알림 수신:', notification);
+        // 앱이 열려있을 때는 자동으로 화면 전환
+        handleForegroundNotification(notification);
+      }
+    );
+
+    // Cleanup
+    return () => {
+      notificationResponseSubscription.remove();
+      foregroundSubscription.remove();
+    };
+  }, [userRole]);
+
+  /**
+   * 알림 응답 처리 (사용자가 알림을 탭했을 때)
+   */
+  const handleNotificationResponse = (
+    response: Notifications.NotificationResponse
+  ) => {
+    const data = response.notification.request.content.data;
+
+    // Type guard to ensure data is NotificationData
+    if (
+      data &&
+      typeof data === 'object' &&
+      'type' in data &&
+      data.type === 'medication_reminder' &&
+      'medicationId' in data &&
+      'scheduledTime' in data &&
+      userRole === 'parent'
+    ) {
+      // 부모 앱: FullScreenReminderScreen으로 이동
+      navigationRef.current?.navigate('FullScreenReminder', {
+        medicationId: String(data.medicationId),
+        scheduledTime: String(data.scheduledTime),
+      });
+    }
+  };
+
+  /**
+   * Foreground 알림 처리 (앱이 열려있을 때)
+   */
+  const handleForegroundNotification = (
+    notification: Notifications.Notification
+  ) => {
+    const data = notification.request.content.data;
+
+    // Type guard to ensure data is NotificationData
+    if (
+      data &&
+      typeof data === 'object' &&
+      'type' in data &&
+      data.type === 'medication_reminder' &&
+      'medicationId' in data &&
+      'scheduledTime' in data &&
+      userRole === 'parent'
+    ) {
+      // 부모 앱: 자동으로 FullScreenReminderScreen으로 이동
+      setTimeout(() => {
+        navigationRef.current?.navigate('FullScreenReminder', {
+          medicationId: String(data.medicationId),
+          scheduledTime: String(data.scheduledTime),
+        });
+      }, 500);
+    }
+  };
 
   const checkUser = async () => {
     try {
@@ -91,7 +176,7 @@ export default function App() {
 
   // Role-based navigation
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <StatusBar style="auto" />
       {!user ? (
         // Not logged in - show auth screens

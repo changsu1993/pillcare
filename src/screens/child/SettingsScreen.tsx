@@ -24,9 +24,16 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase, signOut, getCurrentUser } from '../../services/supabase';
-import { getConnectedParent, getFamilyConnections, removeFamilyConnection } from '../../services/api';
-import { User, FamilyConnection } from '../../types/database.types';
+import {
+  getConnectedParent,
+  getFamilyConnections,
+  removeFamilyConnection,
+  getNotificationPreferences,
+  updateNotificationPreferences,
+} from '../../services/api';
+import { User, FamilyConnection, NotificationPreferences } from '../../types/database.types';
 import { ChildStackParamList } from '../../types/navigation.types';
+import { requestNotificationPermissions } from '../../services/notifications';
 
 interface UserProfile {
   id: string;
@@ -41,6 +48,7 @@ type NavigationProp = NativeStackNavigationProp<ChildStackParamList, 'Settings'>
 const ChildSettingsScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const [isLoading, setIsLoading] = useState(true);
+  const [isSavingPrefs, setIsSavingPrefs] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [connectedParent, setConnectedParent] = useState<User | null>(null);
   const [familyConnections, setFamilyConnections] = useState<FamilyConnection[]>([]);
@@ -59,10 +67,11 @@ const ChildSettingsScreen: React.FC = () => {
       setIsLoading(true);
       const user = await getCurrentUser();
       if (user) {
-        const [profileData, parent, connections] = await Promise.all([
+        const [profileData, parent, connections, prefs] = await Promise.all([
           supabase.from('users').select('*').eq('id', user.id).single(),
           getConnectedParent(),
           getFamilyConnections(),
+          getNotificationPreferences(),
         ]);
 
         if (profileData.data) {
@@ -70,11 +79,93 @@ const ChildSettingsScreen: React.FC = () => {
         }
         setConnectedParent(parent);
         setFamilyConnections(connections);
+
+        // Set notification preferences from database
+        if (prefs) {
+          setNotificationsEnabled(prefs.push_enabled);
+          setMissedAlertEnabled(prefs.missed_medication_alert);
+        }
       }
     } catch (error) {
       console.error('데이터 로딩 실패:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  /**
+   * Handle push notification toggle
+   */
+  const handleNotificationToggle = async (enabled: boolean) => {
+    try {
+      setIsSavingPrefs(true);
+
+      // If enabling, request permission first
+      if (enabled) {
+        const hasPermission = await requestNotificationPermissions();
+        if (!hasPermission) {
+          Alert.alert(
+            '알림 권한 필요',
+            '알림을 받으려면 설정에서 알림 권한을 허용해주세요.',
+            [{ text: '확인' }]
+          );
+          return;
+        }
+      }
+
+      setNotificationsEnabled(enabled);
+
+      // Save to database
+      await updateNotificationPreferences({ push_enabled: enabled });
+
+      // If disabling push, also disable missed alert
+      if (!enabled && missedAlertEnabled) {
+        setMissedAlertEnabled(false);
+        await updateNotificationPreferences({ missed_medication_alert: false });
+      }
+    } catch (error) {
+      console.error('알림 설정 저장 실패:', error);
+      // Revert on error
+      setNotificationsEnabled(!enabled);
+      Alert.alert('오류', '설정을 저장할 수 없습니다.');
+    } finally {
+      setIsSavingPrefs(false);
+    }
+  };
+
+  /**
+   * Handle missed medication alert toggle
+   */
+  const handleMissedAlertToggle = async (enabled: boolean) => {
+    try {
+      setIsSavingPrefs(true);
+
+      // If enabling, ensure push is also enabled
+      if (enabled && !notificationsEnabled) {
+        const hasPermission = await requestNotificationPermissions();
+        if (!hasPermission) {
+          Alert.alert(
+            '알림 권한 필요',
+            '미복용 알림을 받으려면 알림 권한을 허용해주세요.',
+            [{ text: '확인' }]
+          );
+          return;
+        }
+        setNotificationsEnabled(true);
+        await updateNotificationPreferences({ push_enabled: true });
+      }
+
+      setMissedAlertEnabled(enabled);
+
+      // Save to database
+      await updateNotificationPreferences({ missed_medication_alert: enabled });
+    } catch (error) {
+      console.error('미복용 알림 설정 저장 실패:', error);
+      // Revert on error
+      setMissedAlertEnabled(!enabled);
+      Alert.alert('오류', '설정을 저장할 수 없습니다.');
+    } finally {
+      setIsSavingPrefs(false);
     }
   };
 
@@ -170,7 +261,8 @@ const ChildSettingsScreen: React.FC = () => {
             </View>
             <Switch
               value={notificationsEnabled}
-              onValueChange={setNotificationsEnabled}
+              onValueChange={handleNotificationToggle}
+              disabled={isSavingPrefs}
               trackColor={{ false: '#D1D5DB', true: '#93C5FD' }}
               thumbColor={notificationsEnabled ? '#3B82F6' : '#9CA3AF'}
             />
@@ -188,7 +280,8 @@ const ChildSettingsScreen: React.FC = () => {
             </View>
             <Switch
               value={missedAlertEnabled}
-              onValueChange={setMissedAlertEnabled}
+              onValueChange={handleMissedAlertToggle}
+              disabled={isSavingPrefs || !notificationsEnabled}
               trackColor={{ false: '#D1D5DB', true: '#93C5FD' }}
               thumbColor={missedAlertEnabled ? '#3B82F6' : '#9CA3AF'}
             />

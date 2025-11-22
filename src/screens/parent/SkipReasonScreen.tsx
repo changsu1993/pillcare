@@ -22,7 +22,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ParentScreenProps } from '../../types/navigation.types';
-import { logMedicationMissed } from '../../services/api';
+import {
+  logMedicationMissed,
+  getMedication,
+  createMissedMedicationEvent,
+  getUserProfile,
+} from '../../services/api';
 import { speakSkipPrompt, stopSpeaking } from '../../services/voice';
 import { isVoiceGuidanceEnabled } from '../../services/settings';
 
@@ -82,6 +87,25 @@ const SkipReasonScreen: React.FC<Props> = ({ route, navigation }) => {
         new Date(scheduledTime),
         reason
       );
+
+      // Get medication details for the event
+      try {
+        const medication = await getMedication(medicationId);
+
+        // Create missed medication event for child notifications
+        await createMissedMedicationEvent(
+          medicationId,
+          medication.name,
+          new Date(scheduledTime),
+          reason
+        );
+
+        console.log('미복용 이벤트 생성 완료 - 자녀에게 알림 전송됨');
+      } catch (eventError) {
+        // Log error but don't block the main flow
+        console.error('미복용 이벤트 생성 실패:', eventError);
+        // Continue to navigate - the main log was saved
+      }
 
       // Navigate back to home
       navigation.navigate('Home');

@@ -8,6 +8,7 @@
  * - WCAG AAA compliance
  * - 72px button height
  * - Clear labels and icons
+ * - Voice guidance test button
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -28,6 +29,8 @@ import { ParentScreenProps } from '../../types/navigation.types';
 import { getUserProfile, getConnectedChildren, removeFamilyConnection, getFamilyConnections } from '../../services/api';
 import { supabase } from '../../services/supabase';
 import { User, FamilyConnection } from '../../types/database.types';
+import { getSettings, saveSettings, AppSettings } from '../../services/settings';
+import { testVoice, stopSpeaking } from '../../services/voice';
 
 type Props = ParentScreenProps<'Settings'>;
 
@@ -38,25 +41,34 @@ const ParentSettingsScreen: React.FC<Props> = ({ navigation }) => {
   const [familyConnections, setFamilyConnections] = useState<FamilyConnection[]>([]);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [vibrationEnabled, setVibrationEnabled] = useState(true);
+  const [isSettingsSaving, setIsSettingsSaving] = useState(false);
 
   // Reload data when screen comes into focus
   useFocusEffect(
     useCallback(() => {
       loadData();
+      // Stop any ongoing speech when entering settings
+      return () => {
+        stopSpeaking();
+      };
     }, [])
   );
 
   const loadData = async () => {
     try {
       setIsLoading(true);
-      const [profile, children, connections] = await Promise.all([
+      const [profile, children, connections, appSettings] = await Promise.all([
         getUserProfile(),
         getConnectedChildren(),
         getFamilyConnections(),
+        getSettings(),
       ]);
       setUser(profile);
       setConnectedChildren(children);
       setFamilyConnections(connections);
+      // Load saved settings
+      setVoiceEnabled(appSettings.voiceGuidanceEnabled);
+      setVibrationEnabled(appSettings.vibrationEnabled);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -64,16 +76,51 @@ const ParentSettingsScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const handleVoiceToggle = (value: boolean) => {
-    setVoiceEnabled(value);
-    // TODO: Save to AsyncStorage
-    // await AsyncStorage.setItem('voiceEnabled', JSON.stringify(value));
+  const handleVoiceToggle = async (value: boolean) => {
+    try {
+      setIsSettingsSaving(true);
+      setVoiceEnabled(value);
+      await saveSettings({ voiceGuidanceEnabled: value });
+
+      // If enabling voice, play test message
+      if (value) {
+        await testVoice();
+      } else {
+        // Stop any ongoing speech when disabling
+        stopSpeaking();
+      }
+    } catch (error) {
+      console.error('Error saving voice setting:', error);
+      // Revert on error
+      setVoiceEnabled(!value);
+      Alert.alert('오류', '설정을 저장할 수 없습니다.');
+    } finally {
+      setIsSettingsSaving(false);
+    }
   };
 
-  const handleVibrationToggle = (value: boolean) => {
-    setVibrationEnabled(value);
-    // TODO: Save to AsyncStorage
-    // await AsyncStorage.setItem('vibrationEnabled', JSON.stringify(value));
+  const handleVibrationToggle = async (value: boolean) => {
+    try {
+      setIsSettingsSaving(true);
+      setVibrationEnabled(value);
+      await saveSettings({ vibrationEnabled: value });
+    } catch (error) {
+      console.error('Error saving vibration setting:', error);
+      // Revert on error
+      setVibrationEnabled(!value);
+      Alert.alert('오류', '설정을 저장할 수 없습니다.');
+    } finally {
+      setIsSettingsSaving(false);
+    }
+  };
+
+  const handleTestVoice = async () => {
+    try {
+      await testVoice();
+    } catch (error) {
+      console.error('Error testing voice:', error);
+      Alert.alert('오류', '음성 테스트에 실패했습니다.');
+    }
   };
 
   const handleGenerateCode = () => {
@@ -185,8 +232,24 @@ const ParentSettingsScreen: React.FC<Props> = ({ navigation }) => {
               ios_backgroundColor="#D1D5DB"
               style={styles.switch}
               accessibilityLabel={voiceEnabled ? '음성 안내 켜짐' : '음성 안내 꺼짐'}
+              disabled={isSettingsSaving}
             />
           </View>
+
+          {/* Voice test button - only show when voice is enabled */}
+          {voiceEnabled && (
+            <TouchableOpacity
+              style={styles.testVoiceButton}
+              onPress={handleTestVoice}
+              activeOpacity={0.7}
+              accessibilityLabel="음성 테스트"
+              accessibilityHint="음성 안내 테스트 메시지를 재생합니다"
+              accessibilityRole="button"
+            >
+              <Text style={styles.testVoiceIcon}>🎧</Text>
+              <Text style={styles.testVoiceText}>음성 테스트</Text>
+            </TouchableOpacity>
+          )}
 
           {/* Vibration toggle */}
           <View
@@ -206,6 +269,7 @@ const ParentSettingsScreen: React.FC<Props> = ({ navigation }) => {
               ios_backgroundColor="#D1D5DB"
               style={styles.switch}
               accessibilityLabel={vibrationEnabled ? '진동 켜짐' : '진동 꺼짐'}
+              disabled={isSettingsSaving}
             />
           </View>
 
@@ -376,6 +440,26 @@ const styles = StyleSheet.create({
   },
   switch: {
     transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }],
+  },
+  testVoiceButton: {
+    backgroundColor: '#EFF6FF',
+    height: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#3B82F6',
+    gap: 8,
+  },
+  testVoiceIcon: {
+    fontSize: 24,
+  },
+  testVoiceText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#3B82F6',
   },
   arrow: {
     fontSize: 32,

@@ -30,6 +30,9 @@ import ParentNavigator from './src/navigation/ParentNavigator';
 import ChildNavigator from './src/navigation/ChildNavigator';
 import AuthNavigator from './src/navigation/AuthNavigator';
 
+// Contexts
+import { SettingsProvider } from './src/contexts/SettingsContext';
+
 export default function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
@@ -176,33 +179,35 @@ export default function App() {
 
   // Role-based navigation
   return (
-    <NavigationContainer ref={navigationRef}>
-      <StatusBar style="auto" />
-      {!user ? (
-        // Not logged in - show auth screens
-        <AuthNavigator />
-      ) : !userRole ? (
-        // Logged in but no role assigned yet
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#3B82F6" />
-          <Text style={styles.loadingText}>프로필 설정 중...</Text>
-        </View>
-      ) : userRole === 'parent' ? (
-        // Parent app (elderly-optimized UI)
-        <ParentNavigator />
-      ) : userRole === 'child' ? (
-        // Child app (monitoring UI)
-        <ChildNavigator />
-      ) : (
-        // Unknown role
-        <View style={styles.container}>
-          <Text style={styles.errorText}>
-            알 수 없는 사용자 역할입니다.{'\n'}
-            설정을 확인해주세요.
-          </Text>
-        </View>
-      )}
-    </NavigationContainer>
+    <SettingsProvider>
+      <NavigationContainer ref={navigationRef}>
+        <StatusBar style="auto" />
+        {!user ? (
+          // Not logged in - show auth screens
+          <AuthNavigator />
+        ) : !userRole ? (
+          // Logged in but no role assigned yet
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#3B82F6" />
+            <Text style={styles.loadingText}>프로필 설정 중...</Text>
+          </View>
+        ) : userRole === 'parent' ? (
+          // Parent app (elderly-optimized UI)
+          <ParentNavigator />
+        ) : userRole === 'child' ? (
+          // Child app (monitoring UI)
+          <ChildNavigator />
+        ) : (
+          // Unknown role
+          <View style={styles.container}>
+            <Text style={styles.errorText}>
+              알 수 없는 사용자 역할입니다.{'\n'}
+              설정을 확인해주세요.
+            </Text>
+          </View>
+        )}
+      </NavigationContainer>
+    </SettingsProvider>
   );
 }
 

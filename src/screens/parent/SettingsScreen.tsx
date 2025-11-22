@@ -10,7 +10,7 @@
  * - Clear labels and icons
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -22,31 +22,43 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { ParentScreenProps } from '../../types/navigation.types';
-import { getUserProfile } from '../../services/api';
+import { getUserProfile, getConnectedChildren, removeFamilyConnection, getFamilyConnections } from '../../services/api';
 import { supabase } from '../../services/supabase';
-import { User } from '../../types/database.types';
+import { User, FamilyConnection } from '../../types/database.types';
 
 type Props = ParentScreenProps<'Settings'>;
 
 const ParentSettingsScreen: React.FC<Props> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const [connectedChildren, setConnectedChildren] = useState<User[]>([]);
+  const [familyConnections, setFamilyConnections] = useState<FamilyConnection[]>([]);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [vibrationEnabled, setVibrationEnabled] = useState(true);
 
-  useEffect(() => {
-    loadUserProfile();
-    // TODO: Load saved preferences from AsyncStorage
-  }, []);
+  // Reload data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
 
-  const loadUserProfile = async () => {
+  const loadData = async () => {
     try {
       setIsLoading(true);
-      const profile = await getUserProfile();
+      const [profile, children, connections] = await Promise.all([
+        getUserProfile(),
+        getConnectedChildren(),
+        getFamilyConnections(),
+      ]);
       setUser(profile);
+      setConnectedChildren(children);
+      setFamilyConnections(connections);
     } catch (error) {
-      console.error('Error loading user profile:', error);
+      console.error('Error loading data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -64,9 +76,34 @@ const ParentSettingsScreen: React.FC<Props> = ({ navigation }) => {
     // await AsyncStorage.setItem('vibrationEnabled', JSON.stringify(value));
   };
 
-  const handleFamilyConnections = () => {
-    Alert.alert('준비 중', '가족 연결 관리 기능은 준비 중입니다.');
-    // TODO: Navigate to family connections screen
+  const handleGenerateCode = () => {
+    navigation.navigate('InvitationCode');
+  };
+
+  const handleRemoveConnection = (connection: FamilyConnection) => {
+    const childName = connection.child?.name || '자녀';
+    Alert.alert(
+      '연결 해제',
+      `${childName}님과의 연결을 해제하시겠습니까?`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '해제',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await removeFamilyConnection(connection.id);
+              // Reload data after removal
+              await loadData();
+              Alert.alert('완료', '연결이 해제되었습니다.');
+            } catch (error) {
+              console.error('Error removing connection:', error);
+              Alert.alert('오류', '연결 해제에 실패했습니다.');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleLogout = () => {
@@ -172,21 +209,62 @@ const ParentSettingsScreen: React.FC<Props> = ({ navigation }) => {
             />
           </View>
 
-          {/* Family connections */}
-          <TouchableOpacity
-            style={styles.settingItem}
-            onPress={handleFamilyConnections}
-            activeOpacity={0.7}
-            accessibilityLabel="가족 연결 관리"
-            accessibilityHint="가족 연결을 관리합니다"
-            accessibilityRole="button"
-          >
-            <View style={styles.settingLeft}>
+          {/* Family connections section */}
+          <View style={styles.familySection}>
+            <View style={styles.familySectionHeader}>
               <Text style={styles.settingIcon}>👨‍👩‍👧</Text>
               <Text style={styles.settingLabel}>가족 연결</Text>
             </View>
-            <Text style={styles.arrow}>›</Text>
-          </TouchableOpacity>
+
+            {/* Connected children list */}
+            {connectedChildren.length > 0 ? (
+              <View style={styles.connectedList}>
+                {familyConnections.map((connection) => {
+                  const child = connection.child;
+                  if (!child) return null;
+                  return (
+                    <View key={connection.id} style={styles.connectedItem}>
+                      <View style={styles.connectedInfo}>
+                        <View style={styles.childAvatar}>
+                          <Text style={styles.childAvatarText}>
+                            {child.name?.charAt(0) || '?'}
+                          </Text>
+                        </View>
+                        <View>
+                          <Text style={styles.childName}>{child.name}</Text>
+                          <Text style={styles.childRole}>자녀</Text>
+                        </View>
+                      </View>
+                      <TouchableOpacity
+                        onPress={() => handleRemoveConnection(connection)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        accessibilityLabel={`${child.name} 연결 해제`}
+                      >
+                        <Ionicons name="close-circle" size={28} color="#EF4444" />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
+              </View>
+            ) : (
+              <Text style={styles.noConnectionText}>
+                연결된 자녀가 없습니다
+              </Text>
+            )}
+
+            {/* Generate invitation code button */}
+            <TouchableOpacity
+              style={styles.inviteButton}
+              onPress={handleGenerateCode}
+              activeOpacity={0.7}
+              accessibilityLabel="초대 코드 생성"
+              accessibilityHint="자녀와 연결할 초대 코드를 생성합니다"
+              accessibilityRole="button"
+            >
+              <Ionicons name="add-circle" size={28} color="#22C55E" />
+              <Text style={styles.inviteButtonText}>초대 코드 생성</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Logout button */}
           <TouchableOpacity
@@ -317,6 +395,86 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     textAlign: 'center',
     marginTop: 32,
+  },
+  // Family section styles
+  familySection: {
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  familySectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  connectedList: {
+    marginBottom: 16,
+  },
+  connectedItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  connectedInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  childAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#DBEAFE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  childAvatarText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#3B82F6',
+  },
+  childName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1A1A1A',
+  },
+  childRole: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginTop: 2,
+  },
+  noConnectionText: {
+    fontSize: 18,
+    color: '#9CA3AF',
+    textAlign: 'center',
+    paddingVertical: 16,
+  },
+  inviteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ECFDF5',
+    paddingVertical: 16,
+    borderRadius: 12,
+    gap: 8,
+    borderWidth: 2,
+    borderColor: '#22C55E',
+  },
+  inviteButtonText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#22C55E',
   },
 });
 

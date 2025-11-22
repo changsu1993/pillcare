@@ -8,7 +8,7 @@
  * - 로그아웃
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -20,8 +20,13 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase, signOut, getCurrentUser } from '../../services/supabase';
+import { getConnectedParent, getFamilyConnections, removeFamilyConnection } from '../../services/api';
+import { User, FamilyConnection } from '../../types/database.types';
+import { ChildStackParamList } from '../../types/navigation.types';
 
 interface UserProfile {
   id: string;
@@ -31,35 +36,75 @@ interface UserProfile {
   role: string;
 }
 
+type NavigationProp = NativeStackNavigationProp<ChildStackParamList, 'Settings'>;
+
 const ChildSettingsScreen: React.FC = () => {
+  const navigation = useNavigation<NavigationProp>();
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [connectedParent, setConnectedParent] = useState<User | null>(null);
+  const [familyConnections, setFamilyConnections] = useState<FamilyConnection[]>([]);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [missedAlertEnabled, setMissedAlertEnabled] = useState(true);
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
+  // Reload data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
 
-  const loadProfile = async () => {
+  const loadData = async () => {
     try {
       setIsLoading(true);
       const user = await getCurrentUser();
       if (user) {
-        const { data, error } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', user.id)
-          .single();
+        const [profileData, parent, connections] = await Promise.all([
+          supabase.from('users').select('*').eq('id', user.id).single(),
+          getConnectedParent(),
+          getFamilyConnections(),
+        ]);
 
-        if (error) throw error;
-        setProfile(data);
+        if (profileData.data) {
+          setProfile(profileData.data);
+        }
+        setConnectedParent(parent);
+        setFamilyConnections(connections);
       }
     } catch (error) {
-      console.error('프로필 로딩 실패:', error);
+      console.error('데이터 로딩 실패:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleEnterCode = () => {
+    navigation.navigate('EnterCode');
+  };
+
+  const handleRemoveConnection = (connection: FamilyConnection) => {
+    const parentName = connection.parent?.name || '부모님';
+    Alert.alert(
+      '연결 해제',
+      `${parentName}님과의 연결을 해제하시겠습니까?\n\n연결 해제 시 부모님의 복약 현황을 확인할 수 없습니다.`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '해제',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await removeFamilyConnection(connection.id);
+              await loadData();
+              Alert.alert('완료', '연결이 해제되었습니다.');
+            } catch (error) {
+              console.error('Error removing connection:', error);
+              Alert.alert('오류', '연결 해제에 실패했습니다.');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleLogout = () => {
@@ -154,20 +199,53 @@ const ChildSettingsScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>가족 연결</Text>
 
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuInfo}>
-              <Ionicons name="people-outline" size={24} color="#6B7280" />
-              <Text style={styles.menuLabel}>연결된 부모님</Text>
+          {/* Connected parent list */}
+          {connectedParent ? (
+            <View style={styles.connectedParentCard}>
+              <View style={styles.parentInfo}>
+                <View style={styles.parentAvatar}>
+                  <Text style={styles.parentAvatarText}>
+                    {connectedParent.name?.charAt(0) || '?'}
+                  </Text>
+                </View>
+                <View style={styles.parentDetails}>
+                  <Text style={styles.parentName}>{connectedParent.name}</Text>
+                  <Text style={styles.parentEmail}>{connectedParent.email}</Text>
+                  <View style={styles.parentBadge}>
+                    <Text style={styles.parentBadgeText}>부모님</Text>
+                  </View>
+                </View>
+              </View>
+              {familyConnections.length > 0 && (
+                <TouchableOpacity
+                  style={styles.disconnectButton}
+                  onPress={() => handleRemoveConnection(familyConnections[0])}
+                >
+                  <Ionicons name="unlink" size={18} color="#EF4444" />
+                  <Text style={styles.disconnectText}>연결 해제</Text>
+                </TouchableOpacity>
+              )}
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-          </TouchableOpacity>
+          ) : (
+            <View style={styles.noConnectionCard}>
+              <Ionicons name="people-outline" size={48} color="#D1D5DB" />
+              <Text style={styles.noConnectionText}>
+                연결된 부모님이 없습니다
+              </Text>
+              <Text style={styles.noConnectionSubtext}>
+                부모님의 초대 코드를 입력하여 연결하세요
+              </Text>
+            </View>
+          )}
 
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuInfo}>
-              <Ionicons name="add-circle-outline" size={24} color="#6B7280" />
-              <Text style={styles.menuLabel}>새 가족 연결</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+          {/* Enter code button */}
+          <TouchableOpacity
+            style={styles.enterCodeButton}
+            onPress={handleEnterCode}
+          >
+            <Ionicons name="keypad-outline" size={24} color="#3B82F6" />
+            <Text style={styles.enterCodeText}>초대 코드 입력</Text>
+            <Ionicons name="chevron-forward" size={20} color="#3B82F6" />
           </TouchableOpacity>
         </View>
 
@@ -355,6 +433,113 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     marginTop: 24,
     marginBottom: 32,
+  },
+  // Connected parent styles
+  connectedParentCard: {
+    backgroundColor: '#F0FDF4',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+  },
+  parentInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  parentAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#22C55E',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  parentAvatarText: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  parentDetails: {
+    marginLeft: 14,
+    flex: 1,
+  },
+  parentName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1A1A1A',
+  },
+  parentEmail: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 2,
+  },
+  parentBadge: {
+    marginTop: 6,
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+  },
+  parentBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#16A34A',
+  },
+  disconnectButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    paddingVertical: 10,
+    backgroundColor: '#FEF2F2',
+    borderRadius: 8,
+    gap: 6,
+  },
+  disconnectText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#EF4444',
+  },
+  noConnectionCard: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderStyle: 'dashed',
+  },
+  noConnectionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#6B7280',
+    marginTop: 12,
+  },
+  noConnectionSubtext: {
+    fontSize: 13,
+    color: '#9CA3AF',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  enterCodeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    backgroundColor: '#EFF6FF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+    gap: 10,
+  },
+  enterCodeText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#3B82F6',
   },
 });
 

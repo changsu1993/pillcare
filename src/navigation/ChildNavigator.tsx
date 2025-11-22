@@ -21,6 +21,7 @@ import ChildHomeScreen from '../screens/child/HomeScreen';
 import MedicationManageScreen from '../screens/child/MedicationManageScreen';
 import ReportsScreen from '../screens/child/ReportsScreen';
 import ChildSettingsScreen from '../screens/child/SettingsScreen';
+import EnterCodeScreen from '../screens/child/EnterCodeScreen';
 
 const Tab = createBottomTabNavigator<ChildTabParamList>();
 const Stack = createNativeStackNavigator<ChildStackParamList>();
@@ -97,6 +98,11 @@ const SettingsStack: React.FC = () => (
       name="Settings"
       component={ChildSettingsScreen}
       options={{ title: '설정' }}
+    />
+    <Stack.Screen
+      name="EnterCode"
+      component={EnterCodeScreen}
+      options={{ title: '초대 코드 입력' }}
     />
   </Stack.Navigator>
 );

@@ -213,8 +213,15 @@ export const logMedicationMissed = async (
 
 /**
  * Get all family connections for current user
+ * Returns connections where user is either parent or child
  */
 export const getFamilyConnections = async (): Promise<FamilyConnection[]> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error('Not authenticated');
+
   const { data, error } = await supabase
     .from('family_connections')
     .select(
@@ -224,84 +231,168 @@ export const getFamilyConnections = async (): Promise<FamilyConnection[]> => {
       child:child_id(id, name, email, phone_number)
     `
     )
-    .eq('status', 'active');
+    .eq('status', 'active')
+    .or(`parent_id.eq.${user.id},child_id.eq.${user.id}`);
 
   if (error) throw error;
   return data || [];
 };
 
 /**
- * Create a family connection invitation (child creates code)
+ * Check if current user has any active family connections
  */
-export const createFamilyInvitation = async (): Promise<FamilyConnection> => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) throw new Error('Not authenticated');
-
-  // Call database function to generate unique code
-  const { data: code, error: codeError } = await supabase.rpc(
-    'generate_invitation_code'
-  );
-
-  if (codeError) throw codeError;
-
-  const expiresAt = new Date();
-  expiresAt.setHours(expiresAt.getHours() + 24); // 24-hour expiry
-
-  const { data, error } = await supabase
-    .from('family_connections')
-    .insert({
-      child_id: user.id,
-      parent_id: null, // Will be filled when parent accepts
-      invitation_code: code,
-      invitation_expires_at: expiresAt.toISOString(),
-      status: 'pending',
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+export const hasActiveConnection = async (): Promise<boolean> => {
+  const connections = await getFamilyConnections();
+  return connections.length > 0;
 };
 
 /**
- * Accept a family invitation (parent enters code)
+ * Generate invitation code (Parent creates code for children to enter)
+ * @returns Generated 6-digit invitation code
  */
-export const acceptFamilyInvitation = async (
-  invitationCode: string
-): Promise<FamilyConnection> => {
+export const generateInvitationCode = async (): Promise<string> => {
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) throw new Error('Not authenticated');
 
-  // Find invitation by code
-  const { data: invitation, error: findError } = await supabase
+  // Check if there's already a pending invitation
+  const { data: existingInvitation } = await supabase
     .from('family_connections')
-    .select('*')
-    .eq('invitation_code', invitationCode)
+    .select('invitation_code, invitation_expires_at')
+    .eq('parent_id', user.id)
     .eq('status', 'pending')
     .gt('invitation_expires_at', new Date().toISOString())
     .single();
 
-  if (findError) throw new Error('Invalid or expired invitation code');
+  // If valid invitation exists, return existing code
+  if (existingInvitation?.invitation_code) {
+    return existingInvitation.invitation_code;
+  }
 
-  // Update invitation with parent user ID and activate
-  const { data, error } = await supabase
-    .from('family_connections')
-    .update({
-      parent_id: user.id,
-      status: 'active',
-    })
-    .eq('id', invitation.id)
-    .select()
-    .single();
+  // Generate new 6-digit code
+  const generateCode = (): string => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
+  let code = generateCode();
+  let attempts = 0;
+  const maxAttempts = 10;
+
+  // Ensure code is unique
+  while (attempts < maxAttempts) {
+    const { data: existing } = await supabase
+      .from('family_connections')
+      .select('id')
+      .eq('invitation_code', code)
+      .eq('status', 'pending')
+      .single();
+
+    if (!existing) break;
+    code = generateCode();
+    attempts++;
+  }
+
+  if (attempts >= maxAttempts) {
+    throw new Error('Failed to generate unique code');
+  }
+
+  const expiresAt = new Date();
+  expiresAt.setHours(expiresAt.getHours() + 24); // 24-hour expiry
+
+  const { error } = await supabase.from('family_connections').insert({
+    parent_id: user.id,
+    child_id: null, // Will be filled when child enters code
+    invitation_code: code,
+    invitation_expires_at: expiresAt.toISOString(),
+    status: 'pending',
+  });
 
   if (error) throw error;
-  return data;
+  return code;
+};
+
+/**
+ * Connect with invitation code (Child enters code from parent)
+ * @param code 6-digit invitation code
+ * @returns Connection result with parent name if successful
+ */
+export const connectWithCode = async (
+  code: string
+): Promise<{
+  success: boolean;
+  parentName?: string;
+  error?: string;
+}> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  // Find pending invitation by code
+  const { data: invitation, error: findError } = await supabase
+    .from('family_connections')
+    .select(
+      `
+      *,
+      parent:parent_id(id, name, email)
+    `
+    )
+    .eq('invitation_code', code.trim())
+    .eq('status', 'pending')
+    .gt('invitation_expires_at', new Date().toISOString())
+    .single();
+
+  if (findError || !invitation) {
+    return {
+      success: false,
+      error: 'Invalid or expired invitation code',
+    };
+  }
+
+  // Check if already connected to this parent
+  const { data: existingConnection } = await supabase
+    .from('family_connections')
+    .select('id')
+    .eq('parent_id', invitation.parent_id)
+    .eq('child_id', user.id)
+    .eq('status', 'active')
+    .single();
+
+  if (existingConnection) {
+    return {
+      success: false,
+      error: 'Already connected to this parent',
+    };
+  }
+
+  // Update invitation with child ID and activate
+  const { error: updateError } = await supabase
+    .from('family_connections')
+    .update({
+      child_id: user.id,
+      status: 'active',
+      invitation_code: null, // Clear code after use
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', invitation.id);
+
+  if (updateError) {
+    return { success: false, error: 'Failed to connect' };
+  }
+
+  // Extract parent name from joined data
+  const parent = invitation.parent as unknown as User | null;
+  const parentName = parent?.name || 'Unknown';
+
+  return {
+    success: true,
+    parentName,
+  };
 };
 
 /**
@@ -312,10 +403,51 @@ export const removeFamilyConnection = async (
 ): Promise<void> => {
   const { error } = await supabase
     .from('family_connections')
-    .update({ status: 'inactive' })
+    .update({
+      status: 'inactive',
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', connectionId);
 
   if (error) throw error;
+};
+
+/**
+ * Get connected children for parent user
+ */
+export const getConnectedChildren = async (): Promise<User[]> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error('Not authenticated');
+
+  const { data, error } = await supabase
+    .from('family_connections')
+    .select(
+      `
+      child:child_id(id, name, email, phone_number, role, created_at, updated_at)
+    `
+    )
+    .eq('parent_id', user.id)
+    .eq('status', 'active');
+
+  if (error) throw error;
+
+  // Extract child users from result
+  const children: User[] = [];
+  data?.forEach((item) => {
+    const child = item.child;
+    if (child) {
+      if (Array.isArray(child)) {
+        children.push(...(child as User[]));
+      } else {
+        children.push(child as unknown as User);
+      }
+    }
+  });
+
+  return children;
 };
 
 /**

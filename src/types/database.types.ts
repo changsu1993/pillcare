@@ -45,10 +45,13 @@ export interface MedicationLog {
 
 export interface FamilyConnection {
   id: string;
-  parent_id: string;
+  parent_id: string | null;
   child_id: string;
+  invitation_code?: string;
+  invitation_expires_at?: string;
   status: ConnectionStatus;
   created_at: string;
+  updated_at: string;
   // Joined fields
   parent?: User;
   child?: User;

@@ -8,7 +8,7 @@
  * - WCAG AAA compliance (7:1 contrast)
  * - 72px button height
  * - 48pt medication name
- * - Voice guidance ready (expo-speech)
+ * - Voice guidance with expo-speech
  */
 
 import React, { useEffect } from 'react';
@@ -20,9 +20,9 @@ import {
   Vibration,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-// TODO: Uncomment when implementing voice guidance
-// import * as Speech from 'expo-speech';
 import { ParentScreenProps } from '../../types/navigation.types';
+import { speakMedicationReminder, stopSpeaking } from '../../services/voice';
+import { isVoiceGuidanceEnabled, isVibrationEnabled } from '../../services/settings';
 
 type Props = ParentScreenProps<'FullScreenReminder'>;
 
@@ -34,24 +34,38 @@ const FullScreenReminderScreen: React.FC<Props> = ({ route, navigation }) => {
   const dosage = '1알';
 
   useEffect(() => {
-    // Vibration pattern: [duration, pause, duration, pause, ...]
-    Vibration.vibrate([500, 500, 500, 500, 500]);
+    // Initialize notifications (vibration and voice)
+    const initializeReminder = async () => {
+      try {
+        // Check vibration setting and vibrate if enabled
+        const vibrationEnabled = await isVibrationEnabled();
+        if (vibrationEnabled) {
+          // Vibration pattern: [duration, pause, duration, pause, ...]
+          Vibration.vibrate([500, 500, 500, 500, 500]);
+        }
 
-    // TODO: Add voice guidance
-    // Speech.speak(`${medicationName} 드실 시간입니다. ${dosage}을 복용해주세요.`, {
-    //   language: 'ko-KR',
-    //   pitch: 1.0,
-    //   rate: 0.85, // Slower rate for elderly
-    // });
+        // Check voice setting and speak if enabled
+        const voiceEnabled = await isVoiceGuidanceEnabled();
+        if (voiceEnabled) {
+          await speakMedicationReminder(medicationName, dosage);
+        }
+      } catch (error) {
+        console.error('Error initializing reminder:', error);
+      }
+    };
+
+    initializeReminder();
 
     return () => {
       Vibration.cancel();
+      // Stop any ongoing speech when leaving screen
+      stopSpeaking();
     };
-  }, []);
+  }, [medicationName, dosage]);
 
   const handleTaken = () => {
-    // TODO: Add voice feedback
-    // Speech.speak('잘하셨습니다', { language: 'ko-KR' });
+    // Stop any ongoing speech before navigation
+    stopSpeaking();
 
     // Navigate to confirmation screen
     navigation.replace('Confirmation', {
@@ -61,6 +75,9 @@ const FullScreenReminderScreen: React.FC<Props> = ({ route, navigation }) => {
   };
 
   const handleSkipped = () => {
+    // Stop any ongoing speech before navigation
+    stopSpeaking();
+
     // Navigate to skip reason screen
     navigation.replace('SkipReason', {
       medicationId,

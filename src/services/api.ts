@@ -213,8 +213,15 @@ export const logMedicationMissed = async (
 
 /**
  * Get all family connections for current user
+ * Returns connections where user is either parent or child
  */
 export const getFamilyConnections = async (): Promise<FamilyConnection[]> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error('Not authenticated');
+
   const { data, error } = await supabase
     .from('family_connections')
     .select(
@@ -224,84 +231,168 @@ export const getFamilyConnections = async (): Promise<FamilyConnection[]> => {
       child:child_id(id, name, email, phone_number)
     `
     )
-    .eq('status', 'active');
+    .eq('status', 'active')
+    .or(`parent_id.eq.${user.id},child_id.eq.${user.id}`);
 
   if (error) throw error;
   return data || [];
 };
 
 /**
- * Create a family connection invitation (child creates code)
+ * Check if current user has any active family connections
  */
-export const createFamilyInvitation = async (): Promise<FamilyConnection> => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) throw new Error('Not authenticated');
-
-  // Call database function to generate unique code
-  const { data: code, error: codeError } = await supabase.rpc(
-    'generate_invitation_code'
-  );
-
-  if (codeError) throw codeError;
-
-  const expiresAt = new Date();
-  expiresAt.setHours(expiresAt.getHours() + 24); // 24-hour expiry
-
-  const { data, error } = await supabase
-    .from('family_connections')
-    .insert({
-      child_id: user.id,
-      parent_id: null, // Will be filled when parent accepts
-      invitation_code: code,
-      invitation_expires_at: expiresAt.toISOString(),
-      status: 'pending',
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+export const hasActiveConnection = async (): Promise<boolean> => {
+  const connections = await getFamilyConnections();
+  return connections.length > 0;
 };
 
 /**
- * Accept a family invitation (parent enters code)
+ * Generate invitation code (Parent creates code for children to enter)
+ * @returns Generated 6-digit invitation code
  */
-export const acceptFamilyInvitation = async (
-  invitationCode: string
-): Promise<FamilyConnection> => {
+export const generateInvitationCode = async (): Promise<string> => {
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) throw new Error('Not authenticated');
 
-  // Find invitation by code
-  const { data: invitation, error: findError } = await supabase
+  // Check if there's already a pending invitation
+  const { data: existingInvitation } = await supabase
     .from('family_connections')
-    .select('*')
-    .eq('invitation_code', invitationCode)
+    .select('invitation_code, invitation_expires_at')
+    .eq('parent_id', user.id)
     .eq('status', 'pending')
     .gt('invitation_expires_at', new Date().toISOString())
     .single();
 
-  if (findError) throw new Error('Invalid or expired invitation code');
+  // If valid invitation exists, return existing code
+  if (existingInvitation?.invitation_code) {
+    return existingInvitation.invitation_code;
+  }
 
-  // Update invitation with parent user ID and activate
-  const { data, error } = await supabase
-    .from('family_connections')
-    .update({
-      parent_id: user.id,
-      status: 'active',
-    })
-    .eq('id', invitation.id)
-    .select()
-    .single();
+  // Generate new 6-digit code
+  const generateCode = (): string => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
+  let code = generateCode();
+  let attempts = 0;
+  const maxAttempts = 10;
+
+  // Ensure code is unique
+  while (attempts < maxAttempts) {
+    const { data: existing } = await supabase
+      .from('family_connections')
+      .select('id')
+      .eq('invitation_code', code)
+      .eq('status', 'pending')
+      .single();
+
+    if (!existing) break;
+    code = generateCode();
+    attempts++;
+  }
+
+  if (attempts >= maxAttempts) {
+    throw new Error('Failed to generate unique code');
+  }
+
+  const expiresAt = new Date();
+  expiresAt.setHours(expiresAt.getHours() + 24); // 24-hour expiry
+
+  const { error } = await supabase.from('family_connections').insert({
+    parent_id: user.id,
+    child_id: null, // Will be filled when child enters code
+    invitation_code: code,
+    invitation_expires_at: expiresAt.toISOString(),
+    status: 'pending',
+  });
 
   if (error) throw error;
-  return data;
+  return code;
+};
+
+/**
+ * Connect with invitation code (Child enters code from parent)
+ * @param code 6-digit invitation code
+ * @returns Connection result with parent name if successful
+ */
+export const connectWithCode = async (
+  code: string
+): Promise<{
+  success: boolean;
+  parentName?: string;
+  error?: string;
+}> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  // Find pending invitation by code
+  const { data: invitation, error: findError } = await supabase
+    .from('family_connections')
+    .select(
+      `
+      *,
+      parent:parent_id(id, name, email)
+    `
+    )
+    .eq('invitation_code', code.trim())
+    .eq('status', 'pending')
+    .gt('invitation_expires_at', new Date().toISOString())
+    .single();
+
+  if (findError || !invitation) {
+    return {
+      success: false,
+      error: 'Invalid or expired invitation code',
+    };
+  }
+
+  // Check if already connected to this parent
+  const { data: existingConnection } = await supabase
+    .from('family_connections')
+    .select('id')
+    .eq('parent_id', invitation.parent_id)
+    .eq('child_id', user.id)
+    .eq('status', 'active')
+    .single();
+
+  if (existingConnection) {
+    return {
+      success: false,
+      error: 'Already connected to this parent',
+    };
+  }
+
+  // Update invitation with child ID and activate
+  const { error: updateError } = await supabase
+    .from('family_connections')
+    .update({
+      child_id: user.id,
+      status: 'active',
+      invitation_code: null, // Clear code after use
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', invitation.id);
+
+  if (updateError) {
+    return { success: false, error: 'Failed to connect' };
+  }
+
+  // Extract parent name from joined data
+  const parent = invitation.parent as unknown as User | null;
+  const parentName = parent?.name || 'Unknown';
+
+  return {
+    success: true,
+    parentName,
+  };
 };
 
 /**
@@ -312,10 +403,51 @@ export const removeFamilyConnection = async (
 ): Promise<void> => {
   const { error } = await supabase
     .from('family_connections')
-    .update({ status: 'inactive' })
+    .update({
+      status: 'inactive',
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', connectionId);
 
   if (error) throw error;
+};
+
+/**
+ * Get connected children for parent user
+ */
+export const getConnectedChildren = async (): Promise<User[]> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error('Not authenticated');
+
+  const { data, error } = await supabase
+    .from('family_connections')
+    .select(
+      `
+      child:child_id(id, name, email, phone_number, role, created_at, updated_at)
+    `
+    )
+    .eq('parent_id', user.id)
+    .eq('status', 'active');
+
+  if (error) throw error;
+
+  // Extract child users from result
+  const children: User[] = [];
+  data?.forEach((item) => {
+    const child = item.child;
+    if (child) {
+      if (Array.isArray(child)) {
+        children.push(...(child as User[]));
+      } else {
+        children.push(child as unknown as User);
+      }
+    }
+  });
+
+  return children;
 };
 
 /**
@@ -791,4 +923,291 @@ export const toggleMedicationActive = async (
   active: boolean
 ): Promise<Medication> => {
   return updateMedication(medicationId, { active });
+};
+
+/**
+ * =====================================
+ * PUSH TOKEN & NOTIFICATION API
+ * =====================================
+ */
+
+import {
+  MissedMedicationEvent,
+  NotificationPreferences,
+  ChildPushTokenInfo,
+} from '../types/database.types';
+
+/**
+ * Save push token for current user
+ * @param token - Expo Push Token
+ */
+export const savePushToken = async (token: string): Promise<void> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error('Not authenticated');
+
+  const { error } = await supabase
+    .from('users')
+    .update({
+      push_token: token,
+      push_token_updated_at: new Date().toISOString(),
+    })
+    .eq('id', user.id);
+
+  if (error) throw error;
+  console.log('푸시 토큰 저장 완료');
+};
+
+/**
+ * Get push tokens for connected children of a parent
+ * @param parentId - Parent user ID
+ * @returns Array of child push token info
+ */
+export const getChildrenPushTokens = async (
+  parentId: string
+): Promise<ChildPushTokenInfo[]> => {
+  const { data, error } = await supabase.rpc('get_children_push_tokens', {
+    parent_user_id: parentId,
+  });
+
+  if (error) {
+    console.error('자녀 푸시 토큰 조회 실패:', error);
+    return [];
+  }
+
+  return data || [];
+};
+
+/**
+ * Create missed medication event (for child notifications)
+ * @param medicationId - Medication ID
+ * @param medicationName - Medication name
+ * @param scheduledTime - Scheduled time
+ * @param skipReason - Skip reason (optional)
+ * @returns Created event
+ */
+export const createMissedMedicationEvent = async (
+  medicationId: string,
+  medicationName: string,
+  scheduledTime: Date,
+  skipReason?: string
+): Promise<MissedMedicationEvent> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error('Not authenticated');
+
+  const { data, error } = await supabase
+    .from('missed_medication_events')
+    .insert({
+      parent_id: user.id,
+      medication_id: medicationId,
+      medication_name: medicationName,
+      scheduled_time: scheduledTime.toISOString(),
+      skip_reason: skipReason || null,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  console.log('미복용 이벤트 생성:', data.id);
+  return data;
+};
+
+/**
+ * Get unread missed medication events for child
+ * @param parentId - Parent user ID
+ * @returns Array of unread events
+ */
+export const getUnreadMissedEvents = async (
+  parentId: string
+): Promise<MissedMedicationEvent[]> => {
+  const { data, error } = await supabase
+    .from('missed_medication_events')
+    .select('*, parent:parent_id(id, name, email)')
+    .eq('parent_id', parentId)
+    .is('read_at', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+};
+
+/**
+ * Get recent missed medication events for child
+ * @param parentId - Parent user ID
+ * @param limit - Number of events to return (default: 10)
+ * @returns Array of events
+ */
+export const getRecentMissedEvents = async (
+  parentId: string,
+  limit: number = 10
+): Promise<MissedMedicationEvent[]> => {
+  const { data, error } = await supabase
+    .from('missed_medication_events')
+    .select('*, parent:parent_id(id, name, email)')
+    .eq('parent_id', parentId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return data || [];
+};
+
+/**
+ * Mark missed medication event as read
+ * @param eventId - Event ID
+ */
+export const markMissedEventAsRead = async (eventId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('missed_medication_events')
+    .update({ read_at: new Date().toISOString() })
+    .eq('id', eventId);
+
+  if (error) throw error;
+};
+
+/**
+ * Mark all missed events as read for a parent
+ * @param parentId - Parent user ID
+ */
+export const markAllMissedEventsAsRead = async (
+  parentId: string
+): Promise<void> => {
+  const { error } = await supabase
+    .from('missed_medication_events')
+    .update({ read_at: new Date().toISOString() })
+    .eq('parent_id', parentId)
+    .is('read_at', null);
+
+  if (error) throw error;
+};
+
+/**
+ * =====================================
+ * NOTIFICATION PREFERENCES API
+ * =====================================
+ */
+
+/**
+ * Get notification preferences for current user
+ * @returns Notification preferences or null
+ */
+export const getNotificationPreferences =
+  async (): Promise<NotificationPreferences | null> => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('notification_preferences')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No row found - return null
+        return null;
+      }
+      throw error;
+    }
+
+    return data;
+  };
+
+/**
+ * Update notification preferences for current user
+ * @param updates - Partial preferences to update
+ * @returns Updated preferences
+ */
+export const updateNotificationPreferences = async (
+  updates: Partial<Omit<NotificationPreferences, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+): Promise<NotificationPreferences> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error('Not authenticated');
+
+  // Try to update existing preferences
+  const { data: existing } = await supabase
+    .from('notification_preferences')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (existing) {
+    // Update existing
+    const { data, error } = await supabase
+      .from('notification_preferences')
+      .update(updates)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } else {
+    // Create new with defaults
+    const { data, error } = await supabase
+      .from('notification_preferences')
+      .insert({
+        user_id: user.id,
+        push_enabled: updates.push_enabled ?? true,
+        missed_medication_alert: updates.missed_medication_alert ?? true,
+        daily_summary: updates.daily_summary ?? false,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+};
+
+/**
+ * =====================================
+ * REALTIME SUBSCRIPTIONS
+ * =====================================
+ */
+
+/**
+ * Subscribe to missed medication events for a parent
+ * Used by child app to receive real-time notifications
+ *
+ * @param parentId - Parent user ID to subscribe to
+ * @param callback - Function to call when new event arrives
+ * @returns Unsubscribe function
+ */
+export const subscribeMissedMedicationEvents = (
+  parentId: string,
+  callback: (event: MissedMedicationEvent) => void
+): (() => void) => {
+  const channel = supabase
+    .channel(`missed_events_${parentId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'missed_medication_events',
+        filter: `parent_id=eq.${parentId}`,
+      },
+      (payload) => {
+        console.log('새 미복용 이벤트 수신:', payload);
+        callback(payload.new as MissedMedicationEvent);
+      }
+    )
+    .subscribe();
+
+  // Return unsubscribe function
+  return () => {
+    supabase.removeChannel(channel);
+  };
 };

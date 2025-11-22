@@ -16,19 +16,23 @@ import * as Notifications from 'expo-notifications';
 
 // Services
 import { getCurrentUser, onAuthStateChange } from './src/services/supabase';
-import { getUserProfile } from './src/services/api';
+import { getUserProfile, savePushToken } from './src/services/api';
 import {
   registerNotificationResponseListener,
   registerForegroundNotificationListener,
+  getExpoPushToken,
 } from './src/services/notifications';
 
 // Types
-import { UserRole, NotificationData } from './src/types/database.types';
+import { UserRole, NotificationData, MissedMedicationNotificationData } from './src/types/database.types';
 
 // Navigation
 import ParentNavigator from './src/navigation/ParentNavigator';
 import ChildNavigator from './src/navigation/ChildNavigator';
 import AuthNavigator from './src/navigation/AuthNavigator';
+
+// Contexts
+import { SettingsProvider } from './src/contexts/SettingsContext';
 
 export default function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -92,11 +96,12 @@ export default function App() {
   ) => {
     const data = response.notification.request.content.data;
 
-    // Type guard to ensure data is NotificationData
+    if (!data || typeof data !== 'object' || !('type' in data)) {
+      return;
+    }
+
+    // Parent app: medication reminder
     if (
-      data &&
-      typeof data === 'object' &&
-      'type' in data &&
       data.type === 'medication_reminder' &&
       'medicationId' in data &&
       'scheduledTime' in data &&
@@ -107,6 +112,17 @@ export default function App() {
         medicationId: String(data.medicationId),
         scheduledTime: String(data.scheduledTime),
       });
+    }
+
+    // Child app: missed medication notification
+    if (
+      data.type === 'missed_medication' &&
+      userRole === 'child'
+    ) {
+      // 자녀 앱: 홈 화면으로 이동 (부모님 복약 현황 확인)
+      // Note: 자녀 Navigator의 Home 탭으로 이동
+      console.log('Missed medication notification tapped - navigating to home');
+      navigationRef.current?.navigate('HomeTab');
     }
   };
 
@@ -159,9 +175,28 @@ export default function App() {
       const profile = await getUserProfile();
       setUserRole(profile?.role || null);
       console.log('User role:', profile?.role);
+
+      // Initialize push token after user is loaded
+      initializePushToken();
     } catch (error) {
       console.error('Error loading user role:', error);
       setUserRole(null);
+    }
+  };
+
+  /**
+   * Initialize push token and save to database
+   */
+  const initializePushToken = async () => {
+    try {
+      const token = await getExpoPushToken();
+      if (token) {
+        await savePushToken(token);
+        console.log('Push token saved successfully');
+      }
+    } catch (error) {
+      console.error('Error initializing push token:', error);
+      // Non-critical error - app can continue without push token
     }
   };
 
@@ -176,33 +211,35 @@ export default function App() {
 
   // Role-based navigation
   return (
-    <NavigationContainer ref={navigationRef}>
-      <StatusBar style="auto" />
-      {!user ? (
-        // Not logged in - show auth screens
-        <AuthNavigator />
-      ) : !userRole ? (
-        // Logged in but no role assigned yet
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#3B82F6" />
-          <Text style={styles.loadingText}>프로필 설정 중...</Text>
-        </View>
-      ) : userRole === 'parent' ? (
-        // Parent app (elderly-optimized UI)
-        <ParentNavigator />
-      ) : userRole === 'child' ? (
-        // Child app (monitoring UI)
-        <ChildNavigator />
-      ) : (
-        // Unknown role
-        <View style={styles.container}>
-          <Text style={styles.errorText}>
-            알 수 없는 사용자 역할입니다.{'\n'}
-            설정을 확인해주세요.
-          </Text>
-        </View>
-      )}
-    </NavigationContainer>
+    <SettingsProvider>
+      <NavigationContainer ref={navigationRef}>
+        <StatusBar style="auto" />
+        {!user ? (
+          // Not logged in - show auth screens
+          <AuthNavigator />
+        ) : !userRole ? (
+          // Logged in but no role assigned yet
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#3B82F6" />
+            <Text style={styles.loadingText}>프로필 설정 중...</Text>
+          </View>
+        ) : userRole === 'parent' ? (
+          // Parent app (elderly-optimized UI)
+          <ParentNavigator />
+        ) : userRole === 'child' ? (
+          // Child app (monitoring UI)
+          <ChildNavigator />
+        ) : (
+          // Unknown role
+          <View style={styles.container}>
+            <Text style={styles.errorText}>
+              알 수 없는 사용자 역할입니다.{'\n'}
+              설정을 확인해주세요.
+            </Text>
+          </View>
+        )}
+      </NavigationContainer>
+    </SettingsProvider>
   );
 }
 

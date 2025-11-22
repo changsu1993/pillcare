@@ -45,10 +45,13 @@ export interface MedicationLog {
 
 export interface FamilyConnection {
   id: string;
-  parent_id: string;
+  parent_id: string | null;
   child_id: string;
+  invitation_code?: string;
+  invitation_expires_at?: string;
   status: ConnectionStatus;
   created_at: string;
+  updated_at: string;
   // Joined fields
   parent?: User;
   child?: User;
@@ -85,7 +88,49 @@ export interface NotificationData {
   type: 'medication_reminder';
 }
 
+export interface MissedMedicationNotificationData {
+  type: 'missed_medication';
+  parentId: string;
+  parentName: string;
+  medicationName: string;
+  scheduledTime: string;
+  eventId: string;
+}
+
 export interface NotificationSchedule {
   medicationId: string;
   notificationIds: string[];
+}
+
+// Missed medication event (for child notifications)
+export interface MissedMedicationEvent {
+  id: string;
+  parent_id: string;
+  medication_id: string;
+  medication_name: string;
+  scheduled_time: string;
+  skip_reason?: string;
+  notified: boolean;
+  read_at?: string;
+  created_at: string;
+  // Joined fields
+  parent?: User;
+}
+
+// Notification preferences
+export interface NotificationPreferences {
+  id: string;
+  user_id: string;
+  push_enabled: boolean;
+  missed_medication_alert: boolean;
+  daily_summary: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Child push token info
+export interface ChildPushTokenInfo {
+  child_id: string;
+  push_token: string;
+  missed_alert_enabled: boolean;
 }

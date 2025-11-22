@@ -7,15 +7,15 @@
  * Accessibility:
  * - WCAG AAA compliance
  * - Large success icon (120px)
- * - Voice feedback ready
+ * - Voice feedback with expo-speech
  */
 
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-// TODO: Uncomment when implementing voice guidance
-// import * as Speech from 'expo-speech';
 import { ParentScreenProps } from '../../types/navigation.types';
+import { speakConfirmation, stopSpeaking } from '../../services/voice';
+import { isVoiceGuidanceEnabled } from '../../services/settings';
 
 type Props = ParentScreenProps<'Confirmation'>;
 
@@ -23,21 +23,35 @@ const ConfirmationScreen: React.FC<Props> = ({ route, navigation }) => {
   const { medicationName, takenAt } = route.params;
 
   useEffect(() => {
-    // TODO: Add voice feedback
-    // Speech.speak('잘하셨어요! 다음 복약 시간에 알려드리겠습니다.', {
-    //   language: 'ko-KR',
-    //   rate: 0.85,
-    // });
+    // Speak confirmation message if voice guidance is enabled
+    const speakConfirmationMessage = async () => {
+      try {
+        const voiceEnabled = await isVoiceGuidanceEnabled();
+        if (voiceEnabled) {
+          await speakConfirmation(medicationName);
+        }
+      } catch (error) {
+        console.error('Error speaking confirmation:', error);
+      }
+    };
+
+    speakConfirmationMessage();
 
     // Auto-return to home after 3 seconds
     const timer = setTimeout(() => {
       navigation.navigate('Home');
     }, 3000);
 
-    return () => clearTimeout(timer);
-  }, [navigation]);
+    return () => {
+      clearTimeout(timer);
+      // Stop any ongoing speech when leaving screen
+      stopSpeaking();
+    };
+  }, [navigation, medicationName]);
 
   const handleGoHome = () => {
+    // Stop any ongoing speech before navigation
+    stopSpeaking();
     navigation.navigate('Home');
   };
 

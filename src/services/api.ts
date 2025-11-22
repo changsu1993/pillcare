@@ -458,6 +458,68 @@ export const deleteMedicationWithNotifications = async (
 };
 
 /**
+ * 약 등록 폼 데이터 타입
+ * - AddMedicationScreen에서 사용
+ */
+export interface MedicationFormData {
+  name: string;
+  dosage: string;
+  frequency: string;
+  reminder_times: string[]; // ["09:00", "14:00", "21:00"]
+  start_date: string; // "YYYY-MM-DD"
+  end_date?: string; // "YYYY-MM-DD"
+  notes?: string;
+}
+
+/**
+ * 약 등록 폼에서 약 생성
+ *
+ * @param formData - 폼에서 입력받은 약 정보
+ * @returns 생성된 약 정보 및 알림 ID 배열
+ *
+ * @description
+ * - 폼 데이터를 Medication 타입으로 변환
+ * - 데이터베이스에 저장
+ * - 알림 자동 예약
+ *
+ * @example
+ * const result = await createMedicationFromForm({
+ *   name: '혈압약',
+ *   dosage: '1정',
+ *   frequency: 'daily_2',
+ *   reminder_times: ['09:00', '21:00'],
+ *   start_date: '2024-01-01',
+ *   notes: '식후 30분'
+ * });
+ */
+export const createMedicationFromForm = async (
+  formData: MedicationFormData
+): Promise<{ medication: Medication; notificationIds: string[] }> => {
+  // 현재 사용자 ID 가져오기
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error('로그인이 필요합니다.');
+
+  // 폼 데이터를 Medication 타입으로 변환
+  const medicationData: Omit<Medication, 'id' | 'created_at'> = {
+    user_id: user.id,
+    name: formData.name.trim(),
+    dosage: formData.dosage.trim(),
+    frequency: formData.frequency,
+    reminder_times: formData.reminder_times,
+    start_date: formData.start_date,
+    end_date: formData.end_date || undefined,
+    notes: formData.notes?.trim() || undefined,
+    active: true,
+  };
+
+  // 약 생성 및 알림 예약
+  return createMedicationWithNotifications(medicationData);
+};
+
+/**
  * 모든 활성 약에 대해 알림 일괄 예약
  * (앱 재시작 시 또는 권한 허용 직후 사용)
  */

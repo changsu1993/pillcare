@@ -38,8 +38,7 @@ const ParentHomeScreen: React.FC<Props> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [medications, setMedications] = useState<MedicationLog[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [hasNotificationPermission, setHasNotificationPermission] =
-    useState<boolean>(false);
+  const [hasNotificationPermission, setHasNotificationPermission] = useState<boolean>(false);
 
   useEffect(() => {
     loadTodayMedications();
@@ -53,17 +52,13 @@ const ParentHomeScreen: React.FC<Props> = ({ navigation }) => {
 
       if (!hasPermission) {
         // 권한이 없으면 안내 메시지 표시 및 설정으로 이동 옵션 제공
-        Alert.alert(
-          '알림 권한 필요',
-          '약 복용 알림을 받으려면 알림 권한이 필요합니다.',
-          [
-            { text: '나중에', style: 'cancel' },
-            {
-              text: '설정으로 이동',
-              onPress: () => Linking.openSettings(),
-            },
-          ]
-        );
+        Alert.alert('알림 권한 필요', '약 복용 알림을 받으려면 알림 권한이 필요합니다.', [
+          { text: '나중에', style: 'cancel' },
+          {
+            text: '설정으로 이동',
+            onPress: () => Linking.openSettings(),
+          },
+        ]);
       } else {
         // 권한이 있으면 모든 약의 알림 예약
         try {
@@ -98,14 +93,10 @@ const ParentHomeScreen: React.FC<Props> = ({ navigation }) => {
   const handleTestNotification = async (): Promise<void> => {
     try {
       await sendTestNotification();
-      Alert.alert('테스트 알림', '5초 후에 알림이 표시됩니다.', [
-        { text: '확인' },
-      ]);
+      Alert.alert('테스트 알림', '5초 후에 알림이 표시됩니다.', [{ text: '확인' }]);
     } catch (error) {
       console.error('테스트 알림 실패:', error);
-      Alert.alert('오류', '테스트 알림 전송에 실패했습니다.', [
-        { text: '확인' },
-      ]);
+      Alert.alert('오류', '테스트 알림 전송에 실패했습니다.', [{ text: '확인' }]);
     }
   };
 
@@ -115,11 +106,9 @@ const ParentHomeScreen: React.FC<Props> = ({ navigation }) => {
   const handleCheckScheduledNotifications = async (): Promise<void> => {
     try {
       const notifications = await getAllScheduledNotifications();
-      Alert.alert(
-        '예약된 알림',
-        `현재 ${notifications.length}개의 알림이 예약되어 있습니다.`,
-        [{ text: '확인' }]
-      );
+      Alert.alert('예약된 알림', `현재 ${notifications.length}개의 알림이 예약되어 있습니다.`, [
+        { text: '확인' },
+      ]);
     } catch (error) {
       console.error('예약된 알림 확인 실패:', error);
     }
@@ -138,10 +127,7 @@ const ParentHomeScreen: React.FC<Props> = ({ navigation }) => {
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity
-          style={styles.retryButton}
-          onPress={loadTodayMedications}
-        >
+        <TouchableOpacity style={styles.retryButton} onPress={loadTodayMedications}>
           <Text style={styles.retryButtonText}>다시 시도</Text>
         </TouchableOpacity>
       </View>
@@ -152,16 +138,11 @@ const ParentHomeScreen: React.FC<Props> = ({ navigation }) => {
   if (medications.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-        >
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
           {/* 알림 권한 경고 (권한이 없을 때만 표시) */}
           {!hasNotificationPermission && (
             <View style={styles.permissionWarning}>
-              <Text style={styles.permissionWarningText}>
-                ⚠️ 알림 권한이 필요합니다
-              </Text>
+              <Text style={styles.permissionWarningText}>⚠️ 알림 권한이 필요합니다</Text>
               <Text style={styles.permissionWarningSubtext}>
                 약 복용 알림을 받으려면 설정에서 권한을 허용해주세요.
               </Text>
@@ -178,10 +159,7 @@ const ParentHomeScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.devContainer}>
             <Text style={styles.devTitle}>개발자 도구</Text>
             <View style={styles.devButtons}>
-              <TouchableOpacity
-                style={styles.devButton}
-                onPress={handleTestNotification}
-              >
+              <TouchableOpacity style={styles.devButton} onPress={handleTestNotification}>
                 <Text style={styles.devButtonText}>테스트 알림</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -218,16 +196,11 @@ const ParentHomeScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* 알림 권한 경고 (권한이 없을 때만 표시) */}
         {!hasNotificationPermission && (
           <View style={styles.permissionWarning}>
-            <Text style={styles.permissionWarningText}>
-              ⚠️ 알림 권한이 필요합니다
-            </Text>
+            <Text style={styles.permissionWarningText}>⚠️ 알림 권한이 필요합니다</Text>
             <Text style={styles.permissionWarningSubtext}>
               약 복용 알림을 받으려면 설정에서 권한을 허용해주세요.
             </Text>
@@ -244,16 +217,10 @@ const ParentHomeScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.devContainer}>
           <Text style={styles.devTitle}>개발자 도구</Text>
           <View style={styles.devButtons}>
-            <TouchableOpacity
-              style={styles.devButton}
-              onPress={handleTestNotification}
-            >
+            <TouchableOpacity style={styles.devButton} onPress={handleTestNotification}>
               <Text style={styles.devButtonText}>테스트 알림</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.devButton}
-              onPress={handleCheckScheduledNotifications}
-            >
+            <TouchableOpacity style={styles.devButton} onPress={handleCheckScheduledNotifications}>
               <Text style={styles.devButtonText}>예약된 알림 확인</Text>
             </TouchableOpacity>
           </View>
@@ -263,15 +230,10 @@ const ParentHomeScreen: React.FC<Props> = ({ navigation }) => {
         {medications.map((med) => (
           <View
             key={`${med.medication_id}-${med.scheduled_at}`}
-            style={[
-              styles.medicationCard,
-              med.taken && styles.medicationCardTaken,
-            ]}
+            style={[styles.medicationCard, med.taken && styles.medicationCardTaken]}
           >
             {/* Medication name */}
-            <Text style={styles.medicationName}>
-              {med.medications?.name || '약 이름 없음'}
-            </Text>
+            <Text style={styles.medicationName}>{med.medications?.name || '약 이름 없음'}</Text>
 
             {/* Dosage */}
             <Text style={styles.medicationDosage}>

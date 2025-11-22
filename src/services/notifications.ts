@@ -70,8 +70,7 @@ Notifications.setNotificationHandler({
  */
 export const requestNotificationPermissions = async (): Promise<boolean> => {
   try {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
 
     let finalStatus = existingStatus;
 
@@ -173,9 +172,7 @@ export const scheduleMedicationNotifications = async (
       });
 
       notificationIds.push(notificationId);
-      console.log(
-        `알림 예약됨: ${medication.name} - ${timeString} (ID: ${notificationId})`
-      );
+      console.log(`알림 예약됨: ${medication.name} - ${timeString} (ID: ${notificationId})`);
     }
 
     return notificationIds;
@@ -197,9 +194,7 @@ export const scheduleMedicationNotifications = async (
  * @example
  * await cancelMedicationNotifications(['notif-1', 'notif-2']);
  */
-export const cancelMedicationNotifications = async (
-  notificationIds: string[]
-): Promise<void> => {
+export const cancelMedicationNotifications = async (notificationIds: string[]): Promise<void> => {
   try {
     for (const id of notificationIds) {
       await Notifications.cancelScheduledNotificationAsync(id);
@@ -242,18 +237,18 @@ export const cancelAllNotifications = async (): Promise<void> => {
  * const scheduledNotifications = await getAllScheduledNotifications();
  * console.log(`예약된 알림 개수: ${scheduledNotifications.length}`);
  */
-export const getAllScheduledNotifications =
-  async (): Promise<Notifications.NotificationRequest[]> => {
-    try {
-      const notifications =
-        await Notifications.getAllScheduledNotificationsAsync();
-      console.log(`예약된 알림 개수: ${notifications.length}`);
-      return notifications;
-    } catch (error) {
-      console.error('예약된 알림 조회 실패:', error);
-      return [];
-    }
-  };
+export const getAllScheduledNotifications = async (): Promise<
+  Notifications.NotificationRequest[]
+> => {
+  try {
+    const notifications = await Notifications.getAllScheduledNotificationsAsync();
+    console.log(`예약된 알림 개수: ${notifications.length}`);
+    return notifications;
+  } catch (error) {
+    console.error('예약된 알림 조회 실패:', error);
+    return [];
+  }
+};
 
 /**
  * 약 정보 업데이트 시 알림 재예약
@@ -283,9 +278,7 @@ export const rescheduleMedicationNotifications = async (
     // 새로운 알림 예약
     const newIds = await scheduleMedicationNotifications(medication);
 
-    console.log(
-      `알림 재예약 완료: ${medication.name} (${newIds.length}개 알림)`
-    );
+    console.log(`알림 재예약 완료: ${medication.name} (${newIds.length}개 알림)`);
     return newIds;
   } catch (error) {
     console.error('알림 재예약 실패:', error);
@@ -317,9 +310,7 @@ export const getExpoPushToken = async (): Promise<string | null> => {
 
     // Get project ID from Constants (Expo SDK 54+)
     const Constants = require('expo-constants').default;
-    const projectId =
-      Constants.expoConfig?.extra?.eas?.projectId ||
-      Constants.easConfig?.projectId;
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId || Constants.easConfig?.projectId;
 
     if (!projectId) {
       console.warn('Project ID not found. Push token may not work in production.');

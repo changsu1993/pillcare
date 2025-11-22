@@ -25,11 +25,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import {
-  getConnectedParent,
-  getParentTodayLogs,
-  getParentMedications,
-} from '../../services/api';
+import { getConnectedParent, getParentTodayLogs, getParentMedications } from '../../services/api';
 import { User, MedicationLog, Medication } from '../../types/database.types';
 
 // Color constants
@@ -323,44 +319,29 @@ const ChildHomeScreen: React.FC = () => {
         {todayItems.length === 0 ? (
           <View style={styles.emptyMedicationsCard}>
             <Ionicons name="medical-outline" size={32} color={COLORS.gray400} />
-            <Text style={styles.emptyMedicationsText}>
-              오늘 예정된 복약이 없습니다
-            </Text>
+            <Text style={styles.emptyMedicationsText}>오늘 예정된 복약이 없습니다</Text>
           </View>
         ) : (
           <View style={styles.timelineContainer}>
             {todayItems.map((item, index) => {
               const statusDisplay = getStatusDisplay(item.status);
               return (
-                <View key={`${item.medicationId}-${item.scheduledTime}`} style={styles.timelineItem}>
+                <View
+                  key={`${item.medicationId}-${item.scheduledTime}`}
+                  style={styles.timelineItem}
+                >
                   {/* Timeline line */}
                   <View style={styles.timelineLeft}>
-                    <View
-                      style={[
-                        styles.timelineDot,
-                        { backgroundColor: statusDisplay.color },
-                      ]}
-                    >
-                      <Ionicons
-                        name={statusDisplay.icon as any}
-                        size={12}
-                        color={COLORS.white}
-                      />
+                    <View style={[styles.timelineDot, { backgroundColor: statusDisplay.color }]}>
+                      <Ionicons name={statusDisplay.icon as any} size={12} color={COLORS.white} />
                     </View>
-                    {index < todayItems.length - 1 && (
-                      <View style={styles.timelineLine} />
-                    )}
+                    {index < todayItems.length - 1 && <View style={styles.timelineLine} />}
                   </View>
 
                   {/* Content */}
                   <View style={styles.timelineContent}>
                     <Text style={styles.timelineTime}>{item.scheduledTime}</Text>
-                    <View
-                      style={[
-                        styles.medicationCard,
-                        { borderLeftColor: statusDisplay.color },
-                      ]}
-                    >
+                    <View style={[styles.medicationCard, { borderLeftColor: statusDisplay.color }]}>
                       <View style={styles.medicationHeader}>
                         <Text style={styles.medicationName}>{item.medicationName}</Text>
                         <View
@@ -369,9 +350,7 @@ const ChildHomeScreen: React.FC = () => {
                             { backgroundColor: statusDisplay.color + '20' },
                           ]}
                         >
-                          <Text
-                            style={[styles.statusText, { color: statusDisplay.color }]}
-                          >
+                          <Text style={[styles.statusText, { color: statusDisplay.color }]}>
                             {statusDisplay.text}
                           </Text>
                         </View>
@@ -387,11 +366,7 @@ const ChildHomeScreen: React.FC = () => {
       </ScrollView>
 
       {/* Quick Call Button */}
-      <TouchableOpacity
-        style={styles.callButton}
-        onPress={handleCallParent}
-        activeOpacity={0.8}
-      >
+      <TouchableOpacity style={styles.callButton} onPress={handleCallParent} activeOpacity={0.8}>
         <Ionicons name="call" size={20} color={COLORS.white} />
         <Text style={styles.callButtonText}>부모님께 전화</Text>
       </TouchableOpacity>

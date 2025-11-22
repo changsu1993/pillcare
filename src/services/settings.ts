@@ -63,9 +63,7 @@ export const getSettings = async (): Promise<AppSettings> => {
  * @param settings - Partial settings to update
  * @returns Updated settings
  */
-export const saveSettings = async (
-  settings: Partial<AppSettings>
-): Promise<AppSettings> => {
+export const saveSettings = async (settings: Partial<AppSettings>): Promise<AppSettings> => {
   try {
     // Get current settings
     const current = await getSettings();

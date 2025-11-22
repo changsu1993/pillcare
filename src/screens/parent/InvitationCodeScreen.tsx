@@ -92,17 +92,13 @@ const InvitationCodeScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleRefreshCode = () => {
-    Alert.alert(
-      '새 코드 생성',
-      '기존 코드는 무효화됩니다.\n새로운 코드를 생성하시겠습니까?',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '생성',
-          onPress: loadData,
-        },
-      ]
-    );
+    Alert.alert('새 코드 생성', '기존 코드는 무효화됩니다.\n새로운 코드를 생성하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '생성',
+        onPress: loadData,
+      },
+    ]);
   };
 
   // Format code with spaces for readability (123 456)
@@ -124,11 +120,7 @@ const InvitationCodeScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.centerContainer}>
         <Text style={styles.errorIcon}>!</Text>
         <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity
-          style={styles.retryButton}
-          onPress={loadData}
-          activeOpacity={0.7}
-        >
+        <TouchableOpacity style={styles.retryButton} onPress={loadData} activeOpacity={0.7}>
           <Text style={styles.retryButtonText}>다시 시도</Text>
         </TouchableOpacity>
       </View>
@@ -172,14 +164,8 @@ const InvitationCodeScreen: React.FC<Props> = ({ navigation }) => {
             accessibilityLabel="코드 복사하기"
             accessibilityRole="button"
           >
-            <Ionicons
-              name={copied ? 'checkmark' : 'copy-outline'}
-              size={32}
-              color="#FFFFFF"
-            />
-            <Text style={styles.buttonText}>
-              {copied ? '복사됨' : '코드 복사'}
-            </Text>
+            <Ionicons name={copied ? 'checkmark' : 'copy-outline'} size={32} color="#FFFFFF" />
+            <Text style={styles.buttonText}>{copied ? '복사됨' : '코드 복사'}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -201,9 +187,7 @@ const InvitationCodeScreen: React.FC<Props> = ({ navigation }) => {
             {connectedChildren.map((child) => (
               <View key={child.id} style={styles.childItem}>
                 <View style={styles.childAvatar}>
-                  <Text style={styles.childAvatarText}>
-                    {child.name?.charAt(0) || '?'}
-                  </Text>
+                  <Text style={styles.childAvatarText}>{child.name?.charAt(0) || '?'}</Text>
                 </View>
                 <View style={styles.childInfo}>
                   <Text style={styles.childName}>{child.name}</Text>

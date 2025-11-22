@@ -66,21 +66,16 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
         throw new Error('회원가입에 실패했습니다.');
       }
 
-      Alert.alert(
-        '회원가입 완료',
-        '환영합니다! 로그인해주세요.',
-        [
-          {
-            text: '확인',
-            onPress: () => navigation.navigate('SignIn'),
-          },
-        ]
-      );
+      Alert.alert('회원가입 완료', '환영합니다! 로그인해주세요.', [
+        {
+          text: '확인',
+          onPress: () => navigation.navigate('SignIn'),
+        },
+      ]);
     } catch (error) {
       console.error('Sign up error:', error);
-      const errorMessage = error instanceof Error
-        ? error.message
-        : '회원가입에 실패했습니다. 다시 시도해주세요.';
+      const errorMessage =
+        error instanceof Error ? error.message : '회원가입에 실패했습니다. 다시 시도해주세요.';
 
       Alert.alert('회원가입 실패', errorMessage);
     } finally {
@@ -100,10 +95,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
         >
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={styles.backButton}
-            >
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
               <Text style={styles.backButtonText}>← 뒤로</Text>
             </TouchableOpacity>
             <Text style={styles.title}>회원가입</Text>
@@ -117,10 +109,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
               <Text style={styles.label}>사용자 유형</Text>
               <View style={styles.roleContainer}>
                 <TouchableOpacity
-                  style={[
-                    styles.roleButton,
-                    role === 'parent' && styles.roleButtonActive,
-                  ]}
+                  style={[styles.roleButton, role === 'parent' && styles.roleButtonActive]}
                   onPress={() => setRole('parent')}
                   disabled={isLoading}
                 >
@@ -134,18 +123,12 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[
-                    styles.roleButton,
-                    role === 'child' && styles.roleButtonActive,
-                  ]}
+                  style={[styles.roleButton, role === 'child' && styles.roleButtonActive]}
                   onPress={() => setRole('child')}
                   disabled={isLoading}
                 >
                   <Text
-                    style={[
-                      styles.roleButtonText,
-                      role === 'child' && styles.roleButtonTextActive,
-                    ]}
+                    style={[styles.roleButtonText, role === 'child' && styles.roleButtonTextActive]}
                   >
                     자녀 (모니터링)
                   </Text>
@@ -245,10 +228,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
             {/* Sign in link */}
             <View style={styles.footer}>
               <Text style={styles.footerText}>이미 계정이 있으신가요? </Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('SignIn')}
-                disabled={isLoading}
-              >
+              <TouchableOpacity onPress={() => navigation.navigate('SignIn')} disabled={isLoading}>
                 <Text style={styles.link}>로그인</Text>
               </TouchableOpacity>
             </View>

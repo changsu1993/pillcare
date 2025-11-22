@@ -104,11 +104,9 @@ const ChildSettingsScreen: React.FC = () => {
       if (enabled) {
         const hasPermission = await requestNotificationPermissions();
         if (!hasPermission) {
-          Alert.alert(
-            '알림 권한 필요',
-            '알림을 받으려면 설정에서 알림 권한을 허용해주세요.',
-            [{ text: '확인' }]
-          );
+          Alert.alert('알림 권한 필요', '알림을 받으려면 설정에서 알림 권한을 허용해주세요.', [
+            { text: '확인' },
+          ]);
           return;
         }
       }
@@ -144,11 +142,9 @@ const ChildSettingsScreen: React.FC = () => {
       if (enabled && !notificationsEnabled) {
         const hasPermission = await requestNotificationPermissions();
         if (!hasPermission) {
-          Alert.alert(
-            '알림 권한 필요',
-            '미복용 알림을 받으려면 알림 권한을 허용해주세요.',
-            [{ text: '확인' }]
-          );
+          Alert.alert('알림 권한 필요', '미복용 알림을 받으려면 알림 권한을 허용해주세요.', [
+            { text: '확인' },
+          ]);
           return;
         }
         setNotificationsEnabled(true);
@@ -199,25 +195,21 @@ const ChildSettingsScreen: React.FC = () => {
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      '로그아웃',
-      '정말 로그아웃 하시겠습니까?',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '로그아웃',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await signOut();
-            } catch (error) {
-              console.error('로그아웃 실패:', error);
-              Alert.alert('오류', '로그아웃에 실패했습니다.');
-            }
-          },
+    Alert.alert('로그아웃', '정말 로그아웃 하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '로그아웃',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await signOut();
+          } catch (error) {
+            console.error('로그아웃 실패:', error);
+            Alert.alert('오류', '로그아웃에 실패했습니다.');
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   if (isLoading) {
@@ -236,9 +228,7 @@ const ChildSettingsScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>프로필</Text>
           <View style={styles.profileCard}>
             <View style={styles.avatarContainer}>
-              <Text style={styles.avatarText}>
-                {profile?.name?.charAt(0) || '?'}
-              </Text>
+              <Text style={styles.avatarText}>{profile?.name?.charAt(0) || '?'}</Text>
             </View>
             <View style={styles.profileInfo}>
               <Text style={styles.profileName}>{profile?.name || '이름 없음'}</Text>
@@ -273,9 +263,7 @@ const ChildSettingsScreen: React.FC = () => {
               <Ionicons name="alert-circle-outline" size={24} color="#6B7280" />
               <View>
                 <Text style={styles.settingLabel}>미복용 알림</Text>
-                <Text style={styles.settingDescription}>
-                  부모님이 약을 놓치면 알림을 받습니다
-                </Text>
+                <Text style={styles.settingDescription}>부모님이 약을 놓치면 알림을 받습니다</Text>
               </View>
             </View>
             <Switch
@@ -322,9 +310,7 @@ const ChildSettingsScreen: React.FC = () => {
           ) : (
             <View style={styles.noConnectionCard}>
               <Ionicons name="people-outline" size={48} color="#D1D5DB" />
-              <Text style={styles.noConnectionText}>
-                연결된 부모님이 없습니다
-              </Text>
+              <Text style={styles.noConnectionText}>연결된 부모님이 없습니다</Text>
               <Text style={styles.noConnectionSubtext}>
                 부모님의 초대 코드를 입력하여 연결하세요
               </Text>
@@ -332,10 +318,7 @@ const ChildSettingsScreen: React.FC = () => {
           )}
 
           {/* Enter code button */}
-          <TouchableOpacity
-            style={styles.enterCodeButton}
-            onPress={handleEnterCode}
-          >
+          <TouchableOpacity style={styles.enterCodeButton} onPress={handleEnterCode}>
             <Ionicons name="keypad-outline" size={24} color="#3B82F6" />
             <Text style={styles.enterCodeText}>초대 코드 입력</Text>
             <Ionicons name="chevron-forward" size={20} color="#3B82F6" />
@@ -372,10 +355,7 @@ const ChildSettingsScreen: React.FC = () => {
         </View>
 
         {/* 로그아웃 버튼 */}
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-        >
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={24} color="#EF4444" />
           <Text style={styles.logoutText}>로그아웃</Text>
         </TouchableOpacity>

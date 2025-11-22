@@ -65,19 +65,12 @@ const ConfirmationScreen: React.FC<Props> = ({ route, navigation }) => {
       </View>
 
       {/* Success message */}
-      <Text
-        style={styles.title}
-        accessibilityLabel="잘하셨어요!"
-        accessibilityRole="header"
-      >
+      <Text style={styles.title} accessibilityLabel="잘하셨어요!" accessibilityRole="header">
         잘하셨어요!
       </Text>
 
       {/* Medication name */}
-      <Text
-        style={styles.medicationName}
-        accessibilityLabel={`복용한 약: ${medicationName}`}
-      >
+      <Text style={styles.medicationName} accessibilityLabel={`복용한 약: ${medicationName}`}>
         {medicationName}
       </Text>
 

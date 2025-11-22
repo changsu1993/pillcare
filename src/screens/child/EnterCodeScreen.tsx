@@ -207,9 +207,7 @@ const EnterCodeScreen: React.FC<Props> = ({ navigation }) => {
                   ]}
                   value={digit}
                   onChangeText={(value) => handleCodeChange(value, index)}
-                  onKeyPress={({ nativeEvent }) =>
-                    handleKeyPress(nativeEvent.key, index)
-                  }
+                  onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
                   keyboardType="number-pad"
                   maxLength={CODE_LENGTH}
                   selectTextOnFocus

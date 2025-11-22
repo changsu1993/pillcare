@@ -72,10 +72,7 @@ const MedicationDetailScreen: React.FC<Props> = ({ route, navigation }) => {
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.errorText}>{error || '약을 찾을 수 없습니다'}</Text>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Text style={styles.backButtonText}>뒤로</Text>
         </TouchableOpacity>
       </View>
@@ -84,10 +81,7 @@ const MedicationDetailScreen: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Medication icon */}
         <Text style={styles.icon}>💊</Text>
 

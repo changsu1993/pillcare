@@ -33,16 +33,8 @@ const AuthNavigator: React.FC = () => {
         component={WelcomeScreen}
         options={{ title: 'PillCare에 오신 것을 환영합니다' }}
       />
-      <Stack.Screen
-        name="SignIn"
-        component={SignInScreen}
-        options={{ title: '로그인' }}
-      />
-      <Stack.Screen
-        name="SignUp"
-        component={SignUpScreen}
-        options={{ title: '회원가입' }}
-      />
+      <Stack.Screen name="SignIn" component={SignInScreen} options={{ title: '로그인' }} />
+      <Stack.Screen name="SignUp" component={SignUpScreen} options={{ title: '회원가입' }} />
     </Stack.Navigator>
   );
 };

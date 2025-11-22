@@ -37,11 +37,7 @@ const HomeStack: React.FC = () => (
       headerTintColor: '#1A1A1A',
     }}
   >
-    <Stack.Screen
-      name="Home"
-      component={ChildHomeScreen}
-      options={{ title: '부모님 복약 현황' }}
-    />
+    <Stack.Screen name="Home" component={ChildHomeScreen} options={{ title: '부모님 복약 현황' }} />
   </Stack.Navigator>
 );
 
@@ -75,11 +71,7 @@ const ReportsStack: React.FC = () => (
       headerTintColor: '#1A1A1A',
     }}
   >
-    <Stack.Screen
-      name="Reports"
-      component={ReportsScreen}
-      options={{ title: '복약 리포트' }}
-    />
+    <Stack.Screen name="Reports" component={ReportsScreen} options={{ title: '복약 리포트' }} />
   </Stack.Navigator>
 );
 
@@ -94,11 +86,7 @@ const SettingsStack: React.FC = () => (
       headerTintColor: '#1A1A1A',
     }}
   >
-    <Stack.Screen
-      name="Settings"
-      component={ChildSettingsScreen}
-      options={{ title: '설정' }}
-    />
+    <Stack.Screen name="Settings" component={ChildSettingsScreen} options={{ title: '설정' }} />
     <Stack.Screen
       name="EnterCode"
       component={EnterCodeScreen}

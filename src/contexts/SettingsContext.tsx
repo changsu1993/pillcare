@@ -25,12 +25,7 @@ import React, {
   useCallback,
   ReactNode,
 } from 'react';
-import {
-  AppSettings,
-  DEFAULT_SETTINGS,
-  getSettings,
-  saveSettings,
-} from '../services/settings';
+import { AppSettings, DEFAULT_SETTINGS, getSettings, saveSettings } from '../services/settings';
 
 /**
  * Settings context value type
@@ -51,9 +46,7 @@ interface SettingsContextValue {
 }
 
 // Create context with undefined initial value
-const SettingsContext = createContext<SettingsContextValue | undefined>(
-  undefined
-);
+const SettingsContext = createContext<SettingsContextValue | undefined>(undefined);
 
 /**
  * Settings provider component
@@ -62,9 +55,7 @@ interface SettingsProviderProps {
   children: ReactNode;
 }
 
-export const SettingsProvider: React.FC<SettingsProviderProps> = ({
-  children,
-}) => {
+export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) => {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -86,18 +77,15 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     }
   };
 
-  const updateSettings = useCallback(
-    async (updates: Partial<AppSettings>) => {
-      try {
-        const updated = await saveSettings(updates);
-        setSettings(updated);
-      } catch (error) {
-        console.error('[SettingsContext] Error updating settings:', error);
-        throw error;
-      }
-    },
-    []
-  );
+  const updateSettings = useCallback(async (updates: Partial<AppSettings>) => {
+    try {
+      const updated = await saveSettings(updates);
+      setSettings(updated);
+    } catch (error) {
+      console.error('[SettingsContext] Error updating settings:', error);
+      throw error;
+    }
+  }, []);
 
   const reloadSettings = useCallback(async () => {
     await loadSettings();
@@ -112,11 +100,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     isVibrationEnabled: settings.vibrationEnabled,
   };
 
-  return (
-    <SettingsContext.Provider value={value}>
-      {children}
-    </SettingsContext.Provider>
-  );
+  return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 };
 
 /**

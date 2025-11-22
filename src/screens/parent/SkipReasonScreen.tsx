@@ -8,9 +8,10 @@
  * - WCAG AAA compliance
  * - 72px button height
  * - Clear icons and labels
+ * - Voice guidance with expo-speech
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -22,6 +23,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ParentScreenProps } from '../../types/navigation.types';
 import { logMedicationMissed } from '../../services/api';
+import { speakSkipPrompt, stopSpeaking } from '../../services/voice';
+import { isVoiceGuidanceEnabled } from '../../services/settings';
 
 type Props = ParentScreenProps<'SkipReason'>;
 
@@ -45,9 +48,33 @@ const SkipReasonScreen: React.FC<Props> = ({ route, navigation }) => {
   const { medicationId, scheduledTime } = route.params;
   const [isLoading, setIsLoading] = useState(false);
 
+  // Speak skip prompt when screen appears
+  useEffect(() => {
+    const speakPrompt = async () => {
+      try {
+        const voiceEnabled = await isVoiceGuidanceEnabled();
+        if (voiceEnabled) {
+          await speakSkipPrompt();
+        }
+      } catch (error) {
+        console.error('Error speaking skip prompt:', error);
+      }
+    };
+
+    speakPrompt();
+
+    return () => {
+      // Stop any ongoing speech when leaving screen
+      stopSpeaking();
+    };
+  }, []);
+
   const handleReasonSelect = async (reason: SkipReason) => {
     try {
       setIsLoading(true);
+
+      // Stop any ongoing speech
+      stopSpeaking();
 
       // Log the skipped medication with reason
       await logMedicationMissed(

@@ -37,6 +37,7 @@ export type ParentStackParamList = {
   MedicationDetail: {
     medicationId: string;
   };
+  AddMedication: undefined;
 };
 
 export type ParentTabParamList = {

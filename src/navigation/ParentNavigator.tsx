@@ -27,6 +27,7 @@ import FullScreenReminderScreen from '../screens/parent/FullScreenReminderScreen
 import ConfirmationScreen from '../screens/parent/ConfirmationScreen';
 import SkipReasonScreen from '../screens/parent/SkipReasonScreen';
 import MedicationDetailScreen from '../screens/parent/MedicationDetailScreen';
+import AddMedicationScreen from '../screens/parent/AddMedicationScreen';
 
 const Tab = createBottomTabNavigator<ParentTabParamList>();
 const Stack = createStackNavigator<ParentStackParamList>();
@@ -81,6 +82,14 @@ const HomeStack: React.FC = () => {
         component={MedicationDetailScreen}
         options={{
           title: '약 상세 정보',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="AddMedication"
+        component={AddMedicationScreen}
+        options={{
+          title: '약 추가하기',
           headerShown: true,
         }}
       />

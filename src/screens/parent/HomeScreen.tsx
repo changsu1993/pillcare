@@ -34,7 +34,7 @@ import {
 
 type Props = ParentScreenProps<'Home'>;
 
-const ParentHomeScreen: React.FC<Props> = () => {
+const ParentHomeScreen: React.FC<Props> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [medications, setMedications] = useState<MedicationLog[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -200,6 +200,17 @@ const ParentHomeScreen: React.FC<Props> = () => {
               없습니다
             </Text>
           </View>
+
+          {/* 약 추가하기 버튼 */}
+          <TouchableOpacity
+            style={styles.addMedicationButton}
+            onPress={() => navigation.navigate('AddMedication')}
+            accessibilityLabel="약 추가하기"
+            accessibilityHint="탭하여 새로운 약을 등록합니다"
+            accessibilityRole="button"
+          >
+            <Text style={styles.addMedicationButtonText}>+ 약 추가하기</Text>
+          </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
     );
@@ -285,6 +296,17 @@ const ParentHomeScreen: React.FC<Props> = () => {
             </Text>
           </View>
         ))}
+
+        {/* 약 추가하기 버튼 */}
+        <TouchableOpacity
+          style={styles.addMedicationButton}
+          onPress={() => navigation.navigate('AddMedication')}
+          accessibilityLabel="약 추가하기"
+          accessibilityHint="탭하여 새로운 약을 등록합니다"
+          accessibilityRole="button"
+        >
+          <Text style={styles.addMedicationButtonText}>+ 약 추가하기</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -452,6 +474,26 @@ const styles = StyleSheet.create({
   devButtonText: {
     fontSize: 12,
     fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  addMedicationButton: {
+    backgroundColor: '#22C55E',
+    borderRadius: 16,
+    paddingVertical: 24,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 72,
+    marginTop: 16,
+    shadowColor: '#22C55E',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  addMedicationButtonText: {
+    fontSize: 28,
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 });

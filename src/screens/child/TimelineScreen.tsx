@@ -23,12 +23,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getTodayLogs, getFamilyConnections } from '../../services/api';
-import { ChildScreenProps } from '../../types/navigation.types';
 import { MedicationLog, User } from '../../types/database.types';
 
-type Props = ChildScreenProps<'Timeline'>;
+// TimelineScreen은 더 이상 사용되지 않음 (HomeScreen으로 대체됨)
 
-const ChildTimelineScreen: React.FC<Props> = () => {
+const ChildTimelineScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [medications, setMedications] = useState<MedicationLog[]>([]);

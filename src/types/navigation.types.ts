@@ -48,15 +48,30 @@ export type ParentTabParamList = {
 export type ParentScreenProps<T extends keyof ParentStackParamList> =
   StackScreenProps<ParentStackParamList, T>;
 
-// Child Navigator
+// Child Navigator - Tab Navigator
 export type ChildTabParamList = {
-  Timeline: undefined;
-  Records: undefined;
+  HomeTab: undefined;
+  MedicationsTab: undefined;
+  ReportsTab: undefined;
+  SettingsTab: undefined;
+};
+
+// Child Navigator - Stack Navigator (for nested screens)
+export type ChildStackParamList = {
+  Home: undefined;
+  MedicationManage: undefined;
+  MedicationDetail: { medicationId: string };
+  AddMedication: { parentId: string };
+  EditMedication: { medicationId: string };
+  Reports: undefined;
   Settings: undefined;
 };
 
-export type ChildScreenProps<T extends keyof ChildTabParamList> =
+export type ChildTabScreenProps<T extends keyof ChildTabParamList> =
   BottomTabScreenProps<ChildTabParamList, T>;
+
+export type ChildStackScreenProps<T extends keyof ChildStackParamList> =
+  StackScreenProps<ChildStackParamList, T>;
 
 // Root Navigator (if needed)
 export type RootStackParamList = {

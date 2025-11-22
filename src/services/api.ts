@@ -581,7 +581,16 @@ export const getConnectedParent = async (): Promise<User | null> => {
     throw error;
   }
 
-  return data?.parent as User || null;
+  // Supabase 관계형 쿼리 결과 처리
+  const parent = data?.parent;
+  if (!parent) return null;
+
+  // 배열인 경우 첫 번째 요소 반환
+  if (Array.isArray(parent)) {
+    return parent[0] as User || null;
+  }
+
+  return parent as unknown as User;
 };
 
 /**

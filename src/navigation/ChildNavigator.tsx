@@ -1,102 +1,165 @@
 /**
- * ChildNavigator - Child App Navigation
+ * ChildNavigator - 자녀 앱 네비게이션
  *
- * Navigation for adult child users who monitor parents:
- * - Timeline (real-time parent medication status)
- * - Records (weekly/monthly adherence reports)
- * - Settings (profile, notifications, family management)
- *
- * Features:
- * - Standard UI (not elderly-optimized)
- * - Rich data visualization
- * - Real-time updates via Supabase subscriptions
+ * 부모 모니터링을 위한 자녀 사용자 네비게이션:
+ * - 홈 (부모님 복약 현황)
+ * - 약 관리 (약 목록, 추가, 수정, 삭제)
+ * - 리포트 (복약 통계 및 기록)
+ * - 설정 (프로필, 알림, 가족 연결)
  */
 
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text, View } from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 
 // Types
-import { ChildTabParamList } from '../types/navigation.types';
+import { ChildTabParamList, ChildStackParamList } from '../types/navigation.types';
 
 // Screens
-import ChildTimelineScreen from '../screens/child/TimelineScreen';
+import ChildHomeScreen from '../screens/child/HomeScreen';
+import MedicationManageScreen from '../screens/child/MedicationManageScreen';
+import ReportsScreen from '../screens/child/ReportsScreen';
+import ChildSettingsScreen from '../screens/child/SettingsScreen';
 
 const Tab = createBottomTabNavigator<ChildTabParamList>();
+const Stack = createNativeStackNavigator<ChildStackParamList>();
 
-// Placeholder screens
-const PlaceholderRecords: React.FC = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <Text style={{ fontSize: 18, textAlign: 'center' }}>
-      복약 기록 화면 (준비 중)
-    </Text>
-  </View>
+/**
+ * 홈 탭 스택
+ */
+const HomeStack: React.FC = () => (
+  <Stack.Navigator
+    screenOptions={{
+      headerStyle: { backgroundColor: '#FFFFFF' },
+      headerTitleStyle: { fontSize: 18, fontWeight: '700' },
+      headerTintColor: '#1A1A1A',
+    }}
+  >
+    <Stack.Screen
+      name="Home"
+      component={ChildHomeScreen}
+      options={{ title: '부모님 복약 현황' }}
+    />
+  </Stack.Navigator>
 );
 
-const PlaceholderSettings: React.FC = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <Text style={{ fontSize: 18, textAlign: 'center' }}>
-      설정 화면 (준비 중)
-    </Text>
-  </View>
+/**
+ * 약 관리 탭 스택
+ */
+const MedicationsStack: React.FC = () => (
+  <Stack.Navigator
+    screenOptions={{
+      headerStyle: { backgroundColor: '#FFFFFF' },
+      headerTitleStyle: { fontSize: 18, fontWeight: '700' },
+      headerTintColor: '#1A1A1A',
+    }}
+  >
+    <Stack.Screen
+      name="MedicationManage"
+      component={MedicationManageScreen}
+      options={{ title: '약 관리' }}
+    />
+  </Stack.Navigator>
 );
 
+/**
+ * 리포트 탭 스택
+ */
+const ReportsStack: React.FC = () => (
+  <Stack.Navigator
+    screenOptions={{
+      headerStyle: { backgroundColor: '#FFFFFF' },
+      headerTitleStyle: { fontSize: 18, fontWeight: '700' },
+      headerTintColor: '#1A1A1A',
+    }}
+  >
+    <Stack.Screen
+      name="Reports"
+      component={ReportsScreen}
+      options={{ title: '복약 리포트' }}
+    />
+  </Stack.Navigator>
+);
+
+/**
+ * 설정 탭 스택
+ */
+const SettingsStack: React.FC = () => (
+  <Stack.Navigator
+    screenOptions={{
+      headerStyle: { backgroundColor: '#FFFFFF' },
+      headerTitleStyle: { fontSize: 18, fontWeight: '700' },
+      headerTintColor: '#1A1A1A',
+    }}
+  >
+    <Stack.Screen
+      name="Settings"
+      component={ChildSettingsScreen}
+      options={{ title: '설정' }}
+    />
+  </Stack.Navigator>
+);
+
+/**
+ * 자녀 네비게이터 (탭 기반)
+ */
 const ChildNavigator: React.FC = () => {
   return (
     <Tab.Navigator
       screenOptions={{
+        headerShown: false,
         tabBarStyle: {
-          height: 56, // Standard tab bar height
+          height: 56,
           paddingBottom: 4,
           paddingTop: 4,
+          backgroundColor: '#FFFFFF',
+          borderTopWidth: 1,
+          borderTopColor: '#E5E7EB',
         },
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '600',
         },
-        tabBarActiveTintColor: '#3B82F6', // Primary blue
-        tabBarInactiveTintColor: '#9CA3AF', // Medium gray
-        headerStyle: {
-          height: 56,
-        },
-        headerTitleStyle: {
-          fontSize: 18,
-          fontWeight: '700',
-        },
+        tabBarActiveTintColor: '#3B82F6',
+        tabBarInactiveTintColor: '#9CA3AF',
       }}
     >
       <Tab.Screen
-        name="Timeline"
-        component={ChildTimelineScreen}
+        name="HomeTab"
+        component={HomeStack}
         options={{
-          title: '부모님 복약 현황',
-          tabBarLabel: '타임라인',
-          headerShown: true,
+          tabBarLabel: '홈',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="time-outline" size={size} color={color} />
+            <Ionicons name="home-outline" size={size} color={color} />
           ),
         }}
       />
       <Tab.Screen
-        name="Records"
-        component={PlaceholderRecords}
+        name="MedicationsTab"
+        component={MedicationsStack}
         options={{
-          title: '복약 기록',
-          tabBarLabel: '기록',
-          headerShown: true,
+          tabBarLabel: '약 관리',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="medical-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="ReportsTab"
+        component={ReportsStack}
+        options={{
+          tabBarLabel: '리포트',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="bar-chart-outline" size={size} color={color} />
           ),
         }}
       />
       <Tab.Screen
-        name="Settings"
-        component={PlaceholderSettings}
+        name="SettingsTab"
+        component={SettingsStack}
         options={{
-          title: '설정',
           tabBarLabel: '설정',
-          headerShown: true,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-outline" size={size} color={color} />
           ),

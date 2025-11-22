@@ -544,3 +544,251 @@ export const scheduleAllMedicationNotifications = async (): Promise<void> => {
     throw error;
   }
 };
+
+/**
+ * =====================================
+ * CHILD APP API (자녀용 API)
+ * =====================================
+ */
+
+/**
+ * Get connected parent's info for child user
+ * @returns Parent user info or null if not connected
+ */
+export const getConnectedParent = async (): Promise<User | null> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error('Not authenticated');
+
+  const { data, error } = await supabase
+    .from('family_connections')
+    .select(
+      `
+      parent:parent_id(id, name, email, phone_number, role, created_at, updated_at)
+    `
+    )
+    .eq('child_id', user.id)
+    .eq('status', 'active')
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      // No rows found
+      return null;
+    }
+    throw error;
+  }
+
+  // Supabase 관계형 쿼리 결과 처리
+  const parent = data?.parent;
+  if (!parent) return null;
+
+  // 배열인 경우 첫 번째 요소 반환
+  if (Array.isArray(parent)) {
+    return parent[0] as User || null;
+  }
+
+  return parent as unknown as User;
+};
+
+/**
+ * Get parent's medications (for child view)
+ * @param parentId - Parent user ID
+ * @returns List of parent's active medications
+ */
+export const getParentMedications = async (
+  parentId: string
+): Promise<Medication[]> => {
+  const { data, error } = await supabase
+    .from('medications')
+    .select('*')
+    .eq('user_id', parentId)
+    .eq('active', true)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+};
+
+/**
+ * Get parent's medication logs for a date range
+ * @param parentId - Parent user ID
+ * @param startDate - Start date (YYYY-MM-DD format)
+ * @param endDate - End date (YYYY-MM-DD format)
+ * @returns List of medication logs with medication info
+ */
+export const getParentMedicationLogs = async (
+  parentId: string,
+  startDate: string,
+  endDate: string
+): Promise<MedicationLog[]> => {
+  // First get all medication IDs for the parent
+  const { data: medications, error: medError } = await supabase
+    .from('medications')
+    .select('id')
+    .eq('user_id', parentId);
+
+  if (medError) throw medError;
+  if (!medications || medications.length === 0) return [];
+
+  const medicationIds = medications.map((m) => m.id);
+
+  // Then get logs for those medications
+  const { data, error } = await supabase
+    .from('medication_logs')
+    .select('*, medications(name, dosage, frequency)')
+    .in('medication_id', medicationIds)
+    .gte('scheduled_at', `${startDate}T00:00:00`)
+    .lte('scheduled_at', `${endDate}T23:59:59`)
+    .order('scheduled_at', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+};
+
+/**
+ * Get parent's today's medication logs
+ * @param parentId - Parent user ID
+ * @returns List of today's medication logs
+ */
+export const getParentTodayLogs = async (
+  parentId: string
+): Promise<MedicationLog[]> => {
+  const today = new Date();
+  const dateStr = today.toISOString().split('T')[0];
+  return getParentMedicationLogs(parentId, dateStr, dateStr);
+};
+
+/**
+ * Calculate adherence rate for parent
+ * @param parentId - Parent user ID
+ * @param days - Number of days to calculate (default: 7)
+ * @returns Adherence rate as percentage (0-100)
+ */
+export const calculateAdherenceRate = async (
+  parentId: string,
+  days: number = 7
+): Promise<number> => {
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days + 1);
+
+  const startDateStr = startDate.toISOString().split('T')[0];
+  const endDateStr = endDate.toISOString().split('T')[0];
+
+  const logs = await getParentMedicationLogs(parentId, startDateStr, endDateStr);
+
+  if (logs.length === 0) return 0;
+
+  const takenCount = logs.filter((log) => log.taken).length;
+  return Math.round((takenCount / logs.length) * 100);
+};
+
+/**
+ * Get weekly adherence data for parent
+ * @param parentId - Parent user ID
+ * @returns Array of daily adherence data for the last 7 days
+ */
+export const getWeeklyAdherenceData = async (
+  parentId: string
+): Promise<{ date: string; rate: number; taken: number; total: number }[]> => {
+  const result: { date: string; rate: number; taken: number; total: number }[] = [];
+
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+
+    const logs = await getParentMedicationLogs(parentId, dateStr, dateStr);
+    const taken = logs.filter((log) => log.taken).length;
+    const total = logs.length;
+    const rate = total > 0 ? Math.round((taken / total) * 100) : 0;
+
+    result.push({ date: dateStr, rate, taken, total });
+  }
+
+  return result;
+};
+
+/**
+ * Get monthly adherence data for parent
+ * @param parentId - Parent user ID
+ * @param year - Year (e.g., 2024)
+ * @param month - Month (1-12)
+ * @returns Object with date as key and adherence data as value
+ */
+export const getMonthlyAdherenceData = async (
+  parentId: string,
+  year: number,
+  month: number
+): Promise<Record<string, { rate: number; taken: number; total: number }>> => {
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0); // Last day of month
+
+  const startDateStr = startDate.toISOString().split('T')[0];
+  const endDateStr = endDate.toISOString().split('T')[0];
+
+  const logs = await getParentMedicationLogs(parentId, startDateStr, endDateStr);
+
+  // Group logs by date
+  const groupedByDate: Record<string, MedicationLog[]> = {};
+  logs.forEach((log) => {
+    const dateStr = log.scheduled_at.split('T')[0];
+    if (!groupedByDate[dateStr]) {
+      groupedByDate[dateStr] = [];
+    }
+    groupedByDate[dateStr].push(log);
+  });
+
+  // Calculate rate for each date
+  const result: Record<string, { rate: number; taken: number; total: number }> = {};
+  Object.entries(groupedByDate).forEach(([dateStr, dateLogs]) => {
+    const taken = dateLogs.filter((log) => log.taken).length;
+    const total = dateLogs.length;
+    const rate = total > 0 ? Math.round((taken / total) * 100) : 0;
+    result[dateStr] = { rate, taken, total };
+  });
+
+  return result;
+};
+
+/**
+ * Create medication for parent (by child)
+ * @param parentId - Parent user ID
+ * @param formData - Medication form data
+ * @returns Created medication
+ */
+export const createMedicationForParent = async (
+  parentId: string,
+  formData: MedicationFormData
+): Promise<Medication> => {
+  const medicationData: Omit<Medication, 'id' | 'created_at'> = {
+    user_id: parentId,
+    name: formData.name.trim(),
+    dosage: formData.dosage.trim(),
+    frequency: formData.frequency,
+    reminder_times: formData.reminder_times,
+    start_date: formData.start_date,
+    end_date: formData.end_date || undefined,
+    notes: formData.notes?.trim() || undefined,
+    active: true,
+  };
+
+  const medication = await createMedication(medicationData);
+  return medication;
+};
+
+/**
+ * Toggle medication active status
+ * @param medicationId - Medication ID
+ * @param active - Active status
+ * @returns Updated medication
+ */
+export const toggleMedicationActive = async (
+  medicationId: string,
+  active: boolean
+): Promise<Medication> => {
+  return updateMedication(medicationId, { active });
+};

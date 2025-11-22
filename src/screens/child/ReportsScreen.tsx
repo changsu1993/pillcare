@@ -360,10 +360,7 @@ const ReportsScreen: React.FC = () => {
                   return (
                     <View
                       key={`${weekIndex}-${dayIndex}`}
-                      style={[
-                        styles.calendarDay,
-                        { backgroundColor: dayStyle.backgroundColor },
-                      ]}
+                      style={[styles.calendarDay, { backgroundColor: dayStyle.backgroundColor }]}
                     >
                       <Text
                         style={[

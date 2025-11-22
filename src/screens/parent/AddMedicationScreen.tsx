@@ -26,9 +26,7 @@ import {
   Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { ParentScreenProps } from '../../types/navigation.types';
 import { createMedicationFromForm, MedicationFormData } from '../../services/api';
 import TimePickerButton from '../../components/TimePickerButton';
@@ -98,9 +96,7 @@ const AddMedicationScreen: React.FC<Props> = ({ navigation }) => {
   const [name, setName] = useState<string>('');
   const [dosage, setDosage] = useState<string>('');
   const [frequency, setFrequency] = useState<string>('daily_1');
-  const [reminderTimes, setReminderTimes] = useState<string[]>(
-    DEFAULT_TIMES['daily_1']
-  );
+  const [reminderTimes, setReminderTimes] = useState<string[]>(DEFAULT_TIMES['daily_1']);
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [notes, setNotes] = useState<string>('');
@@ -135,10 +131,7 @@ const AddMedicationScreen: React.FC<Props> = ({ navigation }) => {
   /**
    * 시작일 변경 처리
    */
-  const handleStartDateChange = (
-    event: DateTimePickerEvent,
-    selectedDate?: Date
-  ): void => {
+  const handleStartDateChange = (event: DateTimePickerEvent, selectedDate?: Date): void => {
     if (Platform.OS === 'android') {
       setShowStartDatePicker(false);
     }
@@ -155,18 +148,13 @@ const AddMedicationScreen: React.FC<Props> = ({ navigation }) => {
   /**
    * 종료일 변경 처리
    */
-  const handleEndDateChange = (
-    event: DateTimePickerEvent,
-    selectedDate?: Date
-  ): void => {
+  const handleEndDateChange = (event: DateTimePickerEvent, selectedDate?: Date): void => {
     if (Platform.OS === 'android') {
       setShowEndDatePicker(false);
     }
     if (event.type === 'set' && selectedDate) {
       if (selectedDate < startDate) {
-        Alert.alert('오류', '종료일은 시작일보다 이후여야 합니다.', [
-          { text: '확인' },
-        ]);
+        Alert.alert('오류', '종료일은 시작일보다 이후여야 합니다.', [{ text: '확인' }]);
         return;
       }
       setEndDate(selectedDate);
@@ -186,9 +174,7 @@ const AddMedicationScreen: React.FC<Props> = ({ navigation }) => {
    */
   const handleEndDateConfirm = (): void => {
     if (endDate && endDate < startDate) {
-      Alert.alert('오류', '종료일은 시작일보다 이후여야 합니다.', [
-        { text: '확인' },
-      ]);
+      Alert.alert('오류', '종료일은 시작일보다 이후여야 합니다.', [{ text: '확인' }]);
       setEndDate(null);
       setHasEndDate(false);
     }
@@ -236,9 +222,7 @@ const AddMedicationScreen: React.FC<Props> = ({ navigation }) => {
         notes: notes.trim() || undefined,
       };
 
-      const { medication, notificationIds } = await createMedicationFromForm(
-        formData
-      );
+      const { medication, notificationIds } = await createMedicationFromForm(formData);
 
       // 성공 알림
       const notificationMessage =
@@ -246,23 +230,17 @@ const AddMedicationScreen: React.FC<Props> = ({ navigation }) => {
           ? `${notificationIds.length}개의 알림이 예약되었습니다.`
           : '알림 예약에 실패했습니다. 설정에서 알림 권한을 확인해주세요.';
 
-      Alert.alert(
-        '저장 완료',
-        `${medication.name}이(가) 등록되었습니다.\n${notificationMessage}`,
-        [
-          {
-            text: '확인',
-            onPress: () => navigation.goBack(),
-          },
-        ]
-      );
+      Alert.alert('저장 완료', `${medication.name}이(가) 등록되었습니다.\n${notificationMessage}`, [
+        {
+          text: '확인',
+          onPress: () => navigation.goBack(),
+        },
+      ]);
     } catch (error) {
       console.error('약 등록 실패:', error);
-      Alert.alert(
-        '저장 실패',
-        '약 정보를 저장하는 중 오류가 발생했습니다.\n다시 시도해주세요.',
-        [{ text: '확인' }]
-      );
+      Alert.alert('저장 실패', '약 정보를 저장하는 중 오류가 발생했습니다.\n다시 시도해주세요.', [
+        { text: '확인' },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -273,18 +251,14 @@ const AddMedicationScreen: React.FC<Props> = ({ navigation }) => {
    */
   const handleCancel = (): void => {
     if (name || dosage || notes) {
-      Alert.alert(
-        '작성 취소',
-        '입력한 내용이 저장되지 않습니다.\n정말 취소하시겠습니까?',
-        [
-          { text: '계속 작성', style: 'cancel' },
-          {
-            text: '취소',
-            style: 'destructive',
-            onPress: () => navigation.goBack(),
-          },
-        ]
-      );
+      Alert.alert('작성 취소', '입력한 내용이 저장되지 않습니다.\n정말 취소하시겠습니까?', [
+        { text: '계속 작성', style: 'cancel' },
+        {
+          text: '취소',
+          style: 'destructive',
+          onPress: () => navigation.goBack(),
+        },
+      ]);
     } else {
       navigation.goBack();
     }
@@ -294,14 +268,12 @@ const AddMedicationScreen: React.FC<Props> = ({ navigation }) => {
    * 현재 선택된 복용 횟수 라벨
    */
   const selectedFrequencyLabel =
-    FREQUENCY_OPTIONS.find((opt) => opt.value === frequency)?.label ||
-    '하루 1번';
+    FREQUENCY_OPTIONS.find((opt) => opt.value === frequency)?.label || '하루 1번';
 
   /**
    * 현재 선택된 복용 횟수의 시간 개수
    */
-  const timesPerDay =
-    FREQUENCY_OPTIONS.find((opt) => opt.value === frequency)?.timesPerDay || 0;
+  const timesPerDay = FREQUENCY_OPTIONS.find((opt) => opt.value === frequency)?.timesPerDay || 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -360,9 +332,7 @@ const AddMedicationScreen: React.FC<Props> = ({ navigation }) => {
               accessibilityHint="탭하여 복용 횟수를 변경합니다"
               accessibilityRole="button"
             >
-              <Text style={styles.selectButtonText}>
-                {selectedFrequencyLabel}
-              </Text>
+              <Text style={styles.selectButtonText}>{selectedFrequencyLabel}</Text>
             </TouchableOpacity>
           </View>
 
@@ -396,9 +366,7 @@ const AddMedicationScreen: React.FC<Props> = ({ navigation }) => {
               accessibilityHint="탭하여 시작일을 변경합니다"
               accessibilityRole="button"
             >
-              <Text style={styles.selectButtonText}>
-                {formatDateKorean(startDate)}
-              </Text>
+              <Text style={styles.selectButtonText}>{formatDateKorean(startDate)}</Text>
             </TouchableOpacity>
           </View>
 
@@ -407,10 +375,7 @@ const AddMedicationScreen: React.FC<Props> = ({ navigation }) => {
             <Text style={styles.label}>종료일 (선택)</Text>
             <View style={styles.endDateContainer}>
               <TouchableOpacity
-                style={[
-                  styles.toggleButton,
-                  hasEndDate && styles.toggleButtonActive,
-                ]}
+                style={[styles.toggleButton, hasEndDate && styles.toggleButtonActive]}
                 onPress={() => {
                   if (hasEndDate) {
                     setHasEndDate(false);
@@ -422,17 +387,12 @@ const AddMedicationScreen: React.FC<Props> = ({ navigation }) => {
                     setHasEndDate(true);
                   }
                 }}
-                accessibilityLabel={
-                  hasEndDate ? '종료일 설정됨' : '종료일 설정 안함'
-                }
+                accessibilityLabel={hasEndDate ? '종료일 설정됨' : '종료일 설정 안함'}
                 accessibilityHint="탭하여 종료일 설정을 변경합니다"
                 accessibilityRole="switch"
               >
                 <Text
-                  style={[
-                    styles.toggleButtonText,
-                    hasEndDate && styles.toggleButtonTextActive,
-                  ]}
+                  style={[styles.toggleButtonText, hasEndDate && styles.toggleButtonTextActive]}
                 >
                   {hasEndDate ? '설정됨' : '설정 안함'}
                 </Text>
@@ -442,9 +402,7 @@ const AddMedicationScreen: React.FC<Props> = ({ navigation }) => {
                 <TouchableOpacity
                   style={[styles.selectButton, styles.endDateButton]}
                   onPress={() => setShowEndDatePicker(true)}
-                  accessibilityLabel={`종료일: ${
-                    endDate ? formatDateKorean(endDate) : '선택'
-                  }`}
+                  accessibilityLabel={`종료일: ${endDate ? formatDateKorean(endDate) : '선택'}`}
                   accessibilityHint="탭하여 종료일을 변경합니다"
                   accessibilityRole="button"
                 >
@@ -541,15 +499,12 @@ const AddMedicationScreen: React.FC<Props> = ({ navigation }) => {
                 <Text
                   style={[
                     styles.frequencyOptionText,
-                    frequency === option.value &&
-                      styles.frequencyOptionTextSelected,
+                    frequency === option.value && styles.frequencyOptionTextSelected,
                   ]}
                 >
                   {option.label}
                 </Text>
-                {frequency === option.value && (
-                  <Text style={styles.checkmark}>OK</Text>
-                )}
+                {frequency === option.value && <Text style={styles.checkmark}>OK</Text>}
               </TouchableOpacity>
             ))}
           </View>

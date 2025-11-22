@@ -12,13 +12,7 @@
  */
 
 import React, { useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Vibration,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Vibration } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ParentScreenProps } from '../../types/navigation.types';
 import { speakMedicationReminder, stopSpeaking } from '../../services/voice';
@@ -102,10 +96,7 @@ const FullScreenReminderScreen: React.FC<Props> = ({ route, navigation }) => {
       </Text>
 
       {/* Dosage */}
-      <Text
-        style={styles.dosage}
-        accessibilityLabel={`복용량: ${dosage}`}
-      >
+      <Text style={styles.dosage} accessibilityLabel={`복용량: ${dosage}`}>
         {dosage}
       </Text>
 

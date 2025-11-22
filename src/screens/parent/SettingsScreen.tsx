@@ -26,7 +26,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { ParentScreenProps } from '../../types/navigation.types';
-import { getUserProfile, getConnectedChildren, removeFamilyConnection, getFamilyConnections } from '../../services/api';
+import {
+  getUserProfile,
+  getConnectedChildren,
+  removeFamilyConnection,
+  getFamilyConnections,
+} from '../../services/api';
 import { supabase } from '../../services/supabase';
 import { User, FamilyConnection } from '../../types/database.types';
 import { getSettings, saveSettings, AppSettings } from '../../services/settings';
@@ -129,28 +134,24 @@ const ParentSettingsScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleRemoveConnection = (connection: FamilyConnection) => {
     const childName = connection.child?.name || '자녀';
-    Alert.alert(
-      '연결 해제',
-      `${childName}님과의 연결을 해제하시겠습니까?`,
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '해제',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await removeFamilyConnection(connection.id);
-              // Reload data after removal
-              await loadData();
-              Alert.alert('완료', '연결이 해제되었습니다.');
-            } catch (error) {
-              console.error('Error removing connection:', error);
-              Alert.alert('오류', '연결 해제에 실패했습니다.');
-            }
-          },
+    Alert.alert('연결 해제', `${childName}님과의 연결을 해제하시겠습니까?`, [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '해제',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await removeFamilyConnection(connection.id);
+            // Reload data after removal
+            await loadData();
+            Alert.alert('완료', '연결이 해제되었습니다.');
+          } catch (error) {
+            console.error('Error removing connection:', error);
+            Alert.alert('오류', '연결 해제에 실패했습니다.');
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleLogout = () => {
@@ -191,23 +192,14 @@ const ParentSettingsScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Profile card */}
         <View style={styles.profileCard}>
           <Text style={styles.profileIcon}>👤</Text>
-          <Text
-            style={styles.profileName}
-            accessibilityLabel={`이름: ${user?.name || '사용자'}`}
-          >
+          <Text style={styles.profileName} accessibilityLabel={`이름: ${user?.name || '사용자'}`}>
             {user?.name || '사용자'}
           </Text>
-          <Text
-            style={styles.profileEmail}
-            accessibilityLabel={`이메일: ${user?.email || ''}`}
-          >
+          <Text style={styles.profileEmail} accessibilityLabel={`이메일: ${user?.email || ''}`}>
             {user?.email || ''}
           </Text>
         </View>
@@ -290,9 +282,7 @@ const ParentSettingsScreen: React.FC<Props> = ({ navigation }) => {
                     <View key={connection.id} style={styles.connectedItem}>
                       <View style={styles.connectedInfo}>
                         <View style={styles.childAvatar}>
-                          <Text style={styles.childAvatarText}>
-                            {child.name?.charAt(0) || '?'}
-                          </Text>
+                          <Text style={styles.childAvatarText}>{child.name?.charAt(0) || '?'}</Text>
                         </View>
                         <View>
                           <Text style={styles.childName}>{child.name}</Text>
@@ -311,9 +301,7 @@ const ParentSettingsScreen: React.FC<Props> = ({ navigation }) => {
                 })}
               </View>
             ) : (
-              <Text style={styles.noConnectionText}>
-                연결된 자녀가 없습니다
-              </Text>
+              <Text style={styles.noConnectionText}>연결된 자녀가 없습니다</Text>
             )}
 
             {/* Generate invitation code button */}
@@ -341,9 +329,7 @@ const ParentSettingsScreen: React.FC<Props> = ({ navigation }) => {
           >
             <View style={styles.settingLeft}>
               <Text style={styles.settingIcon}>🚪</Text>
-              <Text style={[styles.settingLabel, styles.logoutText]}>
-                로그아웃
-              </Text>
+              <Text style={[styles.settingLabel, styles.logoutText]}>로그아웃</Text>
             </View>
           </TouchableOpacity>
         </View>

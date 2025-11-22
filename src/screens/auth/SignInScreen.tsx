@@ -42,9 +42,10 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
       // Navigation will be handled automatically by App.js auth state change
     } catch (error) {
       console.error('Sign in error:', error);
-      const errorMessage = error instanceof Error
-        ? error.message
-        : '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.';
 
       Alert.alert('로그인 실패', errorMessage);
     } finally {
@@ -64,10 +65,7 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
         >
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={styles.backButton}
-            >
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
               <Text style={styles.backButtonText}>← 뒤로</Text>
             </TouchableOpacity>
             <Text style={styles.title}>로그인</Text>
@@ -124,10 +122,7 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
             {/* Sign up link */}
             <View style={styles.footer}>
               <Text style={styles.footerText}>계정이 없으신가요? </Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('SignUp')}
-                disabled={isLoading}
-              >
+              <TouchableOpacity onPress={() => navigation.navigate('SignUp')} disabled={isLoading}>
                 <Text style={styles.link}>회원가입</Text>
               </TouchableOpacity>
             </View>

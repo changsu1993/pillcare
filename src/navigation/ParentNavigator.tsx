@@ -48,11 +48,7 @@ const HomeStack: React.FC = () => {
         headerTintColor: '#1A1A1A',
       }}
     >
-      <Stack.Screen
-        name="Home"
-        component={ParentHomeScreen}
-        options={{ title: '오늘의 약' }}
-      />
+      <Stack.Screen name="Home" component={ParentHomeScreen} options={{ title: '오늘의 약' }} />
       <Stack.Screen
         name="FullScreenReminder"
         component={FullScreenReminderScreen}
@@ -120,11 +116,7 @@ const SettingsStack: React.FC = () => {
         },
       }}
     >
-      <Stack.Screen
-        name="Settings"
-        component={ParentSettingsScreen}
-        options={{ title: '설정' }}
-      />
+      <Stack.Screen name="Settings" component={ParentSettingsScreen} options={{ title: '설정' }} />
     </Stack.Navigator>
   );
 };

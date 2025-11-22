@@ -44,10 +44,7 @@ const ChildTimelineScreen: React.FC = () => {
       setError(null);
 
       // Load parent info and today's logs
-      const [connections, logs] = await Promise.all([
-        getFamilyConnections(),
-        getTodayLogs(),
-      ]);
+      const [connections, logs] = await Promise.all([getFamilyConnections(), getTodayLogs()]);
 
       if (connections.length > 0 && connections[0].parent) {
         setParentInfo(connections[0].parent);
@@ -100,9 +97,7 @@ const ChildTimelineScreen: React.FC = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyEmoji}>👨‍👩‍👧</Text>
-          <Text style={styles.emptyText}>
-            부모님을 연결해주세요
-          </Text>
+          <Text style={styles.emptyText}>부모님을 연결해주세요</Text>
           <TouchableOpacity style={styles.connectButton}>
             <Text style={styles.connectButtonText}>초대 코드 입력</Text>
           </TouchableOpacity>
@@ -118,15 +113,11 @@ const ChildTimelineScreen: React.FC = () => {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {/* Parent info card */}
         <View style={styles.parentCard}>
-          <Text style={styles.parentName}>
-            {parentInfo?.name || '부모님'}님
-          </Text>
+          <Text style={styles.parentName}>{parentInfo?.name || '부모님'}님</Text>
           <View style={styles.adherenceContainer}>
             <Text style={styles.adherenceLabel}>오늘 복약률</Text>
             <Text
@@ -145,9 +136,7 @@ const ChildTimelineScreen: React.FC = () => {
         {/* Timeline */}
         {medications.length === 0 ? (
           <View style={styles.emptyMedications}>
-            <Text style={styles.emptyMedicationsText}>
-              오늘 예정된 복약이 없습니다
-            </Text>
+            <Text style={styles.emptyMedicationsText}>오늘 예정된 복약이 없습니다</Text>
           </View>
         ) : (
           <View style={styles.timelineContainer}>
@@ -155,15 +144,8 @@ const ChildTimelineScreen: React.FC = () => {
               <View key={`${med.medication_id}-${med.scheduled_at}`} style={styles.timelineItem}>
                 {/* Timeline indicator */}
                 <View style={styles.timelineIndicator}>
-                  <View
-                    style={[
-                      styles.timelineDot,
-                      med.taken && styles.timelineDotTaken,
-                    ]}
-                  />
-                  {index < medications.length - 1 && (
-                    <View style={styles.timelineLine} />
-                  )}
+                  <View style={[styles.timelineDot, med.taken && styles.timelineDotTaken]} />
+                  {index < medications.length - 1 && <View style={styles.timelineLine} />}
                 </View>
 
                 {/* Medication info */}
@@ -174,12 +156,7 @@ const ChildTimelineScreen: React.FC = () => {
                       minute: '2-digit',
                     })}
                   </Text>
-                  <View
-                    style={[
-                      styles.medicationCard,
-                      med.taken && styles.medicationCardTaken,
-                    ]}
-                  >
+                  <View style={[styles.medicationCard, med.taken && styles.medicationCardTaken]}>
                     <Text style={styles.medicationName}>
                       {med.medications?.name || '약 이름 없음'}
                     </Text>
@@ -187,10 +164,7 @@ const ChildTimelineScreen: React.FC = () => {
                       {med.medications?.dosage || '복용량 정보 없음'}
                     </Text>
                     <Text
-                      style={[
-                        styles.medicationStatus,
-                        med.taken && styles.medicationStatusTaken,
-                      ]}
+                      style={[styles.medicationStatus, med.taken && styles.medicationStatusTaken]}
                     >
                       {med.taken ? '복용 완료' : '대기 중'}
                     </Text>

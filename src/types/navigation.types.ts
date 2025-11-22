@@ -15,8 +15,10 @@ export type AuthStackParamList = {
   SignUp: undefined;
 };
 
-export type AuthScreenProps<T extends keyof AuthStackParamList> =
-  StackScreenProps<AuthStackParamList, T>;
+export type AuthScreenProps<T extends keyof AuthStackParamList> = StackScreenProps<
+  AuthStackParamList,
+  T
+>;
 
 // Parent Navigator - Now using Stack inside Tabs
 export type ParentStackParamList = {
@@ -46,8 +48,10 @@ export type ParentTabParamList = {
   SettingsTab: undefined;
 };
 
-export type ParentScreenProps<T extends keyof ParentStackParamList> =
-  StackScreenProps<ParentStackParamList, T>;
+export type ParentScreenProps<T extends keyof ParentStackParamList> = StackScreenProps<
+  ParentStackParamList,
+  T
+>;
 
 // Child Navigator - Tab Navigator
 export type ChildTabParamList = {
@@ -69,11 +73,15 @@ export type ChildStackParamList = {
   EnterCode: undefined;
 };
 
-export type ChildTabScreenProps<T extends keyof ChildTabParamList> =
-  BottomTabScreenProps<ChildTabParamList, T>;
+export type ChildTabScreenProps<T extends keyof ChildTabParamList> = BottomTabScreenProps<
+  ChildTabParamList,
+  T
+>;
 
-export type ChildStackScreenProps<T extends keyof ChildStackParamList> =
-  StackScreenProps<ChildStackParamList, T>;
+export type ChildStackScreenProps<T extends keyof ChildStackParamList> = StackScreenProps<
+  ChildStackParamList,
+  T
+>;
 
 // Root Navigator (if needed)
 export type RootStackParamList = {

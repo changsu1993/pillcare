@@ -59,11 +59,7 @@ export const getMedication = async (medicationId: string): Promise<Medication> =
 export const createMedication = async (
   medication: Omit<Medication, 'id' | 'created_at'>
 ): Promise<Medication> => {
-  const { data, error } = await supabase
-    .from('medications')
-    .insert([medication])
-    .select()
-    .single();
+  const { data, error } = await supabase.from('medications').insert([medication]).select().single();
 
   if (error) throw error;
   return data;
@@ -398,9 +394,7 @@ export const connectWithCode = async (
 /**
  * Remove a family connection
  */
-export const removeFamilyConnection = async (
-  connectionId: string
-): Promise<void> => {
+export const removeFamilyConnection = async (connectionId: string): Promise<void> => {
   const { error } = await supabase
     .from('family_connections')
     .update({
@@ -466,11 +460,7 @@ export const getUserProfile = async (): Promise<User> => {
 
   if (!user) throw new Error('Not authenticated');
 
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+  const { data, error } = await supabase.from('users').select('*').eq('id', user.id).single();
 
   if (error) throw error;
   return data;
@@ -479,9 +469,7 @@ export const getUserProfile = async (): Promise<User> => {
 /**
  * Update user profile
  */
-export const updateUserProfile = async (
-  updates: Partial<User>
-): Promise<User> => {
+export const updateUserProfile = async (updates: Partial<User>): Promise<User> => {
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -520,9 +508,7 @@ export const createMedicationWithNotifications = async (
 
   // 2. 알림 예약
   try {
-    const notificationIds = await scheduleMedicationNotifications(
-      savedMedication
-    );
+    const notificationIds = await scheduleMedicationNotifications(savedMedication);
     notificationSchedules.set(savedMedication.id, notificationIds);
 
     console.log(
@@ -570,9 +556,7 @@ export const updateMedicationWithNotifications = async (
 /**
  * 약 삭제 시 알림 자동 취소
  */
-export const deleteMedicationWithNotifications = async (
-  medicationId: string
-): Promise<void> => {
+export const deleteMedicationWithNotifications = async (medicationId: string): Promise<void> => {
   // 1. 알림 취소
   try {
     const notificationIds = notificationSchedules.get(medicationId) || [];
@@ -661,16 +645,12 @@ export const scheduleAllMedicationNotifications = async (): Promise<void> => {
 
     for (const medication of medications) {
       if (medication.active && medication.reminder_times.length > 0) {
-        const notificationIds = await scheduleMedicationNotifications(
-          medication
-        );
+        const notificationIds = await scheduleMedicationNotifications(medication);
         notificationSchedules.set(medication.id, notificationIds);
       }
     }
 
-    console.log(
-      `총 ${medications.length}개 약의 알림이 예약되었습니다.`
-    );
+    console.log(`총 ${medications.length}개 약의 알림이 예약되었습니다.`);
   } catch (error) {
     console.error('일괄 알림 예약 실패:', error);
     throw error;
@@ -719,7 +699,7 @@ export const getConnectedParent = async (): Promise<User | null> => {
 
   // 배열인 경우 첫 번째 요소 반환
   if (Array.isArray(parent)) {
-    return parent[0] as User || null;
+    return (parent[0] as User) || null;
   }
 
   return parent as unknown as User;
@@ -730,9 +710,7 @@ export const getConnectedParent = async (): Promise<User | null> => {
  * @param parentId - Parent user ID
  * @returns List of parent's active medications
  */
-export const getParentMedications = async (
-  parentId: string
-): Promise<Medication[]> => {
+export const getParentMedications = async (parentId: string): Promise<Medication[]> => {
   const { data, error } = await supabase
     .from('medications')
     .select('*')
@@ -785,9 +763,7 @@ export const getParentMedicationLogs = async (
  * @param parentId - Parent user ID
  * @returns List of today's medication logs
  */
-export const getParentTodayLogs = async (
-  parentId: string
-): Promise<MedicationLog[]> => {
+export const getParentTodayLogs = async (parentId: string): Promise<MedicationLog[]> => {
   const today = new Date();
   const dateStr = today.toISOString().split('T')[0];
   return getParentMedicationLogs(parentId, dateStr, dateStr);
@@ -965,9 +941,7 @@ export const savePushToken = async (token: string): Promise<void> => {
  * @param parentId - Parent user ID
  * @returns Array of child push token info
  */
-export const getChildrenPushTokens = async (
-  parentId: string
-): Promise<ChildPushTokenInfo[]> => {
+export const getChildrenPushTokens = async (parentId: string): Promise<ChildPushTokenInfo[]> => {
   const { data, error } = await supabase.rpc('get_children_push_tokens', {
     parent_user_id: parentId,
   });
@@ -1022,9 +996,7 @@ export const createMissedMedicationEvent = async (
  * @param parentId - Parent user ID
  * @returns Array of unread events
  */
-export const getUnreadMissedEvents = async (
-  parentId: string
-): Promise<MissedMedicationEvent[]> => {
+export const getUnreadMissedEvents = async (parentId: string): Promise<MissedMedicationEvent[]> => {
   const { data, error } = await supabase
     .from('missed_medication_events')
     .select('*, parent:parent_id(id, name, email)')
@@ -1074,9 +1046,7 @@ export const markMissedEventAsRead = async (eventId: string): Promise<void> => {
  * Mark all missed events as read for a parent
  * @param parentId - Parent user ID
  */
-export const markAllMissedEventsAsRead = async (
-  parentId: string
-): Promise<void> => {
+export const markAllMissedEventsAsRead = async (parentId: string): Promise<void> => {
   const { error } = await supabase
     .from('missed_medication_events')
     .update({ read_at: new Date().toISOString() })
@@ -1096,30 +1066,29 @@ export const markAllMissedEventsAsRead = async (
  * Get notification preferences for current user
  * @returns Notification preferences or null
  */
-export const getNotificationPreferences =
-  async (): Promise<NotificationPreferences | null> => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+export const getNotificationPreferences = async (): Promise<NotificationPreferences | null> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-    if (!user) throw new Error('Not authenticated');
+  if (!user) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase
-      .from('notification_preferences')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
+  const { data, error } = await supabase
+    .from('notification_preferences')
+    .select('*')
+    .eq('user_id', user.id)
+    .single();
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        // No row found - return null
-        return null;
-      }
-      throw error;
+  if (error) {
+    if (error.code === 'PGRST116') {
+      // No row found - return null
+      return null;
     }
+    throw error;
+  }
 
-    return data;
-  };
+  return data;
+};
 
 /**
  * Update notification preferences for current user

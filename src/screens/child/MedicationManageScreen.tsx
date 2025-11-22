@@ -127,9 +127,7 @@ const MedicationManageScreen: React.FC = () => {
           onPress: async () => {
             try {
               await deleteMedication(medication.id);
-              setMedications((prev) =>
-                prev.filter((m) => m.id !== medication.id)
-              );
+              setMedications((prev) => prev.filter((m) => m.id !== medication.id));
               Alert.alert('완료', '약이 삭제되었습니다.');
             } catch (err) {
               console.error('Error deleting medication:', err);
@@ -144,15 +142,10 @@ const MedicationManageScreen: React.FC = () => {
   /**
    * Handle toggle active status
    */
-  const handleToggleActive = async (
-    medication: Medication,
-    active: boolean
-  ): Promise<void> => {
+  const handleToggleActive = async (medication: Medication, active: boolean): Promise<void> => {
     try {
       await toggleMedicationActive(medication.id, active);
-      setMedications((prev) =>
-        prev.map((m) => (m.id === medication.id ? { ...m, active } : m))
-      );
+      setMedications((prev) => prev.map((m) => (m.id === medication.id ? { ...m, active } : m)));
     } catch (err) {
       console.error('Error toggling medication active:', err);
       Alert.alert('오류', '상태 변경에 실패했습니다.');
@@ -244,9 +237,7 @@ const MedicationManageScreen: React.FC = () => {
           <View style={styles.emptyMedicationsCard}>
             <Ionicons name="medical-outline" size={48} color={COLORS.gray400} />
             <Text style={styles.emptyMedicationsTitle}>등록된 약이 없습니다</Text>
-            <Text style={styles.emptyMedicationsText}>
-              부모님이 드시는 약을 등록해주세요
-            </Text>
+            <Text style={styles.emptyMedicationsText}>부모님이 드시는 약을 등록해주세요</Text>
           </View>
         ) : (
           <View style={styles.medicationList}>
@@ -260,9 +251,7 @@ const MedicationManageScreen: React.FC = () => {
                   </View>
                   <Switch
                     value={medication.active}
-                    onValueChange={(value) =>
-                      handleToggleActive(medication, value)
-                    }
+                    onValueChange={(value) => handleToggleActive(medication, value)}
                     trackColor={{ false: COLORS.gray300, true: COLORS.success + '60' }}
                     thumbColor={medication.active ? COLORS.success : COLORS.gray400}
                   />
@@ -272,9 +261,7 @@ const MedicationManageScreen: React.FC = () => {
                 <View style={styles.medicationDetails}>
                   <View style={styles.detailRow}>
                     <Ionicons name="repeat-outline" size={16} color={COLORS.gray500} />
-                    <Text style={styles.detailText}>
-                      {formatFrequency(medication.frequency)}
-                    </Text>
+                    <Text style={styles.detailText}>{formatFrequency(medication.frequency)}</Text>
                   </View>
                   <View style={styles.detailRow}>
                     <Ionicons name="time-outline" size={16} color={COLORS.gray500} />
@@ -303,9 +290,7 @@ const MedicationManageScreen: React.FC = () => {
                     <Text
                       style={[
                         styles.statusText,
-                        medication.active
-                          ? styles.statusTextActive
-                          : styles.statusTextInactive,
+                        medication.active ? styles.statusTextActive : styles.statusTextInactive,
                       ]}
                     >
                       {medication.active ? '알림 활성화' : '알림 비활성화'}
@@ -339,11 +324,7 @@ const MedicationManageScreen: React.FC = () => {
       </ScrollView>
 
       {/* Add Medication FAB */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={handleAddMedication}
-        activeOpacity={0.8}
-      >
+      <TouchableOpacity style={styles.fab} onPress={handleAddMedication} activeOpacity={0.8}>
         <Ionicons name="add" size={28} color={COLORS.white} />
       </TouchableOpacity>
     </SafeAreaView>

@@ -12,17 +12,8 @@
  */
 
 import React, { useState } from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  View,
-  Modal,
-  Platform,
-} from 'react-native';
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from '@react-native-community/datetimepicker';
+import { TouchableOpacity, Text, StyleSheet, View, Modal, Platform } from 'react-native';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
 interface TimePickerButtonProps {
   /** 선택된 시간 (HH:mm 형식, 예: "09:00") */
@@ -86,10 +77,7 @@ const TimePickerButton: React.FC<TimePickerButtonProps> = ({
   /**
    * 시간 선택 변경 처리
    */
-  const handleTimeChange = (
-    event: DateTimePickerEvent,
-    selectedDate?: Date
-  ): void => {
+  const handleTimeChange = (event: DateTimePickerEvent, selectedDate?: Date): void => {
     if (Platform.OS === 'android') {
       setShowPicker(false);
       if (event.type === 'set' && selectedDate) {
@@ -134,10 +122,7 @@ const TimePickerButton: React.FC<TimePickerButtonProps> = ({
       {label && <Text style={styles.label}>{label}</Text>}
 
       <TouchableOpacity
-        style={[
-          styles.button,
-          disabled && styles.buttonDisabled,
-        ]}
+        style={[styles.button, disabled && styles.buttonDisabled]}
         onPress={handlePress}
         disabled={disabled}
         accessibilityLabel={`시간 선택: ${formatTimeKorean(value)}`}
@@ -145,12 +130,7 @@ const TimePickerButton: React.FC<TimePickerButtonProps> = ({
         accessibilityRole="button"
         testID={testID}
       >
-        <Text
-          style={[
-            styles.timeText,
-            disabled && styles.timeTextDisabled,
-          ]}
-        >
+        <Text style={[styles.timeText, disabled && styles.timeTextDisabled]}>
           {formatTimeKorean(value)}
         </Text>
       </TouchableOpacity>

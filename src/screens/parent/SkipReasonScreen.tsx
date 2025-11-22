@@ -12,14 +12,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ParentScreenProps } from '../../types/navigation.types';
 import {
@@ -82,11 +75,7 @@ const SkipReasonScreen: React.FC<Props> = ({ route, navigation }) => {
       stopSpeaking();
 
       // Log the skipped medication with reason
-      await logMedicationMissed(
-        medicationId,
-        new Date(scheduledTime),
-        reason
-      );
+      await logMedicationMissed(medicationId, new Date(scheduledTime), reason);
 
       // Get medication details for the event
       try {
@@ -111,11 +100,7 @@ const SkipReasonScreen: React.FC<Props> = ({ route, navigation }) => {
       navigation.navigate('Home');
     } catch (error) {
       console.error('Error logging skipped medication:', error);
-      Alert.alert(
-        '오류',
-        '기록을 저장할 수 없습니다. 다시 시도해주세요.',
-        [{ text: '확인' }]
-      );
+      Alert.alert('오류', '기록을 저장할 수 없습니다. 다시 시도해주세요.', [{ text: '확인' }]);
     } finally {
       setIsLoading(false);
     }
@@ -133,11 +118,7 @@ const SkipReasonScreen: React.FC<Props> = ({ route, navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       {/* Title */}
-      <Text
-        style={styles.title}
-        accessibilityLabel="왜 못 드셨나요?"
-        accessibilityRole="header"
-      >
+      <Text style={styles.title} accessibilityLabel="왜 못 드셨나요?" accessibilityRole="header">
         왜 못 드셨나요?
       </Text>
 

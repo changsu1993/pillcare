@@ -12,10 +12,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-  MissedMedicationEvent,
-  NotificationPreferences,
-} from '../types/database.types';
+import { MissedMedicationEvent, NotificationPreferences } from '../types/database.types';
 import {
   getUnreadMissedEvents,
   getRecentMissedEvents,
@@ -94,35 +91,30 @@ export const useMissedMedicationSubscription = (
     if (!parentId) return;
 
     // Subscribe to new events
-    const unsubscribe = subscribeMissedMedicationEvents(
-      parentId,
-      async (newEvent) => {
-        console.log('New missed medication event received:', newEvent);
+    const unsubscribe = subscribeMissedMedicationEvents(parentId, async (newEvent) => {
+      console.log('New missed medication event received:', newEvent);
 
-        // Add to events list
-        setEvents((prev) => [newEvent, ...prev]);
-        setUnreadCount((prev) => prev + 1);
+      // Add to events list
+      setEvents((prev) => [newEvent, ...prev]);
+      setUnreadCount((prev) => prev + 1);
 
-        // Show local notification if alerts are enabled
-        const shouldNotify =
-          preferences?.push_enabled !== false &&
-          preferences?.missed_medication_alert !== false;
+      // Show local notification if alerts are enabled
+      const shouldNotify =
+        preferences?.push_enabled !== false && preferences?.missed_medication_alert !== false;
 
-        if (shouldNotify) {
-          // Get parent name from event or use default
-          const parentName =
-            (newEvent.parent as any)?.name || '부모님';
+      if (shouldNotify) {
+        // Get parent name from event or use default
+        const parentName = (newEvent.parent as any)?.name || '부모님';
 
-          await sendMissedMedicationNotificationToChild({
-            parentId: newEvent.parent_id,
-            parentName,
-            medicationName: newEvent.medication_name,
-            scheduledTime: newEvent.scheduled_time,
-            eventId: newEvent.id,
-          });
-        }
+        await sendMissedMedicationNotificationToChild({
+          parentId: newEvent.parent_id,
+          parentName,
+          medicationName: newEvent.medication_name,
+          scheduledTime: newEvent.scheduled_time,
+          eventId: newEvent.id,
+        });
       }
-    );
+    });
 
     return () => {
       unsubscribe();
@@ -135,25 +127,20 @@ export const useMissedMedicationSubscription = (
   }, [loadData]);
 
   // Mark single event as read
-  const markAsRead = useCallback(
-    async (eventId: string) => {
-      try {
-        await markMissedEventAsRead(eventId);
+  const markAsRead = useCallback(async (eventId: string) => {
+    try {
+      await markMissedEventAsRead(eventId);
 
-        // Update local state
-        setEvents((prev) =>
-          prev.map((e) =>
-            e.id === eventId ? { ...e, read_at: new Date().toISOString() } : e
-          )
-        );
-        setUnreadCount((prev) => Math.max(0, prev - 1));
-      } catch (err) {
-        console.error('Error marking event as read:', err);
-        throw err;
-      }
-    },
-    []
-  );
+      // Update local state
+      setEvents((prev) =>
+        prev.map((e) => (e.id === eventId ? { ...e, read_at: new Date().toISOString() } : e))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error('Error marking event as read:', err);
+      throw err;
+    }
+  }, []);
 
   // Mark all events as read
   const markAllAsRead = useCallback(async () => {
@@ -164,9 +151,7 @@ export const useMissedMedicationSubscription = (
 
       // Update local state
       const now = new Date().toISOString();
-      setEvents((prev) =>
-        prev.map((e) => (e.read_at ? e : { ...e, read_at: now }))
-      );
+      setEvents((prev) => prev.map((e) => (e.read_at ? e : { ...e, read_at: now })));
       setUnreadCount(0);
     } catch (err) {
       console.error('Error marking all events as read:', err);

@@ -42,7 +42,9 @@ export const supabase = createClient(
  * Get current authenticated user
  */
 export const getCurrentUser = async (): Promise<User | null> => {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   return user;
 };
 

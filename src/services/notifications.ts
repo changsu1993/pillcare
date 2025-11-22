@@ -294,17 +294,19 @@ export const rescheduleMedicationNotifications = async (
 };
 
 /**
- * 푸시 토큰 가져오기 (향후 원격 알림용)
+ * 푸시 토큰 가져오기
  *
- * @returns Expo Push Token (향후 서버 전송용)
+ * @returns Expo Push Token (서버 전송용)
  *
  * @description
- * - 현재는 로컬 알림만 사용
- * - Phase 2에서 자녀에게 푸시 알림 전송 시 사용 예정
+ * - Expo Push Notification 서비스용 토큰
+ * - 데이터베이스에 저장하여 원격 푸시 알림에 사용
  *
  * @example
  * const token = await getExpoPushToken();
- * // 서버에 토큰 저장 (향후 구현)
+ * if (token) {
+ *   await savePushToken(token);
+ * }
  */
 export const getExpoPushToken = async (): Promise<string | null> => {
   try {
@@ -313,8 +315,20 @@ export const getExpoPushToken = async (): Promise<string | null> => {
       return null;
     }
 
+    // Get project ID from Constants (Expo SDK 54+)
+    const Constants = require('expo-constants').default;
+    const projectId =
+      Constants.expoConfig?.extra?.eas?.projectId ||
+      Constants.easConfig?.projectId;
+
+    if (!projectId) {
+      console.warn('Project ID not found. Push token may not work in production.');
+      // For development, return null gracefully
+      return null;
+    }
+
     const token = await Notifications.getExpoPushTokenAsync({
-      projectId: 'your-expo-project-id', // TODO: app.json에서 가져오기
+      projectId,
     });
 
     console.log('Expo Push Token:', token.data);
@@ -322,6 +336,71 @@ export const getExpoPushToken = async (): Promise<string | null> => {
   } catch (error) {
     console.error('Push Token 가져오기 실패:', error);
     return null;
+  }
+};
+
+/**
+ * 자녀에게 미복용 알림 전송 (MVP: 로컬 시뮬레이션)
+ *
+ * @param parentName - 부모님 이름
+ * @param medicationName - 약 이름
+ * @param eventId - 이벤트 ID (missed_medication_events 테이블)
+ *
+ * @description
+ * MVP에서는 실제 원격 푸시 알림을 보낼 수 없습니다 (백엔드 서버 필요).
+ * 대신:
+ * 1. missed_medication_events 테이블에 이벤트 저장
+ * 2. 자녀 앱에서 실시간 구독 또는 폴링으로 확인
+ * 3. 자녀 앱이 포그라운드에 있으면 로컬 알림 표시
+ *
+ * 프로덕션에서는 Supabase Edge Functions 또는 백엔드 서버를 통해
+ * Expo Push API를 호출하여 실제 푸시 알림을 전송해야 합니다.
+ *
+ * @example
+ * await sendMissedMedicationNotificationToChild({
+ *   parentName: '어머니',
+ *   medicationName: '혈압약',
+ *   eventId: 'event-uuid'
+ * });
+ */
+export const sendMissedMedicationNotificationToChild = async ({
+  parentId,
+  parentName,
+  medicationName,
+  scheduledTime,
+  eventId,
+}: {
+  parentId: string;
+  parentName: string;
+  medicationName: string;
+  scheduledTime: string;
+  eventId: string;
+}): Promise<void> => {
+  try {
+    // MVP: 로컬 알림으로 시뮬레이션 (자녀 앱이 포그라운드에 있을 때)
+    // 실제 원격 푸시는 Supabase Edge Function으로 구현 필요
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: '부모님 복약 알림',
+        body: `${parentName}님이 ${medicationName}을(를) 놓치셨어요`,
+        data: {
+          type: 'missed_medication',
+          parentId,
+          parentName,
+          medicationName,
+          scheduledTime,
+          eventId,
+        },
+        sound: 'default',
+        priority: Notifications.AndroidNotificationPriority.HIGH,
+      },
+      trigger: null, // 즉시 전송
+    });
+
+    console.log(`미복용 알림 전송 (로컬): ${parentName} - ${medicationName}`);
+  } catch (error) {
+    console.error('미복용 알림 전송 실패:', error);
+    // 에러가 발생해도 앱이 중단되지 않도록 함
   }
 };
 

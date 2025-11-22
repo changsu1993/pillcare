@@ -924,3 +924,290 @@ export const toggleMedicationActive = async (
 ): Promise<Medication> => {
   return updateMedication(medicationId, { active });
 };
+
+/**
+ * =====================================
+ * PUSH TOKEN & NOTIFICATION API
+ * =====================================
+ */
+
+import {
+  MissedMedicationEvent,
+  NotificationPreferences,
+  ChildPushTokenInfo,
+} from '../types/database.types';
+
+/**
+ * Save push token for current user
+ * @param token - Expo Push Token
+ */
+export const savePushToken = async (token: string): Promise<void> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error('Not authenticated');
+
+  const { error } = await supabase
+    .from('users')
+    .update({
+      push_token: token,
+      push_token_updated_at: new Date().toISOString(),
+    })
+    .eq('id', user.id);
+
+  if (error) throw error;
+  console.log('푸시 토큰 저장 완료');
+};
+
+/**
+ * Get push tokens for connected children of a parent
+ * @param parentId - Parent user ID
+ * @returns Array of child push token info
+ */
+export const getChildrenPushTokens = async (
+  parentId: string
+): Promise<ChildPushTokenInfo[]> => {
+  const { data, error } = await supabase.rpc('get_children_push_tokens', {
+    parent_user_id: parentId,
+  });
+
+  if (error) {
+    console.error('자녀 푸시 토큰 조회 실패:', error);
+    return [];
+  }
+
+  return data || [];
+};
+
+/**
+ * Create missed medication event (for child notifications)
+ * @param medicationId - Medication ID
+ * @param medicationName - Medication name
+ * @param scheduledTime - Scheduled time
+ * @param skipReason - Skip reason (optional)
+ * @returns Created event
+ */
+export const createMissedMedicationEvent = async (
+  medicationId: string,
+  medicationName: string,
+  scheduledTime: Date,
+  skipReason?: string
+): Promise<MissedMedicationEvent> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error('Not authenticated');
+
+  const { data, error } = await supabase
+    .from('missed_medication_events')
+    .insert({
+      parent_id: user.id,
+      medication_id: medicationId,
+      medication_name: medicationName,
+      scheduled_time: scheduledTime.toISOString(),
+      skip_reason: skipReason || null,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  console.log('미복용 이벤트 생성:', data.id);
+  return data;
+};
+
+/**
+ * Get unread missed medication events for child
+ * @param parentId - Parent user ID
+ * @returns Array of unread events
+ */
+export const getUnreadMissedEvents = async (
+  parentId: string
+): Promise<MissedMedicationEvent[]> => {
+  const { data, error } = await supabase
+    .from('missed_medication_events')
+    .select('*, parent:parent_id(id, name, email)')
+    .eq('parent_id', parentId)
+    .is('read_at', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+};
+
+/**
+ * Get recent missed medication events for child
+ * @param parentId - Parent user ID
+ * @param limit - Number of events to return (default: 10)
+ * @returns Array of events
+ */
+export const getRecentMissedEvents = async (
+  parentId: string,
+  limit: number = 10
+): Promise<MissedMedicationEvent[]> => {
+  const { data, error } = await supabase
+    .from('missed_medication_events')
+    .select('*, parent:parent_id(id, name, email)')
+    .eq('parent_id', parentId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return data || [];
+};
+
+/**
+ * Mark missed medication event as read
+ * @param eventId - Event ID
+ */
+export const markMissedEventAsRead = async (eventId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('missed_medication_events')
+    .update({ read_at: new Date().toISOString() })
+    .eq('id', eventId);
+
+  if (error) throw error;
+};
+
+/**
+ * Mark all missed events as read for a parent
+ * @param parentId - Parent user ID
+ */
+export const markAllMissedEventsAsRead = async (
+  parentId: string
+): Promise<void> => {
+  const { error } = await supabase
+    .from('missed_medication_events')
+    .update({ read_at: new Date().toISOString() })
+    .eq('parent_id', parentId)
+    .is('read_at', null);
+
+  if (error) throw error;
+};
+
+/**
+ * =====================================
+ * NOTIFICATION PREFERENCES API
+ * =====================================
+ */
+
+/**
+ * Get notification preferences for current user
+ * @returns Notification preferences or null
+ */
+export const getNotificationPreferences =
+  async (): Promise<NotificationPreferences | null> => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('notification_preferences')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No row found - return null
+        return null;
+      }
+      throw error;
+    }
+
+    return data;
+  };
+
+/**
+ * Update notification preferences for current user
+ * @param updates - Partial preferences to update
+ * @returns Updated preferences
+ */
+export const updateNotificationPreferences = async (
+  updates: Partial<Omit<NotificationPreferences, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+): Promise<NotificationPreferences> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error('Not authenticated');
+
+  // Try to update existing preferences
+  const { data: existing } = await supabase
+    .from('notification_preferences')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (existing) {
+    // Update existing
+    const { data, error } = await supabase
+      .from('notification_preferences')
+      .update(updates)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } else {
+    // Create new with defaults
+    const { data, error } = await supabase
+      .from('notification_preferences')
+      .insert({
+        user_id: user.id,
+        push_enabled: updates.push_enabled ?? true,
+        missed_medication_alert: updates.missed_medication_alert ?? true,
+        daily_summary: updates.daily_summary ?? false,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+};
+
+/**
+ * =====================================
+ * REALTIME SUBSCRIPTIONS
+ * =====================================
+ */
+
+/**
+ * Subscribe to missed medication events for a parent
+ * Used by child app to receive real-time notifications
+ *
+ * @param parentId - Parent user ID to subscribe to
+ * @param callback - Function to call when new event arrives
+ * @returns Unsubscribe function
+ */
+export const subscribeMissedMedicationEvents = (
+  parentId: string,
+  callback: (event: MissedMedicationEvent) => void
+): (() => void) => {
+  const channel = supabase
+    .channel(`missed_events_${parentId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'missed_medication_events',
+        filter: `parent_id=eq.${parentId}`,
+      },
+      (payload) => {
+        console.log('새 미복용 이벤트 수신:', payload);
+        callback(payload.new as MissedMedicationEvent);
+      }
+    )
+    .subscribe();
+
+  // Return unsubscribe function
+  return () => {
+    supabase.removeChannel(channel);
+  };
+};

@@ -6,13 +6,7 @@
  */
 
 import { supabase } from './supabase';
-import {
-  User,
-  Medication,
-  MedicationLog,
-  FamilyConnection,
-  NotificationSchedule,
-} from '../types/database.types';
+import { User, Medication, MedicationLog, FamilyConnection } from '../types/database.types';
 import {
   scheduleMedicationNotifications,
   cancelMedicationNotifications,

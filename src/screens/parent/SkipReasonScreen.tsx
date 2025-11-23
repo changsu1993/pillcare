@@ -19,7 +19,6 @@ import {
   logMedicationMissed,
   getMedication,
   createMissedMedicationEvent,
-  getUserProfile,
 } from '../../services/api';
 import { speakSkipPrompt, stopSpeaking } from '../../services/voice';
 import { isVoiceGuidanceEnabled } from '../../services/settings';

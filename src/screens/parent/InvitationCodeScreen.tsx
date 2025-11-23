@@ -18,7 +18,6 @@ import {
   ActivityIndicator,
   Alert,
   Share,
-  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
@@ -29,7 +28,7 @@ import { User } from '../../types/database.types';
 
 type Props = ParentScreenProps<'InvitationCode'>;
 
-const InvitationCodeScreen = ({ navigation }: Props) => {
+const InvitationCodeScreen = (_props: Props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [invitationCode, setInvitationCode] = useState<string | null>(null);
   const [connectedChildren, setConnectedChildren] = useState<User[]>([]);
@@ -89,16 +88,6 @@ const InvitationCodeScreen = ({ navigation }: Props) => {
     } catch (err) {
       console.error('Error sharing code:', err);
     }
-  };
-
-  const handleRefreshCode = () => {
-    Alert.alert('새 코드 생성', '기존 코드는 무효화됩니다.\n새로운 코드를 생성하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '생성',
-        onPress: loadData,
-      },
-    ]);
   };
 
   // Format code with spaces for readability (123 456)

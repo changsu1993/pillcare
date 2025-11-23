@@ -301,7 +301,7 @@ const ReportsScreen = () => {
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>주간 복약률</Text>
           <View style={styles.weeklyChart}>
-            {weeklyData.map((day, index) => (
+            {weeklyData.map((day) => (
               <View key={day.date} style={styles.barContainer}>
                 <View style={styles.barWrapper}>
                   <View

@@ -11,7 +11,7 @@
  * - Voice guidance test button
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -34,7 +34,7 @@ import {
 } from '../../services/api';
 import { supabase } from '../../services/supabase';
 import { User, FamilyConnection } from '../../types/database.types';
-import { getSettings, saveSettings, AppSettings } from '../../services/settings';
+import { getSettings, saveSettings } from '../../services/settings';
 import { testVoice, stopSpeaking } from '../../services/voice';
 
 type Props = ParentScreenProps<'Settings'>;
@@ -446,11 +446,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#3B82F6',
-  },
-  arrow: {
-    fontSize: 32,
-    color: '#9CA3AF',
-    fontWeight: '300',
   },
   logoutItem: {
     marginTop: 16,

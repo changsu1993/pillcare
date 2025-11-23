@@ -16,7 +16,6 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -24,7 +23,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ChildStackScreenProps } from '../../types/navigation.types';
-import { connectWithCode, getConnectedParent } from '../../services/api';
+import { connectWithCode } from '../../services/api';
 
 type Props = ChildStackScreenProps<'EnterCode'>;
 
@@ -137,10 +136,6 @@ const EnterCodeScreen = ({ navigation }: Props) => {
     setCode(Array(CODE_LENGTH).fill(''));
     setErrorMessage(null);
     inputRefs.current[0]?.focus();
-  };
-
-  const handleGoBack = () => {
-    navigation.goBack();
   };
 
   const handleSuccessContinue = () => {

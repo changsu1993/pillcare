@@ -34,7 +34,7 @@ import {
 
 type Props = ParentScreenProps<'Home'>;
 
-const ParentHomeScreen: React.FC<Props> = ({ navigation }) => {
+const ParentHomeScreen = ({ navigation }: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [medications, setMedications] = useState<MedicationLog[]>([]);
   const [error, setError] = useState<string | null>(null);

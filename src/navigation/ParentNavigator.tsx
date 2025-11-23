@@ -34,7 +34,7 @@ const Tab = createBottomTabNavigator<ParentTabParamList>();
 const Stack = createStackNavigator<ParentStackParamList>();
 
 // Home Stack Navigator
-const HomeStack: React.FC = () => {
+const HomeStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -103,7 +103,7 @@ const HomeStack: React.FC = () => {
 };
 
 // Settings Stack Navigator
-const SettingsStack: React.FC = () => {
+const SettingsStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -122,7 +122,7 @@ const SettingsStack: React.FC = () => {
 };
 
 // Main Tab Navigator
-const ParentNavigator: React.FC = () => {
+const ParentNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={{

@@ -39,7 +39,7 @@ import { testVoice, stopSpeaking } from '../../services/voice';
 
 type Props = ParentScreenProps<'Settings'>;
 
-const ParentSettingsScreen: React.FC<Props> = ({ navigation }) => {
+const ParentSettingsScreen = ({ navigation }: Props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [connectedChildren, setConnectedChildren] = useState<User[]>([]);

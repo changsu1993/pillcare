@@ -20,7 +20,7 @@ import SignUpScreen from '../screens/auth/SignUpScreen';
 
 const Stack = createStackNavigator<AuthStackParamList>();
 
-const AuthNavigator: React.FC = () => {
+const AuthNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{

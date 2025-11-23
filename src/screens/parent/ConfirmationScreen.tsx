@@ -19,7 +19,7 @@ import { isVoiceGuidanceEnabled } from '../../services/settings';
 
 type Props = ParentScreenProps<'Confirmation'>;
 
-const ConfirmationScreen: React.FC<Props> = ({ route, navigation }) => {
+const ConfirmationScreen = ({ route, navigation }: Props) => {
   const { medicationName, takenAt } = route.params;
 
   useEffect(() => {

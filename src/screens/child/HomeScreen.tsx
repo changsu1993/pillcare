@@ -53,7 +53,7 @@ interface TodayMedicationItem {
   log?: MedicationLog;
 }
 
-const ChildHomeScreen: React.FC = () => {
+const ChildHomeScreen = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [parentInfo, setParentInfo] = useState<User | null>(null);

@@ -64,13 +64,13 @@ const formatTimeKorean = (timeString: string): string => {
   return `${period} ${displayHours}:${minutes.toString().padStart(2, '0')}`;
 };
 
-const TimePickerButton: React.FC<TimePickerButtonProps> = ({
+const TimePickerButton = ({
   value,
   onTimeChange,
   label,
   disabled = false,
   testID,
-}) => {
+}: TimePickerButtonProps) => {
   const [showPicker, setShowPicker] = useState<boolean>(false);
   const [tempDate, setTempDate] = useState<Date>(parseTimeToDate(value));
 

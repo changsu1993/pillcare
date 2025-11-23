@@ -58,7 +58,7 @@ interface MonthlyData {
   [date: string]: { rate: number; taken: number; total: number };
 }
 
-const ReportsScreen: React.FC = () => {
+const ReportsScreen = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [parentInfo, setParentInfo] = useState<User | null>(null);

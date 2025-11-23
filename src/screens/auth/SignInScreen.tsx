@@ -24,7 +24,7 @@ import { AuthScreenProps } from '../../types/navigation.types';
 
 type Props = AuthScreenProps<'SignIn'>;
 
-const SignInScreen: React.FC<Props> = ({ navigation }) => {
+const SignInScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);

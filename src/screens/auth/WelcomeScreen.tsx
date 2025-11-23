@@ -12,7 +12,7 @@ import { AuthScreenProps } from '../../types/navigation.types';
 
 type Props = AuthScreenProps<'Welcome'>;
 
-const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
+const WelcomeScreen = ({ navigation }: Props) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>

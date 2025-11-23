@@ -27,7 +27,7 @@ import { MedicationLog, User } from '../../types/database.types';
 
 // TimelineScreen은 더 이상 사용되지 않음 (HomeScreen으로 대체됨)
 
-const ChildTimelineScreen: React.FC = () => {
+const ChildTimelineScreen = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [medications, setMedications] = useState<MedicationLog[]>([]);

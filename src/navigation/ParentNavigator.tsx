@@ -38,9 +38,6 @@ const HomeStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: {
-          height: 64,
-        },
         headerTitleStyle: {
           fontSize: 24,
           fontWeight: '700',
@@ -107,13 +104,11 @@ const SettingsStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: {
-          height: 64,
-        },
         headerTitleStyle: {
           fontSize: 24,
           fontWeight: '700',
         },
+        headerTintColor: '#1A1A1A',
       }}
     >
       <Stack.Screen name="Settings" component={ParentSettingsScreen} options={{ title: '설정' }} />

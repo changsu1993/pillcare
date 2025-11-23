@@ -216,16 +216,17 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
               <Text style={styles.settingIcon}>🔊</Text>
               <Text style={styles.settingLabel}>음성 안내</Text>
             </View>
-            <Switch
-              value={voiceEnabled}
-              onValueChange={handleVoiceToggle}
-              trackColor={{ false: '#D1D5DB', true: '#86EFAC' }}
-              thumbColor={voiceEnabled ? '#22C55E' : '#F3F4F6'}
-              ios_backgroundColor="#D1D5DB"
-              style={styles.switch}
-              accessibilityLabel={voiceEnabled ? '음성 안내 켜짐' : '음성 안내 꺼짐'}
-              disabled={isSettingsSaving}
-            />
+            <View style={styles.switchContainer}>
+              <Switch
+                value={voiceEnabled}
+                onValueChange={handleVoiceToggle}
+                trackColor={{ false: '#D1D5DB', true: '#86EFAC' }}
+                thumbColor={voiceEnabled ? '#22C55E' : '#F3F4F6'}
+                ios_backgroundColor="#D1D5DB"
+                accessibilityLabel={voiceEnabled ? '음성 안내 켜짐' : '음성 안내 꺼짐'}
+                disabled={isSettingsSaving}
+              />
+            </View>
           </View>
 
           {/* Voice test button - only show when voice is enabled */}
@@ -253,16 +254,17 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
               <Text style={styles.settingIcon}>📳</Text>
               <Text style={styles.settingLabel}>진동</Text>
             </View>
-            <Switch
-              value={vibrationEnabled}
-              onValueChange={handleVibrationToggle}
-              trackColor={{ false: '#D1D5DB', true: '#86EFAC' }}
-              thumbColor={vibrationEnabled ? '#22C55E' : '#F3F4F6'}
-              ios_backgroundColor="#D1D5DB"
-              style={styles.switch}
-              accessibilityLabel={vibrationEnabled ? '진동 켜짐' : '진동 꺼짐'}
-              disabled={isSettingsSaving}
-            />
+            <View style={styles.switchContainer}>
+              <Switch
+                value={vibrationEnabled}
+                onValueChange={handleVibrationToggle}
+                trackColor={{ false: '#D1D5DB', true: '#86EFAC' }}
+                thumbColor={vibrationEnabled ? '#22C55E' : '#F3F4F6'}
+                ios_backgroundColor="#D1D5DB"
+                accessibilityLabel={vibrationEnabled ? '진동 켜짐' : '진동 꺼짐'}
+                disabled={isSettingsSaving}
+              />
+            </View>
           </View>
 
           {/* Family connections section */}
@@ -424,8 +426,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1A1A1A',
   },
-  switch: {
-    transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }],
+  switchContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 60,
+    height: 36,
   },
   testVoiceButton: {
     backgroundColor: '#EFF6FF',

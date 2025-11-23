@@ -18,10 +18,15 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ParentScreenProps } from '../../types/navigation.types';
-import { getMedication, getMedicationLogs } from '../../services/api';
+import {
+  getMedication,
+  getMedicationLogs,
+  deleteMedicationWithNotifications,
+} from '../../services/api';
 import { Medication, MedicationLog } from '../../types/database.types';
 
 type Props = ParentScreenProps<'MedicationDetail'>;
@@ -57,6 +62,33 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDelete = () => {
+    if (!medication) return;
+
+    Alert.alert(
+      '약 삭제',
+      `"${medication.name}"을(를) 삭제하시겠습니까?\n\n삭제하면 복약 알림도 함께 취소됩니다.`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteMedicationWithNotifications(medicationId);
+              Alert.alert('완료', '약이 삭제되었습니다.', [
+                { text: '확인', onPress: () => navigation.goBack() },
+              ]);
+            } catch (err) {
+              console.error('Error deleting medication:', err);
+              Alert.alert('오류', '약을 삭제할 수 없습니다.');
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (isLoading) {
@@ -168,17 +200,28 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
         </View>
       </ScrollView>
 
-      {/* Back button */}
+      {/* Action buttons */}
       <View style={styles.bottomButtonContainer}>
-        <TouchableOpacity
-          style={styles.largeBackButton}
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.7}
-          accessibilityLabel="뒤로 가기"
-          accessibilityRole="button"
-        >
-          <Text style={styles.largeBackButtonText}>뒤로</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.backButtonLarge}
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.7}
+            accessibilityLabel="뒤로 가기"
+            accessibilityRole="button"
+          >
+            <Text style={styles.backButtonLargeText}>뒤로</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={handleDelete}
+            activeOpacity={0.7}
+            accessibilityLabel="약 삭제"
+            accessibilityRole="button"
+          >
+            <Text style={styles.deleteButtonText}>삭제</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -329,7 +372,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     textAlign: 'center',
   },
-  largeBackButton: {
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  backButtonLarge: {
+    flex: 1,
     backgroundColor: '#3B82F6',
     height: 60,
     justifyContent: 'center',
@@ -341,7 +389,25 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-  largeBackButtonText: {
+  backButtonLargeText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  deleteButton: {
+    flex: 1,
+    backgroundColor: '#EF4444',
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  deleteButtonText: {
     fontSize: 24,
     fontWeight: '700',
     color: '#FFFFFF',

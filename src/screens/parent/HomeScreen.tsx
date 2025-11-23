@@ -231,9 +231,16 @@ const ParentHomeScreen = ({ navigation }: Props) => {
 
         {/* Medication list */}
         {medications.map((med) => (
-          <View
+          <TouchableOpacity
             key={med.id}
             style={[styles.medicationCard, med.taken && styles.medicationCardTaken]}
+            onPress={() =>
+              navigation.navigate('MedicationDetail', { medicationId: med.medication_id })
+            }
+            activeOpacity={0.7}
+            accessibilityLabel={`${med.medication_name} 상세 보기`}
+            accessibilityHint="탭하여 약 상세 정보를 확인합니다"
+            accessibilityRole="button"
           >
             {/* Medication name */}
             <Text style={styles.medicationName}>{med.medication_name}</Text>
@@ -252,7 +259,7 @@ const ParentHomeScreen = ({ navigation }: Props) => {
 
             {/* Scheduled time */}
             <Text style={styles.scheduledTime}>{med.scheduled_time}</Text>
-          </View>
+          </TouchableOpacity>
         ))}
 
         {/* 약 추가하기 버튼 */}

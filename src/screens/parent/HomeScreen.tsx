@@ -23,9 +23,12 @@ import {
   Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getTodayLogs, scheduleAllMedicationNotifications } from '../../services/api';
+import {
+  getTodayScheduledMedications,
+  scheduleAllMedicationNotifications,
+} from '../../services/api';
 import { ParentScreenProps } from '../../types/navigation.types';
-import { MedicationLog } from '../../types/database.types';
+import { ScheduledMedication } from '../../types/database.types';
 import {
   requestNotificationPermissions,
   sendTestNotification,
@@ -36,7 +39,7 @@ type Props = ParentScreenProps<'Home'>;
 
 const ParentHomeScreen = ({ navigation }: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [medications, setMedications] = useState<MedicationLog[]>([]);
+  const [medications, setMedications] = useState<ScheduledMedication[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [hasNotificationPermission, setHasNotificationPermission] = useState<boolean>(false);
 
@@ -77,8 +80,8 @@ const ParentHomeScreen = ({ navigation }: Props) => {
     try {
       setIsLoading(true);
       setError(null);
-      const logs = await getTodayLogs();
-      setMedications(logs);
+      const scheduled = await getTodayScheduledMedications();
+      setMedications(scheduled);
     } catch (err) {
       console.error('Error loading medications:', err);
       setError('복약 정보를 불러올 수 없습니다');
@@ -229,16 +232,14 @@ const ParentHomeScreen = ({ navigation }: Props) => {
         {/* Medication list */}
         {medications.map((med) => (
           <View
-            key={`${med.medication_id}-${med.scheduled_at}`}
+            key={med.id}
             style={[styles.medicationCard, med.taken && styles.medicationCardTaken]}
           >
             {/* Medication name */}
-            <Text style={styles.medicationName}>{med.medications?.name || '약 이름 없음'}</Text>
+            <Text style={styles.medicationName}>{med.medication_name}</Text>
 
             {/* Dosage */}
-            <Text style={styles.medicationDosage}>
-              {med.medications?.dosage || '복용량 정보 없음'}
-            </Text>
+            <Text style={styles.medicationDosage}>{med.dosage}</Text>
 
             {/* Status */}
             <View style={styles.statusContainer}>
@@ -250,12 +251,7 @@ const ParentHomeScreen = ({ navigation }: Props) => {
             </View>
 
             {/* Scheduled time */}
-            <Text style={styles.scheduledTime}>
-              {new Date(med.scheduled_at).toLocaleTimeString('ko-KR', {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </Text>
+            <Text style={styles.scheduledTime}>{med.scheduled_time}</Text>
           </View>
         ))}
 

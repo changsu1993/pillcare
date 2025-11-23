@@ -134,3 +134,17 @@ export interface ChildPushTokenInfo {
   push_token: string;
   missed_alert_enabled: boolean;
 }
+
+// Scheduled medication for today's view
+export interface ScheduledMedication {
+  id: string; // unique key: medicationId-scheduledTime
+  medication_id: string;
+  medication_name: string;
+  dosage: string;
+  scheduled_time: string; // "HH:mm" format
+  scheduled_at: string; // Full ISO datetime
+  taken: boolean;
+  taken_at?: string;
+  skipped_reason?: string;
+  notes?: string;
+}

@@ -28,6 +28,7 @@ import ConfirmationScreen from '../screens/parent/ConfirmationScreen';
 import SkipReasonScreen from '../screens/parent/SkipReasonScreen';
 import MedicationDetailScreen from '../screens/parent/MedicationDetailScreen';
 import AddMedicationScreen from '../screens/parent/AddMedicationScreen';
+import EditMedicationScreen from '../screens/parent/EditMedicationScreen';
 import InvitationCodeScreen from '../screens/parent/InvitationCodeScreen';
 
 const Tab = createBottomTabNavigator<ParentTabParamList>();
@@ -84,6 +85,14 @@ const HomeStack = () => {
         component={AddMedicationScreen}
         options={{
           title: '약 추가하기',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="EditMedication"
+        component={EditMedicationScreen}
+        options={{
+          title: '약 수정하기',
           headerShown: true,
         }}
       />

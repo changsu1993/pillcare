@@ -13,7 +13,6 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Platform } from 'react-native';
 import { getExpoPushToken, requestNotificationPermissions } from '../services/notifications';
 import { savePushToken } from '../services/api';
 

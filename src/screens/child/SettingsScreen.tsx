@@ -8,7 +8,7 @@
  * - 로그아웃
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -31,7 +31,7 @@ import {
   getNotificationPreferences,
   updateNotificationPreferences,
 } from '../../services/api';
-import { User, FamilyConnection, NotificationPreferences } from '../../types/database.types';
+import { User, FamilyConnection } from '../../types/database.types';
 import { ChildStackParamList } from '../../types/navigation.types';
 import { requestNotificationPermissions } from '../../services/notifications';
 

@@ -122,18 +122,19 @@ const ParentNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         tabBarStyle: {
-          height: 72, // Larger tab bar for elderly users
-          paddingBottom: 8,
-          paddingTop: 8,
+          height: 90, // Larger tab bar for elderly users
+          paddingBottom: 16,
+          paddingTop: 10,
         },
         tabBarLabelStyle: {
           fontSize: 16, // Large text
           fontWeight: '600',
+          marginTop: 6,
         },
         tabBarActiveTintColor: '#22C55E', // Success green
         tabBarInactiveTintColor: '#9CA3AF', // Medium gray
         tabBarIconStyle: {
-          marginTop: 4,
+          marginBottom: 4,
         },
         headerShown: false, // Headers are shown in Stack navigators
       }}
@@ -143,9 +144,7 @@ const ParentNavigator = () => {
         component={HomeStack}
         options={{
           tabBarLabel: '홈',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="medical" size={size + 8} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="medical" size={size} color={color} />,
         }}
       />
       <Tab.Screen
@@ -153,9 +152,7 @@ const ParentNavigator = () => {
         component={SettingsStack}
         options={{
           tabBarLabel: '설정',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings" size={size + 8} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="settings" size={size} color={color} />,
         }}
       />
     </Tab.Navigator>

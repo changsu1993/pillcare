@@ -121,7 +121,14 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
 
   const handleTestVoice = async () => {
     try {
-      await testVoice();
+      Alert.alert('음성 테스트', '잠시 후 음성이 재생됩니다.\n기기의 음량을 확인해주세요.', [
+        {
+          text: '확인',
+          onPress: async () => {
+            await testVoice();
+          },
+        },
+      ]);
     } catch (error) {
       console.error('Error testing voice:', error);
       Alert.alert('오류', '음성 테스트에 실패했습니다.');

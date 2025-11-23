@@ -10,7 +10,7 @@
  * - Large touch targets
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -38,11 +38,7 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
   const [logs, setLogs] = useState<MedicationLog[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadMedicationDetails();
-  }, [medicationId]);
-
-  const loadMedicationDetails = async () => {
+  const loadMedicationDetails = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -62,7 +58,11 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [medicationId]);
+
+  useEffect(() => {
+    loadMedicationDetails();
+  }, [loadMedicationDetails]);
 
   const handleDelete = () => {
     if (!medication) return;
@@ -211,6 +211,15 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
             accessibilityRole="button"
           >
             <Text style={styles.backButtonLargeText}>뒤로</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => navigation.navigate('EditMedication', { medicationId })}
+            activeOpacity={0.7}
+            accessibilityLabel="약 수정"
+            accessibilityRole="button"
+          >
+            <Text style={styles.editButtonText}>수정</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.deleteButton}
@@ -390,6 +399,24 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   backButtonLargeText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  editButton: {
+    flex: 1,
+    backgroundColor: '#22C55E',
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  editButtonText: {
     fontSize: 24,
     fontWeight: '700',
     color: '#FFFFFF',

@@ -40,6 +40,9 @@ export type ParentStackParamList = {
     medicationId: string;
   };
   AddMedication: undefined;
+  EditMedication: {
+    medicationId: string;
+  };
   InvitationCode: undefined;
 };
 

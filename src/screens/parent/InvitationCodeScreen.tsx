@@ -29,7 +29,7 @@ import { User } from '../../types/database.types';
 
 type Props = ParentScreenProps<'InvitationCode'>;
 
-const InvitationCodeScreen: React.FC<Props> = ({ navigation }) => {
+const InvitationCodeScreen = ({ navigation }: Props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [invitationCode, setInvitationCode] = useState<string | null>(null);
   const [connectedChildren, setConnectedChildren] = useState<User[]>([]);

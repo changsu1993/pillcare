@@ -42,7 +42,7 @@ const REASONS: ReasonOption[] = [
   { key: 'other', label: '기타', icon: '❓' },
 ];
 
-const SkipReasonScreen: React.FC<Props> = ({ route, navigation }) => {
+const SkipReasonScreen = ({ route, navigation }: Props) => {
   const { medicationId, scheduledTime } = route.params;
   const [isLoading, setIsLoading] = useState(false);
 

@@ -29,7 +29,7 @@ const Stack = createNativeStackNavigator<ChildStackParamList>();
 /**
  * 홈 탭 스택
  */
-const HomeStack: React.FC = () => (
+const HomeStack = () => (
   <Stack.Navigator
     screenOptions={{
       headerStyle: { backgroundColor: '#FFFFFF' },
@@ -44,7 +44,7 @@ const HomeStack: React.FC = () => (
 /**
  * 약 관리 탭 스택
  */
-const MedicationsStack: React.FC = () => (
+const MedicationsStack = () => (
   <Stack.Navigator
     screenOptions={{
       headerStyle: { backgroundColor: '#FFFFFF' },
@@ -63,7 +63,7 @@ const MedicationsStack: React.FC = () => (
 /**
  * 리포트 탭 스택
  */
-const ReportsStack: React.FC = () => (
+const ReportsStack = () => (
   <Stack.Navigator
     screenOptions={{
       headerStyle: { backgroundColor: '#FFFFFF' },
@@ -78,7 +78,7 @@ const ReportsStack: React.FC = () => (
 /**
  * 설정 탭 스택
  */
-const SettingsStack: React.FC = () => (
+const SettingsStack = () => (
   <Stack.Navigator
     screenOptions={{
       headerStyle: { backgroundColor: '#FFFFFF' },
@@ -98,7 +98,7 @@ const SettingsStack: React.FC = () => (
 /**
  * 자녀 네비게이터 (탭 기반)
  */
-const ChildNavigator: React.FC = () => {
+const ChildNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={{

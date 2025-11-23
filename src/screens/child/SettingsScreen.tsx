@@ -45,7 +45,7 @@ interface UserProfile {
 
 type NavigationProp = NativeStackNavigationProp<ChildStackParamList, 'Settings'>;
 
-const ChildSettingsScreen: React.FC = () => {
+const ChildSettingsScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingPrefs, setIsSavingPrefs] = useState(false);

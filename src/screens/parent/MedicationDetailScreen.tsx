@@ -26,7 +26,7 @@ import { Medication, MedicationLog } from '../../types/database.types';
 
 type Props = ParentScreenProps<'MedicationDetail'>;
 
-const MedicationDetailScreen: React.FC<Props> = ({ route, navigation }) => {
+const MedicationDetailScreen = ({ route, navigation }: Props) => {
   const { medicationId } = route.params;
   const [isLoading, setIsLoading] = useState(true);
   const [medication, setMedication] = useState<Medication | null>(null);

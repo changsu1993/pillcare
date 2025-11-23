@@ -91,7 +91,7 @@ const formatDateKorean = (date: Date): string => {
   return `${year}년 ${month}월 ${day}일`;
 };
 
-const AddMedicationScreen: React.FC<Props> = ({ navigation }) => {
+const AddMedicationScreen = ({ navigation }: Props) => {
   // 폼 상태
   const [name, setName] = useState<string>('');
   const [dosage, setDosage] = useState<string>('');

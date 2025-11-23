@@ -55,7 +55,7 @@ const COLORS = {
 
 type NavigationProp = NativeStackNavigationProp<ChildStackParamList>;
 
-const MedicationManageScreen: React.FC = () => {
+const MedicationManageScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);

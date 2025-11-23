@@ -25,7 +25,7 @@ import { UserRole } from '../../types/database.types';
 
 type Props = AuthScreenProps<'SignUp'>;
 
-const SignUpScreen: React.FC<Props> = ({ navigation }) => {
+const SignUpScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');

@@ -30,7 +30,7 @@ type Props = ChildStackScreenProps<'EnterCode'>;
 
 const CODE_LENGTH = 6;
 
-const EnterCodeScreen: React.FC<Props> = ({ navigation }) => {
+const EnterCodeScreen = ({ navigation }: Props) => {
   const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);

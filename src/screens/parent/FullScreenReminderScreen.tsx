@@ -20,7 +20,7 @@ import { isVoiceGuidanceEnabled, isVibrationEnabled } from '../../services/setti
 
 type Props = ParentScreenProps<'FullScreenReminder'>;
 
-const FullScreenReminderScreen: React.FC<Props> = ({ route, navigation }) => {
+const FullScreenReminderScreen = ({ route, navigation }: Props) => {
   const { medicationId, scheduledTime } = route.params;
 
   // TODO: Fetch medication details from API

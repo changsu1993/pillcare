@@ -15,24 +15,24 @@ import { User } from '@supabase/supabase-js';
 import * as Notifications from 'expo-notifications';
 
 // Services
-import { getCurrentUser, onAuthStateChange } from './src/services/supabase';
-import { getUserProfile, savePushToken } from './src/services/api';
+import { getCurrentUser, onAuthStateChange } from './src/shared/services/supabase';
+import { getUserProfile, savePushToken } from './src/shared/services/api';
 import {
   registerNotificationResponseListener,
   registerForegroundNotificationListener,
   getExpoPushToken,
-} from './src/services/notifications';
+} from './src/features/notifications/services/notifications';
 
 // Types
-import { UserRole, NotificationData, MissedMedicationNotificationData } from './src/types/database.types';
+import { UserRole, NotificationData, MissedMedicationNotificationData } from './src/shared/types/database.types';
 
 // Navigation
 import ParentNavigator from './src/navigation/ParentNavigator';
 import ChildNavigator from './src/navigation/ChildNavigator';
-import AuthNavigator from './src/navigation/AuthNavigator';
+import AuthNavigator from './src/features/auth/navigation/AuthNavigator';
 
 // Contexts
-import { SettingsProvider } from './src/contexts/SettingsContext';
+import { SettingsProvider } from './src/features/settings/contexts/SettingsContext';
 
 export default function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);

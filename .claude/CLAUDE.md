@@ -35,25 +35,33 @@ A healthcare service that automatically manages medication schedules and hospita
 
 ```
 PillCare/
-├── mobile/               # React Native app
-│   ├── src/
-│   │   ├── screens/     # Screen components
-│   │   │   ├── parent/  # Parent-facing screens
-│   │   │   └── child/   # Child-facing screens
-│   │   ├── components/  # Reusable components
-│   │   ├── services/    # API, notification services
-│   │   ├── hooks/       # Custom React Hooks
-│   │   └── utils/       # Utility functions
-│   ├── ios/
-│   └── android/
-├── backend/             # Supabase configuration
-│   ├── supabase/
-│   │   ├── migrations/  # Database schema
-│   │   └── functions/   # Edge Functions
-│   └── firebase/        # FCM configuration
-├── data/                # SQLite DB (local development)
-├── tests/               # E2E tests
-└── docs/                # Documentation
+├── src/
+│   ├── features/              # Feature-based modules
+│   │   ├── auth/              # Authentication feature
+│   │   ├── medications/       # Medication management
+│   │   ├── home/              # Home screens
+│   │   └── settings/          # Settings feature
+│   │       ├── components/    # Feature-specific components
+│   │       ├── screens/
+│   │       │   ├── parent/    # Parent-facing screens
+│   │       │   └── child/     # Child-facing screens
+│   │       ├── hooks/         # Feature-specific hooks
+│   │       ├── services/      # Feature services
+│   │       ├── contexts/      # React contexts
+│   │       └── types/         # TypeScript types
+│   ├── components/            # Shared components
+│   ├── services/              # Global services (Supabase, etc.)
+│   ├── hooks/                 # Global hooks
+│   ├── navigation/            # Navigation configuration
+│   ├── types/                 # Global TypeScript types
+│   └── utils/                 # Utility functions
+├── ios/
+├── android/
+├── .claude/
+│   ├── agents/                # Custom AI agents (16 specialists)
+│   ├── skills/                # Reusable skills (12 skills)
+│   └── commands/              # Slash commands
+└── tests/                     # E2E tests
 ```
 
 ## Database Schema
@@ -232,6 +240,58 @@ npm run build:android
 - Premium conversion rate
 - Churn rate
 
+## Claude Code Integration
+
+### Agents (16 Specialists)
+
+All agents use **Opus** model for best performance.
+
+| Agent | Description |
+|-------|-------------|
+| **mobile-developer** | React Native/Flutter specialist |
+| **frontend-developer** | React component architecture |
+| **backend-architect** | API design and microservices |
+| **fullstack-developer** | End-to-end development |
+| **database-architect** | Database design and optimization |
+| **test-engineer** | Test automation and QA |
+| **code-reviewer** | Code quality and security review |
+| **debugger** | Root cause analysis |
+| **security-auditor** | OWASP compliance, auth flows |
+| **devops-engineer** | CI/CD and infrastructure |
+| **deployment-engineer** | Container orchestration |
+| **cloud-architect** | AWS/GCP/Azure infrastructure |
+| **react-performance-optimizer** | Bundle and render optimization |
+| **ui-ux-designer** | User-centered design |
+| **product-strategist** | Product roadmap and market analysis |
+| **business-analyst** | KPI tracking and reporting |
+
+### Skills (12 Reusable Workflows)
+
+| Skill | Description |
+|-------|-------------|
+| **run-dev** | Start Expo development server |
+| **lint-fix** | Auto-fix linting and formatting |
+| **type-check** | TypeScript type checking |
+| **accessibility-audit** | Elderly UX accessibility (WCAG AAA) |
+| **security-review** | Healthcare data security audit |
+| **create-feature** | Generate feature module structure |
+| **create-screen** | Create screen with accessibility |
+| **create-component** | Create typed, accessible component |
+| **update-deps** | Safe dependency updates |
+| **clean-cache** | Clear caches and reset environment |
+| **generate-types** | Generate Supabase TypeScript types |
+| **performance-audit** | App performance analysis |
+
+### Commands (Slash Commands)
+
+| Command | Description |
+|---------|-------------|
+| `/test-app` | Run E2E tests |
+| `/db-schema` | Show database schema |
+| `/analyze-code` | Codebase analysis |
+| `/deploy` | Deploy to TestFlight/Play Console |
+| `/setup-supabase` | Initialize Supabase |
+
 ## Resources
 
 - [React Native Documentation](https://reactnative.dev)
@@ -244,5 +304,5 @@ npm run build:android
 MIT License
 
 ---
-**Last Updated**: 2025-11-19
-**Version**: 0.1.0 (MVP Planning Phase)
+**Last Updated**: 2025-11-27
+**Version**: 0.2.0 (Feature-based Architecture)

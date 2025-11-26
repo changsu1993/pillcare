@@ -18,18 +18,18 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 
 // Types
-import { ParentTabParamList, ParentStackParamList } from '../types/navigation.types';
+import { ParentTabParamList, ParentStackParamList } from '../shared/types/navigation.types';
 
 // Screens
-import ParentHomeScreen from '../screens/parent/HomeScreen';
-import ParentSettingsScreen from '../screens/parent/SettingsScreen';
-import FullScreenReminderScreen from '../screens/parent/FullScreenReminderScreen';
-import ConfirmationScreen from '../screens/parent/ConfirmationScreen';
-import SkipReasonScreen from '../screens/parent/SkipReasonScreen';
-import MedicationDetailScreen from '../screens/parent/MedicationDetailScreen';
-import AddMedicationScreen from '../screens/parent/AddMedicationScreen';
-import EditMedicationScreen from '../screens/parent/EditMedicationScreen';
-import InvitationCodeScreen from '../screens/parent/InvitationCodeScreen';
+import ParentHomeScreen from '../features/home/screens/parent/HomeScreen';
+import ParentSettingsScreen from '../features/settings/screens/parent/SettingsScreen';
+import FullScreenReminderScreen from '../features/medication/screens/parent/FullScreenReminderScreen';
+import ConfirmationScreen from '../features/medication/screens/parent/ConfirmationScreen';
+import SkipReasonScreen from '../features/medication/screens/parent/SkipReasonScreen';
+import MedicationDetailScreen from '../features/medication/screens/parent/MedicationDetailScreen';
+import AddMedicationScreen from '../features/medication/screens/parent/AddMedicationScreen';
+import EditMedicationScreen from '../features/medication/screens/parent/EditMedicationScreen';
+import InvitationCodeScreen from '../features/family/screens/parent/InvitationCodeScreen';
 
 const Tab = createBottomTabNavigator<ParentTabParamList>();
 const Stack = createStackNavigator<ParentStackParamList>();

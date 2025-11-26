@@ -14,14 +14,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 
 // Types
-import { ChildTabParamList, ChildStackParamList } from '../types/navigation.types';
+import { ChildTabParamList, ChildStackParamList } from '../shared/types/navigation.types';
 
 // Screens
-import ChildHomeScreen from '../screens/child/HomeScreen';
-import MedicationManageScreen from '../screens/child/MedicationManageScreen';
-import ReportsScreen from '../screens/child/ReportsScreen';
-import ChildSettingsScreen from '../screens/child/SettingsScreen';
-import EnterCodeScreen from '../screens/child/EnterCodeScreen';
+import ChildHomeScreen from '../features/home/screens/child/HomeScreen';
+import MedicationManageScreen from '../features/medication/screens/child/MedicationManageScreen';
+import ReportsScreen from '../features/home/screens/child/ReportsScreen';
+import ChildSettingsScreen from '../features/settings/screens/child/SettingsScreen';
+import EnterCodeScreen from '../features/family/screens/child/EnterCodeScreen';
 
 const Tab = createBottomTabNavigator<ChildTabParamList>();
 const Stack = createNativeStackNavigator<ChildStackParamList>();

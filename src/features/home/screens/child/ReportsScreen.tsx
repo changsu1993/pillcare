@@ -1,13 +1,18 @@
 /**
  * ReportsScreen - Medication Adherence Reports
  *
- * Shows medication adherence statistics and calendar view.
+ * Shows comprehensive medication adherence statistics:
+ * - Weekly/Monthly adherence rate summary
+ * - Per-medication adherence breakdown
+ * - Time-based missed medication pattern
+ * - 4-week adherence trend
+ * - Monthly calendar view
+ * - Weekly bar chart
  *
  * Features:
- * - Weekly adherence rate chart (bar chart style)
- * - Monthly calendar with color-coded days
- * - Statistics summary
  * - Pull-to-refresh
+ * - Color-coded adherence visualization
+ * - Detailed statistics
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -27,8 +32,17 @@ import {
   getWeeklyAdherenceData,
   getMonthlyAdherenceData,
   calculateAdherenceRate,
+  getMedicationAdherenceByDrug,
+  getMissedMedicationPattern,
+  getAdherenceTrend,
 } from '../../../../shared/services/api';
-import { User } from '../../../../shared/types/database.types';
+import { MedicationAdherenceCard, TimePatternChart, TrendIndicator } from '../../components';
+import {
+  User,
+  MedicationAdherence,
+  TimeSlotPattern,
+  WeeklyTrend,
+} from '../../../../shared/types/database.types';
 
 // Color constants
 const COLORS = {
@@ -72,6 +86,11 @@ const ReportsScreen = () => {
   });
   const [error, setError] = useState<string | null>(null);
 
+  // Enhanced report state
+  const [medicationAdherences, setMedicationAdherences] = useState<MedicationAdherence[]>([]);
+  const [timeSlotPattern, setTimeSlotPattern] = useState<TimeSlotPattern[]>([]);
+  const [weeklyTrends, setWeeklyTrends] = useState<number[]>([]);
+
   const loadData = useCallback(async (): Promise<void> => {
     try {
       setError(null);
@@ -83,24 +102,24 @@ const ReportsScreen = () => {
         return;
       }
 
-      // Load weekly data
-      const weekly = await getWeeklyAdherenceData(parent.id);
+      // Load all data in parallel for better performance
+      const [weekly, monthly, wRate, mRate, medAdherence, timePattern, trends] = await Promise.all([
+        getWeeklyAdherenceData(parent.id),
+        getMonthlyAdherenceData(parent.id, selectedMonth.year, selectedMonth.month),
+        calculateAdherenceRate(parent.id, 7),
+        calculateAdherenceRate(parent.id, 30),
+        getMedicationAdherenceByDrug(parent.id, 7),
+        getMissedMedicationPattern(parent.id, 7),
+        getAdherenceTrend(parent.id),
+      ]);
+
       setWeeklyData(weekly);
-
-      // Load monthly data
-      const monthly = await getMonthlyAdherenceData(
-        parent.id,
-        selectedMonth.year,
-        selectedMonth.month
-      );
       setMonthlyData(monthly);
-
-      // Calculate rates
-      const wRate = await calculateAdherenceRate(parent.id, 7);
       setWeeklyRate(wRate);
-
-      const mRate = await calculateAdherenceRate(parent.id, 30);
       setMonthlyRate(mRate);
+      setMedicationAdherences(medAdherence);
+      setTimeSlotPattern(timePattern);
+      setWeeklyTrends(trends.map((t: WeeklyTrend) => t.adherence_rate));
     } catch (err) {
       console.error('Error loading reports:', err);
       setError('데이터를 불러올 수 없습니다');
@@ -119,9 +138,6 @@ const ReportsScreen = () => {
     setRefreshing(false);
   };
 
-  /**
-   * Navigate to previous month
-   */
   const goToPreviousMonth = (): void => {
     setSelectedMonth((prev) => {
       if (prev.month === 1) {
@@ -131,9 +147,6 @@ const ReportsScreen = () => {
     });
   };
 
-  /**
-   * Navigate to next month
-   */
   const goToNextMonth = (): void => {
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -141,7 +154,7 @@ const ReportsScreen = () => {
 
     setSelectedMonth((prev) => {
       if (prev.year === currentYear && prev.month >= currentMonth) {
-        return prev; // Don't go beyond current month
+        return prev;
       }
       if (prev.month === 12) {
         return { year: prev.year + 1, month: 1 };
@@ -150,27 +163,18 @@ const ReportsScreen = () => {
     });
   };
 
-  /**
-   * Get rate color
-   */
   const getRateColor = (rate: number): string => {
     if (rate >= 80) return COLORS.success;
     if (rate >= 50) return COLORS.warning;
     return COLORS.error;
   };
 
-  /**
-   * Get day names in Korean
-   */
   const getDayName = (dateStr: string): string => {
     const days = ['일', '월', '화', '수', '목', '금', '토'];
     const date = new Date(dateStr);
     return days[date.getDay()];
   };
 
-  /**
-   * Generate calendar grid for selected month
-   */
   const generateCalendarGrid = (): (number | null)[][] => {
     const firstDay = new Date(selectedMonth.year, selectedMonth.month - 1, 1);
     const lastDay = new Date(selectedMonth.year, selectedMonth.month, 0);
@@ -199,9 +203,6 @@ const ReportsScreen = () => {
     return grid;
   };
 
-  /**
-   * Get calendar day style based on adherence
-   */
   const getCalendarDayStyle = (
     day: number | null
   ): { backgroundColor: string; textColor: string } => {
@@ -224,6 +225,15 @@ const ReportsScreen = () => {
       return { backgroundColor: COLORS.warning + '30', textColor: COLORS.warning };
     }
     return { backgroundColor: COLORS.error + '30', textColor: COLORS.error };
+  };
+
+  // Helper to get time slot data safely
+  const getTimeSlotData = (slot: string) => {
+    const data = timeSlotPattern.find((p) => p.time_slot === slot);
+    return {
+      missed: data?.missed_count || 0,
+      total: data?.total_count || 0,
+    };
   };
 
   // Loading state
@@ -297,6 +307,40 @@ const ReportsScreen = () => {
           </View>
         </View>
 
+        {/* Trend Indicator - 4 Week Trend */}
+        {weeklyTrends.length > 0 && <TrendIndicator weeklyRates={weeklyTrends} isLoading={false} />}
+
+        {/* Per-Medication Adherence Cards */}
+        {medicationAdherences.length > 0 && (
+          <View style={styles.sectionCard}>
+            <Text style={styles.sectionTitle}>약별 복약률</Text>
+            {medicationAdherences.map((med) => (
+              <MedicationAdherenceCard
+                key={med.medication_id}
+                medicationName={med.medication_name}
+                dosage={med.dosage}
+                adherenceRate={med.adherence_rate}
+                taken={med.total_taken}
+                total={med.total_scheduled}
+                isLoading={false}
+              />
+            ))}
+          </View>
+        )}
+
+        {/* Time Pattern Chart */}
+        {timeSlotPattern.length > 0 && (
+          <TimePatternChart
+            data={{
+              morning: getTimeSlotData('morning'),
+              afternoon: getTimeSlotData('afternoon'),
+              evening: getTimeSlotData('evening'),
+              night: getTimeSlotData('night'),
+            }}
+            isLoading={false}
+          />
+        )}
+
         {/* Weekly Bar Chart */}
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>주간 복약률</Text>
@@ -335,7 +379,6 @@ const ReportsScreen = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Day names */}
           <View style={styles.calendarWeekHeader}>
             {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
               <Text
@@ -351,7 +394,6 @@ const ReportsScreen = () => {
             ))}
           </View>
 
-          {/* Calendar grid */}
           <View style={styles.calendarGrid}>
             {calendarGrid.map((week, weekIndex) => (
               <View key={weekIndex} style={styles.calendarWeek}>
@@ -366,8 +408,6 @@ const ReportsScreen = () => {
                         style={[
                           styles.calendarDayText,
                           { color: day ? dayStyle.textColor : 'transparent' },
-                          dayIndex === 0 && day && styles.calendarDaySundayText,
-                          dayIndex === 6 && day && styles.calendarDaySaturdayText,
                         ]}
                       >
                         {day || ''}
@@ -379,7 +419,6 @@ const ReportsScreen = () => {
             ))}
           </View>
 
-          {/* Legend */}
           <View style={styles.legend}>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: COLORS.success + '30' }]} />
@@ -619,12 +658,6 @@ const styles = StyleSheet.create({
   calendarDayText: {
     fontSize: 14,
     fontWeight: '500',
-  },
-  calendarDaySundayText: {
-    // Applied when day is Sunday
-  },
-  calendarDaySaturdayText: {
-    // Applied when day is Saturday
   },
   legend: {
     flexDirection: 'row',

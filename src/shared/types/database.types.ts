@@ -148,3 +148,55 @@ export interface ScheduledMedication {
   skipped_reason?: string;
   notes?: string;
 }
+
+// =====================================
+// REPORT & ANALYTICS TYPES
+// =====================================
+
+/**
+ * Time slot for medication pattern analysis
+ * - morning: 06:00-12:00
+ * - afternoon: 12:00-18:00
+ * - evening: 18:00-22:00
+ * - night: 22:00-06:00
+ */
+export type TimeSlot = 'morning' | 'afternoon' | 'evening' | 'night';
+
+/**
+ * Trend direction compared to previous period
+ */
+export type TrendDirection = 'up' | 'down' | 'stable';
+
+/**
+ * Per-medication adherence statistics
+ */
+export interface MedicationAdherence {
+  medication_id: string;
+  medication_name: string;
+  dosage: string;
+  total_scheduled: number;
+  total_taken: number;
+  adherence_rate: number;
+}
+
+/**
+ * Time slot pattern for missed medication analysis
+ */
+export interface TimeSlotPattern {
+  time_slot: TimeSlot;
+  time_range: string; // e.g., "06:00-12:00"
+  missed_count: number;
+  total_count: number;
+  miss_rate: number;
+}
+
+/**
+ * Weekly adherence trend data
+ */
+export interface WeeklyTrend {
+  week_start: string; // ISO date string
+  week_end: string; // ISO date string
+  week_label: string; // e.g., "1주차", "2주차"
+  adherence_rate: number;
+  trend: TrendDirection;
+}

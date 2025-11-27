@@ -12,6 +12,11 @@ import {
   MedicationLog,
   FamilyConnection,
   ScheduledMedication,
+  MedicationAdherence,
+  TimeSlotPattern,
+  WeeklyTrend,
+  TimeSlot,
+  TrendDirection,
 } from '../types/database.types';
 import {
   scheduleMedicationNotifications,
@@ -164,7 +169,6 @@ export const getTodayScheduledMedications = async (): Promise<ScheduledMedicatio
 
   // Get today's date boundaries
   const today = new Date();
-  const todayStr = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
 
   // Get existing logs for today
   const todayStart = new Date(today);
@@ -1258,4 +1262,284 @@ export const subscribeMissedMedicationEvents = (
   return () => {
     supabase.removeChannel(channel);
   };
+};
+
+/**
+ * =====================================
+ * REPORT & ANALYTICS API
+ * =====================================
+ */
+
+/**
+ * Time slot definitions for pattern analysis
+ */
+const TIME_SLOT_CONFIG: Record<TimeSlot, { start: number; end: number; range: string }> = {
+  morning: { start: 6, end: 12, range: '06:00-12:00' },
+  afternoon: { start: 12, end: 18, range: '12:00-18:00' },
+  evening: { start: 18, end: 22, range: '18:00-22:00' },
+  night: { start: 22, end: 6, range: '22:00-06:00' },
+};
+
+/**
+ * Determine time slot from hour
+ * @param hour - Hour of day (0-23)
+ * @returns TimeSlot
+ */
+const getTimeSlotFromHour = (hour: number): TimeSlot => {
+  if (hour >= 6 && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 18) return 'afternoon';
+  if (hour >= 18 && hour < 22) return 'evening';
+  return 'night'; // 22-6
+};
+
+/**
+ * Get per-medication adherence statistics
+ *
+ * Calculates adherence rate for each medication individually,
+ * helping identify which medications are most often missed.
+ *
+ * @param parentId - Parent user ID
+ * @param days - Number of days to analyze (default: 30)
+ * @returns Array of medication adherence data sorted by adherence rate (ascending)
+ *
+ * @example
+ * const adherenceByDrug = await getMedicationAdherenceByDrug('parent-uuid', 30);
+ * // Returns: [
+ * //   { medication_id: '...', medication_name: '혈압약', dosage: '1정', total_scheduled: 60, total_taken: 45, adherence_rate: 75 },
+ * //   { medication_id: '...', medication_name: '당뇨약', dosage: '2정', total_scheduled: 30, total_taken: 28, adherence_rate: 93.33 }
+ * // ]
+ */
+export const getMedicationAdherenceByDrug = async (
+  parentId: string,
+  days: number = 30
+): Promise<MedicationAdherence[]> => {
+  try {
+    // Calculate date range
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days + 1);
+    startDate.setHours(0, 0, 0, 0);
+
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+
+    // Get parent's medications
+    const medications = await getParentMedications(parentId);
+    if (medications.length === 0) return [];
+
+    // Get all logs for the period
+    const logs = await getParentMedicationLogs(parentId, startDateStr, endDateStr);
+
+    // Group logs by medication_id
+    const logsByMedication = new Map<string, MedicationLog[]>();
+    logs.forEach((log) => {
+      const existing = logsByMedication.get(log.medication_id) || [];
+      existing.push(log);
+      logsByMedication.set(log.medication_id, existing);
+    });
+
+    // Calculate adherence for each medication
+    const adherenceData: MedicationAdherence[] = medications.map((med) => {
+      const medLogs = logsByMedication.get(med.id) || [];
+      const totalScheduled = medLogs.length;
+      const totalTaken = medLogs.filter((log) => log.taken).length;
+      const adherenceRate =
+        totalScheduled > 0 ? Math.round((totalTaken / totalScheduled) * 100 * 100) / 100 : 0;
+
+      return {
+        medication_id: med.id,
+        medication_name: med.name,
+        dosage: med.dosage,
+        total_scheduled: totalScheduled,
+        total_taken: totalTaken,
+        adherence_rate: adherenceRate,
+      };
+    });
+
+    // Sort by adherence rate (ascending) - lowest adherence first
+    adherenceData.sort((a, b) => a.adherence_rate - b.adherence_rate);
+
+    return adherenceData;
+  } catch (error) {
+    console.error('약별 복약률 분석 실패:', error);
+    throw error;
+  }
+};
+
+/**
+ * Analyze missed medication patterns by time slot
+ *
+ * Identifies which time periods (morning, afternoon, evening, night)
+ * have the highest miss rates to help optimize reminder strategies.
+ *
+ * @param parentId - Parent user ID
+ * @param days - Number of days to analyze (default: 30)
+ * @returns Array of time slot patterns sorted by miss rate (descending)
+ *
+ * @example
+ * const patterns = await getMissedMedicationPattern('parent-uuid', 30);
+ * // Returns: [
+ * //   { time_slot: 'evening', time_range: '18:00-22:00', missed_count: 15, total_count: 60, miss_rate: 25 },
+ * //   { time_slot: 'morning', time_range: '06:00-12:00', missed_count: 8, total_count: 60, miss_rate: 13.33 },
+ * //   ...
+ * // ]
+ */
+export const getMissedMedicationPattern = async (
+  parentId: string,
+  days: number = 30
+): Promise<TimeSlotPattern[]> => {
+  try {
+    // Calculate date range
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days + 1);
+    startDate.setHours(0, 0, 0, 0);
+
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+
+    // Get all logs for the period
+    const logs = await getParentMedicationLogs(parentId, startDateStr, endDateStr);
+
+    if (logs.length === 0) {
+      // Return empty pattern for all time slots
+      return (['morning', 'afternoon', 'evening', 'night'] as TimeSlot[]).map((slot) => ({
+        time_slot: slot,
+        time_range: TIME_SLOT_CONFIG[slot].range,
+        missed_count: 0,
+        total_count: 0,
+        miss_rate: 0,
+      }));
+    }
+
+    // Initialize counters for each time slot
+    const slotCounts: Record<TimeSlot, { missed: number; total: number }> = {
+      morning: { missed: 0, total: 0 },
+      afternoon: { missed: 0, total: 0 },
+      evening: { missed: 0, total: 0 },
+      night: { missed: 0, total: 0 },
+    };
+
+    // Categorize each log by time slot
+    logs.forEach((log) => {
+      const scheduledDate = new Date(log.scheduled_at);
+      const hour = scheduledDate.getHours();
+      const timeSlot = getTimeSlotFromHour(hour);
+
+      slotCounts[timeSlot].total += 1;
+      if (!log.taken) {
+        slotCounts[timeSlot].missed += 1;
+      }
+    });
+
+    // Build result array
+    const patterns: TimeSlotPattern[] = (
+      ['morning', 'afternoon', 'evening', 'night'] as TimeSlot[]
+    ).map((slot) => {
+      const { missed, total } = slotCounts[slot];
+      const missRate = total > 0 ? Math.round((missed / total) * 100 * 100) / 100 : 0;
+
+      return {
+        time_slot: slot,
+        time_range: TIME_SLOT_CONFIG[slot].range,
+        missed_count: missed,
+        total_count: total,
+        miss_rate: missRate,
+      };
+    });
+
+    // Sort by miss rate (descending) - highest miss rate first
+    patterns.sort((a, b) => b.miss_rate - a.miss_rate);
+
+    return patterns;
+  } catch (error) {
+    console.error('시간대별 미복약 패턴 분석 실패:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get weekly adherence trend over 4 weeks
+ *
+ * Tracks adherence rate changes over time to identify improvement
+ * or decline patterns in medication compliance.
+ *
+ * @param parentId - Parent user ID
+ * @returns Array of 4 weekly trend data points, oldest first
+ *
+ * @example
+ * const trend = await getAdherenceTrend('parent-uuid');
+ * // Returns: [
+ * //   { week_start: '2024-01-01', week_end: '2024-01-07', week_label: '1주차', adherence_rate: 75, trend: 'stable' },
+ * //   { week_start: '2024-01-08', week_end: '2024-01-14', week_label: '2주차', adherence_rate: 80, trend: 'up' },
+ * //   { week_start: '2024-01-15', week_end: '2024-01-21', week_label: '3주차', adherence_rate: 78, trend: 'down' },
+ * //   { week_start: '2024-01-22', week_end: '2024-01-28', week_label: '4주차', adherence_rate: 85, trend: 'up' }
+ * // ]
+ */
+export const getAdherenceTrend = async (parentId: string): Promise<WeeklyTrend[]> => {
+  try {
+    const trends: WeeklyTrend[] = [];
+    const today = new Date();
+
+    // Calculate 4 weeks of data (going backwards from today)
+    for (let weekIndex = 3; weekIndex >= 0; weekIndex--) {
+      // Calculate week boundaries
+      const weekEnd = new Date(today);
+      weekEnd.setDate(today.getDate() - weekIndex * 7);
+      weekEnd.setHours(23, 59, 59, 999);
+
+      const weekStart = new Date(weekEnd);
+      weekStart.setDate(weekEnd.getDate() - 6);
+      weekStart.setHours(0, 0, 0, 0);
+
+      const weekStartStr = weekStart.toISOString().split('T')[0];
+      const weekEndStr = weekEnd.toISOString().split('T')[0];
+
+      // Get logs for this week
+      const logs = await getParentMedicationLogs(parentId, weekStartStr, weekEndStr);
+
+      // Calculate adherence rate
+      const totalScheduled = logs.length;
+      const totalTaken = logs.filter((log) => log.taken).length;
+      const adherenceRate =
+        totalScheduled > 0 ? Math.round((totalTaken / totalScheduled) * 100) : 0;
+
+      // Determine week label (1주차 = oldest, 4주차 = most recent)
+      const weekLabel = `${4 - weekIndex}주차`;
+
+      trends.push({
+        week_start: weekStartStr,
+        week_end: weekEndStr,
+        week_label: weekLabel,
+        adherence_rate: adherenceRate,
+        trend: 'stable' as TrendDirection, // Will be calculated after all weeks are processed
+      });
+    }
+
+    // Calculate trend direction by comparing with previous week
+    for (let i = 0; i < trends.length; i++) {
+      if (i === 0) {
+        // First week has no previous week to compare
+        trends[i].trend = 'stable';
+      } else {
+        const currentRate = trends[i].adherence_rate;
+        const previousRate = trends[i - 1].adherence_rate;
+        const difference = currentRate - previousRate;
+
+        // Use 5% threshold for determining trend
+        if (difference > 5) {
+          trends[i].trend = 'up';
+        } else if (difference < -5) {
+          trends[i].trend = 'down';
+        } else {
+          trends[i].trend = 'stable';
+        }
+      }
+    }
+
+    return trends;
+  } catch (error) {
+    console.error('복약률 트렌드 분석 실패:', error);
+    throw error;
+  }
 };

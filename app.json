@@ -3,6 +3,7 @@
     "name": "PillCare",
     "slug": "PillCare",
     "version": "1.0.0",
+    "scheme": "pillcare",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

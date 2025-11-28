@@ -98,4 +98,99 @@ export const onAuthStateChange = (
   return supabase.auth.onAuthStateChange(callback);
 };
 
+/**
+ * Request password reset email
+ * Supabase will send an email with a reset link
+ */
+export const resetPasswordForEmail = async (email: string): Promise<void> => {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: 'pillcare://reset-password',
+  });
+  if (error) throw error;
+};
+
+/**
+ * Update user password (after reset token verification)
+ */
+export const updatePassword = async (newPassword: string): Promise<void> => {
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+  if (error) throw error;
+};
+
+/**
+ * Mask email for privacy (e.g., "test@example.com" -> "t**t@example.com")
+ */
+const maskEmail = (email: string): string => {
+  if (!email || !email.includes('@')) {
+    return '****@****.***';
+  }
+
+  const [localPart, domain] = email.split('@');
+
+  if (!localPart || localPart.length === 0) {
+    return `****@${domain || '****.***'}`;
+  }
+
+  const maskedLocal =
+    localPart.length > 2
+      ? localPart[0] + '*'.repeat(localPart.length - 2) + localPart[localPart.length - 1]
+      : localPart.length === 2
+        ? localPart[0] + '*'
+        : '*';
+
+  return `${maskedLocal}@${domain}`;
+};
+
+/**
+ * Escape SQL wildcard characters to prevent injection
+ */
+const escapeSqlWildcards = (str: string): string => {
+  return str.replace(/[%_\\]/g, '\\$&');
+};
+
+/**
+ * Find email by phone number
+ * Returns masked email for privacy (e.g., "t***@example.com")
+ */
+export const findEmailByPhone = async (
+  phoneNumber: string
+): Promise<{ found: boolean; maskedEmail?: string }> => {
+  const { data, error } = await supabase
+    .from('users')
+    .select('email')
+    .eq('phone_number', phoneNumber)
+    .single();
+
+  if (error || !data) {
+    return { found: false };
+  }
+
+  return { found: true, maskedEmail: maskEmail(data.email) };
+};
+
+/**
+ * Find email by name
+ * Returns list of masked emails matching the name
+ */
+export const findEmailByName = async (
+  name: string
+): Promise<{ found: boolean; maskedEmails?: string[] }> => {
+  const escapedName = escapeSqlWildcards(name);
+  const { data, error } = await supabase
+    .from('users')
+    .select('email')
+    .ilike('name', `%${escapedName}%`)
+    .limit(5);
+
+  if (error || !data || data.length === 0) {
+    return { found: false };
+  }
+
+  const maskedEmails = data.map((user) => maskEmail(user.email));
+
+  return { found: true, maskedEmails };
+};
+
 export default supabase;

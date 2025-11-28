@@ -13,6 +13,9 @@ export type AuthStackParamList = {
   Welcome: undefined;
   SignIn: undefined;
   SignUp: undefined;
+  ForgotPassword: undefined;
+  FindEmail: undefined;
+  ResetPassword: { email?: string };
 };
 
 export type AuthScreenProps<T extends keyof AuthStackParamList> = StackScreenProps<

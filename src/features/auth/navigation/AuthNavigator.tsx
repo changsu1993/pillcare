@@ -17,6 +17,9 @@ import { AuthStackParamList } from '../../../shared/types/navigation.types';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import SignInScreen from '../screens/SignInScreen';
 import SignUpScreen from '../screens/SignUpScreen';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import FindEmailScreen from '../screens/FindEmailScreen';
+import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 
 const Stack = createStackNavigator<AuthStackParamList>();
 
@@ -35,6 +38,21 @@ const AuthNavigator = () => {
       />
       <Stack.Screen name="SignIn" component={SignInScreen} options={{ title: '로그인' }} />
       <Stack.Screen name="SignUp" component={SignUpScreen} options={{ title: '회원가입' }} />
+      <Stack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={{ title: '비밀번호 찾기' }}
+      />
+      <Stack.Screen
+        name="FindEmail"
+        component={FindEmailScreen}
+        options={{ title: '아이디 찾기' }}
+      />
+      <Stack.Screen
+        name="ResetPassword"
+        component={ResetPasswordScreen}
+        options={{ title: '비밀번호 재설정' }}
+      />
     </Stack.Navigator>
   );
 };

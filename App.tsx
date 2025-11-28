@@ -13,9 +13,10 @@ import { NavigationContainer, NavigationContainerRef } from '@react-navigation/n
 import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
 import { User } from '@supabase/supabase-js';
 import * as Notifications from 'expo-notifications';
+import * as Linking from 'expo-linking';
 
 // Services
-import { getCurrentUser, onAuthStateChange } from './src/shared/services/supabase';
+import { getCurrentUser, onAuthStateChange, supabase } from './src/shared/services/supabase';
 import { getUserProfile, savePushToken } from './src/shared/services/api';
 import {
   registerNotificationResponseListener,
@@ -31,13 +32,27 @@ import ParentNavigator from './src/navigation/ParentNavigator';
 import ChildNavigator from './src/navigation/ChildNavigator';
 import AuthNavigator from './src/features/auth/navigation/AuthNavigator';
 
+// Screens
+import ResetPasswordScreen from './src/features/auth/screens/ResetPasswordScreen';
+
 // Contexts
 import { SettingsProvider } from './src/features/settings/contexts/SettingsContext';
+
+// Deep linking configuration
+const linking = {
+  prefixes: [Linking.createURL('/'), 'pillcare://'],
+  config: {
+    screens: {
+      ResetPassword: 'reset-password',
+    },
+  },
+};
 
 export default function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState<boolean>(false);
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
 
   useEffect(() => {
@@ -48,18 +63,71 @@ export default function App() {
     const authListener = onAuthStateChange(async (event, session) => {
       console.log('Auth event:', event);
 
+      // Handle password recovery event
+      if (event === 'PASSWORD_RECOVERY') {
+        console.log('Password recovery mode activated');
+        setIsPasswordRecovery(true);
+        setUser(session?.user || null);
+        return;
+      }
+
       if (session?.user) {
         setUser(session.user);
-        await loadUserRole(session.user.id);
+        // Only load user role if not in password recovery mode
+        if (!isPasswordRecovery) {
+          await loadUserRole(session.user.id);
+        }
       } else {
         setUser(null);
         setUserRole(null);
+        setIsPasswordRecovery(false);
       }
+    });
+
+    // Handle deep link URL for password recovery
+    const handleDeepLink = async (url: string | null) => {
+      if (!url) return;
+
+      console.log('Deep link received:', url);
+
+      // Extract tokens from URL if present
+      if (url.includes('access_token') || url.includes('refresh_token')) {
+        try {
+          // Parse URL to extract tokens
+          const params = new URLSearchParams(url.split('#')[1] || url.split('?')[1]);
+          const accessToken = params.get('access_token');
+          const refreshToken = params.get('refresh_token');
+          const type = params.get('type');
+
+          if (accessToken && refreshToken && type === 'recovery') {
+            // Set session with tokens
+            const { error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+
+            if (error) {
+              console.error('Error setting session:', error);
+            }
+          }
+        } catch (error) {
+          console.error('Error parsing deep link:', error);
+        }
+      }
+    };
+
+    // Check for initial URL
+    Linking.getInitialURL().then(handleDeepLink);
+
+    // Listen for URL changes
+    const linkingSubscription = Linking.addEventListener('url', (event) => {
+      handleDeepLink(event.url);
     });
 
     // Cleanup
     return () => {
       authListener?.data?.subscription?.unsubscribe();
+      linkingSubscription.remove();
     };
   }, []);
 
@@ -209,12 +277,32 @@ export default function App() {
     );
   }
 
+  // Handler for successful password reset
+  const handlePasswordResetSuccess = () => {
+    setIsPasswordRecovery(false);
+    setUser(null);
+    setUserRole(null);
+  };
+
   // Role-based navigation
   return (
     <SettingsProvider>
-      <NavigationContainer ref={navigationRef}>
+      <NavigationContainer ref={navigationRef} linking={linking}>
         <StatusBar style="auto" />
-        {!user ? (
+        {isPasswordRecovery ? (
+          // Password recovery mode - show reset password screen
+          <ResetPasswordScreen
+            navigation={{
+              navigate: (screen: string) => {
+                if (screen === 'SignIn') {
+                  handlePasswordResetSuccess();
+                }
+              },
+              goBack: handlePasswordResetSuccess,
+            } as any}
+            route={{ params: { email: user?.email } } as any}
+          />
+        ) : !user ? (
           // Not logged in - show auth screens
           <AuthNavigator />
         ) : !userRole ? (

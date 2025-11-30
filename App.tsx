@@ -7,7 +7,7 @@
  * - Role-based routing (Parent vs Child app)
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
@@ -54,6 +54,7 @@ export default function App() {
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [isPasswordRecovery, setIsPasswordRecovery] = useState<boolean>(false);
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
+  const isPasswordRecoveryRef = useRef<boolean>(false);
 
   useEffect(() => {
     // Check initial auth state
@@ -62,24 +63,32 @@ export default function App() {
     // Listen to auth changes
     const authListener = onAuthStateChange(async (event, session) => {
       console.log('Auth event:', event);
+      console.log('isPasswordRecoveryRef.current:', isPasswordRecoveryRef.current);
 
       // Handle password recovery event
       if (event === 'PASSWORD_RECOVERY') {
-        console.log('Password recovery mode activated');
+        console.log('Password recovery mode activated via PASSWORD_RECOVERY event');
+        isPasswordRecoveryRef.current = true;
         setIsPasswordRecovery(true);
         setUser(session?.user || null);
         return;
       }
 
+      // If in password recovery mode, don't load user role
+      // This prevents the app from showing the home screen during password reset
+      if (isPasswordRecoveryRef.current && session?.user) {
+        console.log('In password recovery mode - skipping role load');
+        setUser(session.user);
+        return;
+      }
+
       if (session?.user) {
         setUser(session.user);
-        // Only load user role if not in password recovery mode
-        if (!isPasswordRecovery) {
-          await loadUserRole(session.user.id);
-        }
+        await loadUserRole(session.user.id);
       } else {
         setUser(null);
         setUserRole(null);
+        isPasswordRecoveryRef.current = false;
         setIsPasswordRecovery(false);
       }
     });
@@ -88,7 +97,7 @@ export default function App() {
     const handleDeepLink = async (url: string | null) => {
       if (!url) return;
 
-      console.log('Deep link received:', url);
+      console.log('[Deep Link] Received URL:', url);
 
       // Extract tokens from URL if present
       if (url.includes('access_token') || url.includes('refresh_token')) {
@@ -99,19 +108,36 @@ export default function App() {
           const refreshToken = params.get('refresh_token');
           const type = params.get('type');
 
+          console.log('[Deep Link] Parsed params:', {
+            hasAccessToken: !!accessToken,
+            hasRefreshToken: !!refreshToken,
+            type,
+          });
+
           if (accessToken && refreshToken && type === 'recovery') {
+            // Set password recovery mode BEFORE setting session
+            // This ensures the auth listener doesn't try to load user role
+            console.log('[Deep Link] Password recovery type detected - setting recovery mode');
+            isPasswordRecoveryRef.current = true;
+            setIsPasswordRecovery(true);
+
             // Set session with tokens
+            console.log('[Deep Link] Calling setSession with tokens');
             const { error } = await supabase.auth.setSession({
               access_token: accessToken,
               refresh_token: refreshToken,
             });
 
             if (error) {
-              console.error('Error setting session:', error);
+              console.error('[Deep Link] Error setting session:', error);
+              isPasswordRecoveryRef.current = false;
+              setIsPasswordRecovery(false);
+            } else {
+              console.log('[Deep Link] Session set successfully - should show ResetPasswordScreen');
             }
           }
         } catch (error) {
-          console.error('Error parsing deep link:', error);
+          console.error('[Deep Link] Error parsing deep link:', error);
         }
       }
     };
@@ -279,12 +305,19 @@ export default function App() {
 
   // Handler for successful password reset
   const handlePasswordResetSuccess = () => {
+    isPasswordRecoveryRef.current = false;
     setIsPasswordRecovery(false);
     setUser(null);
     setUserRole(null);
   };
 
   // Role-based navigation
+  console.log('[Render] State:', {
+    isPasswordRecovery,
+    hasUser: !!user,
+    userRole,
+  });
+
   return (
     <SettingsProvider>
       <NavigationContainer ref={navigationRef} linking={linking}>

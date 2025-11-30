@@ -33,7 +33,7 @@ import {
 } from '../../../../shared/services/api';
 import { supabase } from '../../../../shared/services/supabase';
 import { User, FamilyConnection } from '../../../../shared/types/database.types';
-import { getSettings, saveSettings } from '../../services/settings';
+import { getSettings, saveSettings, VoiceSpeed } from '../../services/settings';
 import { testVoice, stopSpeaking } from '../../../notifications/services/voice';
 
 type Props = ParentScreenProps<'Settings'>;
@@ -45,6 +45,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
   const [familyConnections, setFamilyConnections] = useState<FamilyConnection[]>([]);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [vibrationEnabled, setVibrationEnabled] = useState(true);
+  const [voiceSpeed, setVoiceSpeed] = useState<VoiceSpeed>(0.85);
   const [isSettingsSaving, setIsSettingsSaving] = useState(false);
 
   // Reload data when screen comes into focus
@@ -73,6 +74,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
       // Load saved settings
       setVoiceEnabled(appSettings.voiceGuidanceEnabled);
       setVibrationEnabled(appSettings.vibrationEnabled);
+      setVoiceSpeed(appSettings.voiceSpeed);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -120,17 +122,54 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
 
   const handleTestVoice = async () => {
     try {
-      Alert.alert('음성 테스트', '잠시 후 음성이 재생됩니다.\n기기의 음량을 확인해주세요.', [
-        {
-          text: '확인',
-          onPress: async () => {
-            await testVoice();
-          },
-        },
-      ]);
+      await testVoice();
     } catch (error) {
       console.error('Error testing voice:', error);
       Alert.alert('오류', '음성 테스트에 실패했습니다.');
+    }
+  };
+
+  const handleVoiceSpeedChange = async (speed: VoiceSpeed) => {
+    try {
+      setIsSettingsSaving(true);
+      setVoiceSpeed(speed);
+      await saveSettings({ voiceSpeed: speed });
+      // Auto-play test voice after speed change
+      await testVoice();
+    } catch (error) {
+      console.error('Error saving voice speed:', error);
+      // Revert on error
+      const settings = await getSettings();
+      setVoiceSpeed(settings.voiceSpeed);
+      Alert.alert('오류', '설정을 저장할 수 없습니다.');
+    } finally {
+      setIsSettingsSaving(false);
+    }
+  };
+
+  const getSpeedLabel = (speed: VoiceSpeed): string => {
+    switch (speed) {
+      case 0.7:
+        return '느리게';
+      case 0.85:
+        return '보통';
+      case 1.0:
+        return '빠르게';
+      default:
+        return '보통';
+    }
+  };
+
+  const getSpeedEmoji = (speed: VoiceSpeed): string => {
+    switch (speed) {
+      case 0.7:
+        return '\u{1F422}'; // Turtle
+      case 0.85:
+        return '\u{1F6B6}'; // Walking person
+      case 1.0:
+        return '\u{1F407}'; // Rabbit
+      default:
+        return '\u{1F6B6}';
     }
   };
 
@@ -254,6 +293,83 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
               <Text className="text-2xl">🎧</Text>
               <Text className="text-lg font-semibold text-primary">음성 테스트</Text>
             </TouchableOpacity>
+          )}
+
+          {/* Voice speed control - only show when voice is enabled */}
+          {voiceEnabled && (
+            <View className="bg-white p-6 rounded-2xl border-2 border-gray-200 shadow-sm">
+              <Text className="text-2xl font-semibold text-gray-900 mb-4">음성 속도</Text>
+              <View className="flex-row gap-3">
+                {/* Slow speed button */}
+                <TouchableOpacity
+                  className={`flex-1 h-[72px] items-center justify-center rounded-xl border-2 ${
+                    voiceSpeed === 0.7 ? 'bg-primary border-primary' : 'bg-gray-50 border-gray-200'
+                  }`}
+                  onPress={() => handleVoiceSpeedChange(0.7)}
+                  activeOpacity={0.7}
+                  disabled={isSettingsSaving}
+                  accessibilityLabel="느리게"
+                  accessibilityHint="음성 속도를 느리게 설정합니다"
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: voiceSpeed === 0.7 }}
+                >
+                  <Text className="text-4xl mb-1">{getSpeedEmoji(0.7)}</Text>
+                  <Text
+                    className={`text-xl font-semibold ${
+                      voiceSpeed === 0.7 ? 'text-white' : 'text-gray-900'
+                    }`}
+                  >
+                    {getSpeedLabel(0.7)}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Normal speed button */}
+                <TouchableOpacity
+                  className={`flex-1 h-[72px] items-center justify-center rounded-xl border-2 ${
+                    voiceSpeed === 0.85 ? 'bg-primary border-primary' : 'bg-gray-50 border-gray-200'
+                  }`}
+                  onPress={() => handleVoiceSpeedChange(0.85)}
+                  activeOpacity={0.7}
+                  disabled={isSettingsSaving}
+                  accessibilityLabel="보통"
+                  accessibilityHint="음성 속도를 보통으로 설정합니다"
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: voiceSpeed === 0.85 }}
+                >
+                  <Text className="text-4xl mb-1">{getSpeedEmoji(0.85)}</Text>
+                  <Text
+                    className={`text-xl font-semibold ${
+                      voiceSpeed === 0.85 ? 'text-white' : 'text-gray-900'
+                    }`}
+                  >
+                    {getSpeedLabel(0.85)}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Fast speed button */}
+                <TouchableOpacity
+                  className={`flex-1 h-[72px] items-center justify-center rounded-xl border-2 ${
+                    voiceSpeed === 1.0 ? 'bg-primary border-primary' : 'bg-gray-50 border-gray-200'
+                  }`}
+                  onPress={() => handleVoiceSpeedChange(1.0)}
+                  activeOpacity={0.7}
+                  disabled={isSettingsSaving}
+                  accessibilityLabel="빠르게"
+                  accessibilityHint="음성 속도를 빠르게 설정합니다"
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: voiceSpeed === 1.0 }}
+                >
+                  <Text className="text-4xl mb-1">{getSpeedEmoji(1.0)}</Text>
+                  <Text
+                    className={`text-xl font-semibold ${
+                      voiceSpeed === 1.0 ? 'text-white' : 'text-gray-900'
+                    }`}
+                  >
+                    {getSpeedLabel(1.0)}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           )}
 
           {/* Vibration toggle */}

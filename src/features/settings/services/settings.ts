@@ -17,6 +17,11 @@ const STORAGE_KEYS = {
 } as const;
 
 /**
+ * Voice speed options
+ */
+export type VoiceSpeed = 0.7 | 0.85 | 1.0;
+
+/**
  * App settings interface
  */
 export interface AppSettings {
@@ -24,6 +29,8 @@ export interface AppSettings {
   voiceGuidanceEnabled: boolean;
   /** Enable vibration for reminders */
   vibrationEnabled: boolean;
+  /** Voice guidance speed (0.7: slow, 0.85: normal, 1.0: fast) */
+  voiceSpeed: VoiceSpeed;
 }
 
 /**
@@ -32,6 +39,7 @@ export interface AppSettings {
 export const DEFAULT_SETTINGS: AppSettings = {
   voiceGuidanceEnabled: true,
   vibrationEnabled: true,
+  voiceSpeed: 0.85, // Normal speed by default
 };
 
 /**
@@ -166,6 +174,28 @@ export const toggleVibration = async (): Promise<boolean> => {
 };
 
 /**
+ * Get voice speed setting
+ * @returns Current voice speed setting
+ */
+export const getVoiceSpeed = async (): Promise<VoiceSpeed> => {
+  try {
+    const settings = await getSettings();
+    return settings.voiceSpeed;
+  } catch (error) {
+    console.error('[SettingsService] Error getting voice speed:', error);
+    return DEFAULT_SETTINGS.voiceSpeed;
+  }
+};
+
+/**
+ * Set voice speed
+ * @param speed - Voice speed to set (0.7, 0.85, or 1.0)
+ */
+export const setVoiceSpeed = async (speed: VoiceSpeed): Promise<void> => {
+  await saveSettings({ voiceSpeed: speed });
+};
+
+/**
  * Reset settings to defaults
  */
 export const resetSettings = async (): Promise<AppSettings> => {
@@ -184,6 +214,8 @@ export default {
   enableVibration,
   disableVibration,
   toggleVibration,
+  getVoiceSpeed,
+  setVoiceSpeed,
   resetSettings,
   DEFAULT_SETTINGS,
 };

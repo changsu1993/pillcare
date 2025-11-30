@@ -11,7 +11,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -94,9 +93,11 @@ const FindEmailScreen = ({ navigation }: Props) => {
   };
 
   const renderSearchMethodSelector = () => (
-    <View style={styles.methodSelector}>
+    <View className="flex-row gap-3">
       <TouchableOpacity
-        style={[styles.methodButton, searchMethod === 'phone' && styles.methodButtonActive]}
+        className={`flex-1 h-[52px] border-2 rounded-xl items-center justify-center ${
+          searchMethod === 'phone' ? 'border-primary bg-blue-50' : 'border-gray-200 bg-white'
+        }`}
         onPress={() => {
           setSearchMethod('phone');
           resetSearch();
@@ -104,16 +105,17 @@ const FindEmailScreen = ({ navigation }: Props) => {
         disabled={isLoading}
       >
         <Text
-          style={[
-            styles.methodButtonText,
-            searchMethod === 'phone' && styles.methodButtonTextActive,
-          ]}
+          className={`text-base font-semibold ${
+            searchMethod === 'phone' ? 'text-primary' : 'text-gray-500'
+          }`}
         >
           휴대폰 번호
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.methodButton, searchMethod === 'name' && styles.methodButtonActive]}
+        className={`flex-1 h-[52px] border-2 rounded-xl items-center justify-center ${
+          searchMethod === 'name' ? 'border-primary bg-blue-50' : 'border-gray-200 bg-white'
+        }`}
         onPress={() => {
           setSearchMethod('name');
           resetSearch();
@@ -121,10 +123,9 @@ const FindEmailScreen = ({ navigation }: Props) => {
         disabled={isLoading}
       >
         <Text
-          style={[
-            styles.methodButtonText,
-            searchMethod === 'name' && styles.methodButtonTextActive,
-          ]}
+          className={`text-base font-semibold ${
+            searchMethod === 'name' ? 'text-primary' : 'text-gray-500'
+          }`}
         >
           이름
         </Text>
@@ -135,10 +136,10 @@ const FindEmailScreen = ({ navigation }: Props) => {
   const renderInputField = () => {
     if (searchMethod === 'phone') {
       return (
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>휴대폰 번호</Text>
+        <View className="mb-5">
+          <Text className="text-sm font-semibold text-gray-900 mb-2">휴대폰 번호</Text>
           <TextInput
-            style={styles.input}
+            className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
             placeholder="010-0000-0000"
             placeholderTextColor="#9CA3AF"
             value={phoneNumber}
@@ -153,10 +154,10 @@ const FindEmailScreen = ({ navigation }: Props) => {
     }
 
     return (
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>이름</Text>
+      <View className="mb-5">
+        <Text className="text-sm font-semibold text-gray-900 mb-2">이름</Text>
         <TextInput
-          style={styles.input}
+          className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
           placeholder="홍길동"
           placeholderTextColor="#9CA3AF"
           value={name}
@@ -174,14 +175,19 @@ const FindEmailScreen = ({ navigation }: Props) => {
 
     if (!searchResult.found) {
       return (
-        <View style={styles.resultContainer}>
-          <View style={styles.resultBox}>
-            <Text style={styles.resultTitle}>검색 결과</Text>
-            <Text style={styles.noResultText}>일치하는 아이디를 찾을 수 없습니다.</Text>
-            <Text style={styles.noResultHint}>입력하신 정보를 다시 확인해주세요.</Text>
+        <View className="flex-1">
+          <View className="bg-gray-50 rounded-2xl p-6 mb-6">
+            <Text className="text-xl font-bold text-gray-900 mb-2">검색 결과</Text>
+            <Text className="text-base font-semibold text-error mb-2">
+              일치하는 아이디를 찾을 수 없습니다.
+            </Text>
+            <Text className="text-sm text-gray-500">입력하신 정보를 다시 확인해주세요.</Text>
           </View>
-          <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={resetSearch}>
-            <Text style={styles.secondaryButtonText}>다시 검색하기</Text>
+          <TouchableOpacity
+            className="h-14 rounded-xl items-center justify-center mt-2 bg-white border-2 border-primary"
+            onPress={resetSearch}
+          >
+            <Text className="text-lg font-semibold text-primary">다시 검색하기</Text>
           </TouchableOpacity>
         </View>
       );
@@ -190,51 +196,59 @@ const FindEmailScreen = ({ navigation }: Props) => {
     const emails = Array.isArray(searchResult.result) ? searchResult.result : [searchResult.result];
 
     return (
-      <View style={styles.resultContainer}>
-        <View style={styles.resultBox}>
-          <Text style={styles.resultTitle}>검색 결과</Text>
-          <Text style={styles.resultDescription}>입력하신 정보와 일치하는 아이디입니다.</Text>
+      <View className="flex-1">
+        <View className="bg-gray-50 rounded-2xl p-6 mb-6">
+          <Text className="text-xl font-bold text-gray-900 mb-2">검색 결과</Text>
+          <Text className="text-sm text-gray-500 mb-4">입력하신 정보와 일치하는 아이디입니다.</Text>
           {emails.map((email, index) => (
-            <View key={index} style={styles.emailItem}>
-              <Text style={styles.emailText}>{email}</Text>
+            <View key={index} className="bg-white rounded-xl p-4 mt-2 border border-gray-200">
+              <Text className="text-lg font-semibold text-gray-900 text-center">{email}</Text>
             </View>
           ))}
         </View>
-        <TouchableOpacity style={[styles.button, styles.primaryButton]} onPress={handleGoToSignIn}>
-          <Text style={styles.primaryButtonText}>로그인하러 가기</Text>
+        <TouchableOpacity
+          className="h-14 rounded-xl items-center justify-center mt-2 bg-primary"
+          onPress={handleGoToSignIn}
+        >
+          <Text className="text-lg font-semibold text-white">로그인하러 가기</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={resetSearch}>
-          <Text style={styles.secondaryButtonText}>다시 검색하기</Text>
+        <TouchableOpacity
+          className="h-14 rounded-xl items-center justify-center mt-2 bg-white border-2 border-primary"
+          onPress={resetSearch}
+        >
+          <Text className="text-lg font-semibold text-primary">다시 검색하기</Text>
         </TouchableOpacity>
       </View>
     );
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
+        className="flex-1"
       >
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingVertical: 16 }}
           keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-              <Text style={styles.backButtonText}>← 뒤로</Text>
+          <View className="mb-8">
+            <TouchableOpacity onPress={() => navigation.goBack()} className="mb-6">
+              <Text className="text-base text-primary">← 뒤로</Text>
             </TouchableOpacity>
-            <Text style={styles.title}>아이디 찾기</Text>
-            <Text style={styles.subtitle}>가입 시 등록한 정보로 아이디를 찾을 수 있습니다</Text>
+            <Text className="text-[32px] font-bold text-gray-900 mb-2">아이디 찾기</Text>
+            <Text className="text-base text-gray-500">
+              가입 시 등록한 정보로 아이디를 찾을 수 있습니다
+            </Text>
           </View>
 
           {/* Search Form or Result */}
           {!searchResult ? (
-            <View style={styles.form}>
+            <View className="flex-1">
               {/* Search method selector */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>검색 방법 선택</Text>
+              <View className="mb-5">
+                <Text className="text-sm font-semibold text-gray-900 mb-2">검색 방법 선택</Text>
                 {renderSearchMethodSelector()}
               </View>
 
@@ -243,22 +257,22 @@ const FindEmailScreen = ({ navigation }: Props) => {
 
               {/* Find email button */}
               <TouchableOpacity
-                style={[styles.button, styles.primaryButton, isLoading && styles.buttonDisabled]}
+                className={`h-14 rounded-xl items-center justify-center mt-2 bg-primary ${isLoading ? 'opacity-60' : ''}`}
                 onPress={handleFindEmail}
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.primaryButtonText}>아이디 찾기</Text>
+                  <Text className="text-lg font-semibold text-white">아이디 찾기</Text>
                 )}
               </TouchableOpacity>
 
               {/* Sign in link */}
-              <View style={styles.footer}>
-                <Text style={styles.footerText}>아이디가 기억나셨나요? </Text>
+              <View className="flex-row justify-center items-center mt-6">
+                <Text className="text-sm text-gray-500">아이디가 기억나셨나요? </Text>
                 <TouchableOpacity onPress={handleGoToSignIn} disabled={isLoading}>
-                  <Text style={styles.link}>로그인</Text>
+                  <Text className="text-sm font-semibold text-primary">로그인</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -270,175 +284,5 @@ const FindEmailScreen = ({ navigation }: Props) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-  header: {
-    marginBottom: 32,
-  },
-  backButton: {
-    marginBottom: 24,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: '#3B82F6',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  form: {
-    flex: 1,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    marginBottom: 8,
-  },
-  methodSelector: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  methodButton: {
-    flex: 1,
-    height: 52,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  methodButtonActive: {
-    borderColor: '#3B82F6',
-    backgroundColor: '#EFF6FF',
-  },
-  methodButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#6B7280',
-  },
-  methodButtonTextActive: {
-    color: '#3B82F6',
-  },
-  input: {
-    height: 52,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#1A1A1A',
-    backgroundColor: '#FFFFFF',
-  },
-  button: {
-    height: 56,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-  },
-  primaryButton: {
-    backgroundColor: '#3B82F6',
-  },
-  secondaryButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#3B82F6',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  primaryButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  secondaryButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#3B82F6',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  link: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#3B82F6',
-  },
-  resultContainer: {
-    flex: 1,
-  },
-  resultBox: {
-    backgroundColor: '#F9FAFB',
-    borderRadius: 16,
-    padding: 24,
-    marginBottom: 24,
-  },
-  resultTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 8,
-  },
-  resultDescription: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginBottom: 16,
-  },
-  emailItem: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  emailText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    textAlign: 'center',
-  },
-  noResultText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#EF4444',
-    marginBottom: 8,
-  },
-  noResultHint: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-});
 
 export default FindEmailScreen;

@@ -11,7 +11,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -54,31 +53,31 @@ const SignInScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
+        className="flex-1"
       >
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingVertical: 16 }}
           keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-              <Text style={styles.backButtonText}>← 뒤로</Text>
+          <View className="mb-8">
+            <TouchableOpacity onPress={() => navigation.goBack()} className="mb-6">
+              <Text className="text-base text-primary">← 뒤로</Text>
             </TouchableOpacity>
-            <Text style={styles.title}>로그인</Text>
-            <Text style={styles.subtitle}>PillCare에 오신 것을 환영합니다</Text>
+            <Text className="text-[32px] font-bold text-gray-900 mb-2">로그인</Text>
+            <Text className="text-base text-gray-500">PillCare에 오신 것을 환영합니다</Text>
           </View>
 
           {/* Form */}
-          <View style={styles.form}>
+          <View className="flex-1">
             {/* Email input */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>이메일</Text>
+            <View className="mb-5">
+              <Text className="text-sm font-semibold text-gray-900 mb-2">이메일</Text>
               <TextInput
-                style={styles.input}
+                className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
                 placeholder="example@email.com"
                 placeholderTextColor="#9CA3AF"
                 value={email}
@@ -91,10 +90,10 @@ const SignInScreen = ({ navigation }: Props) => {
             </View>
 
             {/* Password input */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>비밀번호</Text>
+            <View className="mb-5">
+              <Text className="text-sm font-semibold text-gray-900 mb-2">비밀번호</Text>
               <TextInput
-                style={styles.input}
+                className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
                 placeholder="비밀번호를 입력하세요"
                 placeholderTextColor="#9CA3AF"
                 value={password}
@@ -107,40 +106,40 @@ const SignInScreen = ({ navigation }: Props) => {
             </View>
 
             {/* Forgot credentials links */}
-            <View style={styles.forgotLinks}>
+            <View className="flex-row justify-center items-center mt-4 mb-2">
               <TouchableOpacity
                 onPress={() => navigation.navigate('FindEmail')}
                 disabled={isLoading}
               >
-                <Text style={styles.forgotLink}>아이디 찾기</Text>
+                <Text className="text-sm text-gray-500">아이디 찾기</Text>
               </TouchableOpacity>
-              <Text style={styles.forgotDivider}>|</Text>
+              <Text className="text-sm text-gray-300 mx-3">|</Text>
               <TouchableOpacity
                 onPress={() => navigation.navigate('ForgotPassword')}
                 disabled={isLoading}
               >
-                <Text style={styles.forgotLink}>비밀번호 찾기</Text>
+                <Text className="text-sm text-gray-500">비밀번호 찾기</Text>
               </TouchableOpacity>
             </View>
 
             {/* Sign in button */}
             <TouchableOpacity
-              style={[styles.button, styles.primaryButton, isLoading && styles.buttonDisabled]}
+              className={`h-14 rounded-xl items-center justify-center mt-2 bg-primary ${isLoading ? 'opacity-60' : ''}`}
               onPress={handleSignIn}
               disabled={isLoading}
             >
               {isLoading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.primaryButtonText}>로그인</Text>
+                <Text className="text-lg font-semibold text-white">로그인</Text>
               )}
             </TouchableOpacity>
 
             {/* Sign up link */}
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>계정이 없으신가요? </Text>
+            <View className="flex-row justify-center items-center mt-6">
+              <Text className="text-sm text-gray-500">계정이 없으신가요? </Text>
               <TouchableOpacity onPress={() => navigation.navigate('SignUp')} disabled={isLoading}>
-                <Text style={styles.link}>회원가입</Text>
+                <Text className="text-sm font-semibold text-primary">회원가입</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -149,111 +148,5 @@ const SignInScreen = ({ navigation }: Props) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-  header: {
-    marginBottom: 32,
-  },
-  backButton: {
-    marginBottom: 24,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: '#3B82F6',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  form: {
-    flex: 1,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    marginBottom: 8,
-  },
-  input: {
-    height: 52,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#1A1A1A',
-    backgroundColor: '#FFFFFF',
-  },
-  button: {
-    height: 56,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-  },
-  primaryButton: {
-    backgroundColor: '#3B82F6',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  primaryButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  link: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#3B82F6',
-  },
-  forgotLinks: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  forgotLink: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  forgotDivider: {
-    fontSize: 14,
-    color: '#D1D5DB',
-    marginHorizontal: 12,
-  },
-});
 
 export default SignInScreen;

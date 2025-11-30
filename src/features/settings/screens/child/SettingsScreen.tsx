@@ -12,7 +12,6 @@ import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   Switch,
@@ -214,40 +213,44 @@ const ChildSettingsScreen = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View className="flex-1 justify-center items-center bg-gray-50">
         <ActivityIndicator size="large" color="#3B82F6" />
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <ScrollView style={styles.scrollView}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
+      <ScrollView className="flex-1">
         {/* 프로필 섹션 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>프로필</Text>
-          <View style={styles.profileCard}>
-            <View style={styles.avatarContainer}>
-              <Text style={styles.avatarText}>{profile?.name?.charAt(0) || '?'}</Text>
+        <View className="bg-white mt-4 px-4 py-3 border-t border-b border-gray-200">
+          <Text className="text-xs font-semibold text-gray-500 mb-3 uppercase">프로필</Text>
+          <View className="flex-row items-center py-2">
+            <View className="w-[60px] h-[60px] rounded-full bg-primary justify-center items-center">
+              <Text className="text-2xl font-bold text-white">
+                {profile?.name?.charAt(0) || '?'}
+              </Text>
             </View>
-            <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>{profile?.name || '이름 없음'}</Text>
-              <Text style={styles.profileEmail}>{profile?.email}</Text>
-              <View style={styles.roleBadge}>
-                <Text style={styles.roleText}>자녀</Text>
+            <View className="ml-4 flex-1">
+              <Text className="text-lg font-semibold text-gray-900">
+                {profile?.name || '이름 없음'}
+              </Text>
+              <Text className="text-sm text-gray-500 mt-0.5">{profile?.email}</Text>
+              <View className="mt-1.5 bg-primary-100 px-2.5 py-1 rounded-xl self-start">
+                <Text className="text-xs font-semibold text-primary">자녀</Text>
               </View>
             </View>
           </View>
         </View>
 
         {/* 알림 설정 섹션 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>알림 설정</Text>
+        <View className="bg-white mt-4 px-4 py-3 border-t border-b border-gray-200">
+          <Text className="text-xs font-semibold text-gray-500 mb-3 uppercase">알림 설정</Text>
 
-          <View style={styles.settingItem}>
-            <View style={styles.settingInfo}>
+          <View className="flex-row items-center justify-between py-3 border-b border-gray-100">
+            <View className="flex-row items-center flex-1 gap-3">
               <Ionicons name="notifications-outline" size={24} color="#6B7280" />
-              <Text style={styles.settingLabel}>푸시 알림</Text>
+              <Text className="text-base text-gray-900">푸시 알림</Text>
             </View>
             <Switch
               value={notificationsEnabled}
@@ -258,12 +261,14 @@ const ChildSettingsScreen = () => {
             />
           </View>
 
-          <View style={styles.settingItem}>
-            <View style={styles.settingInfo}>
+          <View className="flex-row items-center justify-between py-3 border-b border-gray-100">
+            <View className="flex-row items-center flex-1 gap-3">
               <Ionicons name="alert-circle-outline" size={24} color="#6B7280" />
               <View>
-                <Text style={styles.settingLabel}>미복용 알림</Text>
-                <Text style={styles.settingDescription}>부모님이 약을 놓치면 알림을 받습니다</Text>
+                <Text className="text-base text-gray-900">미복용 알림</Text>
+                <Text className="text-xs text-gray-400 mt-0.5">
+                  부모님이 약을 놓치면 알림을 받습니다
+                </Text>
               </View>
             </View>
             <Switch
@@ -277,343 +282,104 @@ const ChildSettingsScreen = () => {
         </View>
 
         {/* 가족 연결 섹션 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>가족 연결</Text>
+        <View className="bg-white mt-4 px-4 py-3 border-t border-b border-gray-200">
+          <Text className="text-xs font-semibold text-gray-500 mb-3 uppercase">가족 연결</Text>
 
           {/* Connected parent list */}
           {connectedParent ? (
-            <View style={styles.connectedParentCard}>
-              <View style={styles.parentInfo}>
-                <View style={styles.parentAvatar}>
-                  <Text style={styles.parentAvatarText}>
+            <View className="bg-success-50 rounded-xl p-4 mb-3 border border-success-200">
+              <View className="flex-row items-center">
+                <View className="w-14 h-14 rounded-full bg-success justify-center items-center">
+                  <Text className="text-[22px] font-bold text-white">
                     {connectedParent.name?.charAt(0) || '?'}
                   </Text>
                 </View>
-                <View style={styles.parentDetails}>
-                  <Text style={styles.parentName}>{connectedParent.name}</Text>
-                  <Text style={styles.parentEmail}>{connectedParent.email}</Text>
-                  <View style={styles.parentBadge}>
-                    <Text style={styles.parentBadgeText}>부모님</Text>
+                <View className="ml-3.5 flex-1">
+                  <Text className="text-lg font-semibold text-gray-900">
+                    {connectedParent.name}
+                  </Text>
+                  <Text className="text-xs text-gray-500 mt-0.5">{connectedParent.email}</Text>
+                  <View className="mt-1.5 bg-success-100 px-2.5 py-1 rounded-xl self-start">
+                    <Text className="text-xs font-semibold text-success-600">부모님</Text>
                   </View>
                 </View>
               </View>
               {familyConnections.length > 0 && (
                 <TouchableOpacity
-                  style={styles.disconnectButton}
+                  className="flex-row items-center justify-center mt-3 py-2.5 bg-error-50 rounded-lg gap-1.5"
                   onPress={() => handleRemoveConnection(familyConnections[0])}
                 >
                   <Ionicons name="unlink" size={18} color="#EF4444" />
-                  <Text style={styles.disconnectText}>연결 해제</Text>
+                  <Text className="text-sm font-semibold text-error">연결 해제</Text>
                 </TouchableOpacity>
               )}
             </View>
           ) : (
-            <View style={styles.noConnectionCard}>
+            <View className="items-center py-6 bg-gray-50 rounded-xl mb-3 border border-gray-200 border-dashed">
               <Ionicons name="people-outline" size={48} color="#D1D5DB" />
-              <Text style={styles.noConnectionText}>연결된 부모님이 없습니다</Text>
-              <Text style={styles.noConnectionSubtext}>
+              <Text className="text-base font-semibold text-gray-500 mt-3">
+                연결된 부모님이 없습니다
+              </Text>
+              <Text className="text-xs text-gray-400 mt-1 text-center">
                 부모님의 초대 코드를 입력하여 연결하세요
               </Text>
             </View>
           )}
 
           {/* Enter code button */}
-          <TouchableOpacity style={styles.enterCodeButton} onPress={handleEnterCode}>
+          <TouchableOpacity
+            className="flex-row items-center py-3.5 px-4 bg-primary-50 rounded-xl border border-primary-200 gap-2.5"
+            onPress={handleEnterCode}
+          >
             <Ionicons name="keypad-outline" size={24} color="#3B82F6" />
-            <Text style={styles.enterCodeText}>초대 코드 입력</Text>
+            <Text className="flex-1 text-base font-semibold text-primary">초대 코드 입력</Text>
             <Ionicons name="chevron-forward" size={20} color="#3B82F6" />
           </TouchableOpacity>
         </View>
 
         {/* 기타 섹션 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>기타</Text>
+        <View className="bg-white mt-4 px-4 py-3 border-t border-b border-gray-200">
+          <Text className="text-xs font-semibold text-gray-500 mb-3 uppercase">기타</Text>
 
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuInfo}>
+          <TouchableOpacity className="flex-row items-center justify-between py-3.5 border-b border-gray-100">
+            <View className="flex-row items-center gap-3">
               <Ionicons name="help-circle-outline" size={24} color="#6B7280" />
-              <Text style={styles.menuLabel}>도움말</Text>
+              <Text className="text-base text-gray-900">도움말</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuInfo}>
+          <TouchableOpacity className="flex-row items-center justify-between py-3.5 border-b border-gray-100">
+            <View className="flex-row items-center gap-3">
               <Ionicons name="document-text-outline" size={24} color="#6B7280" />
-              <Text style={styles.menuLabel}>이용약관</Text>
+              <Text className="text-base text-gray-900">이용약관</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuInfo}>
+          <TouchableOpacity className="flex-row items-center justify-between py-3.5 border-b border-gray-100">
+            <View className="flex-row items-center gap-3">
               <Ionicons name="shield-checkmark-outline" size={24} color="#6B7280" />
-              <Text style={styles.menuLabel}>개인정보 처리방침</Text>
+              <Text className="text-base text-gray-900">개인정보 처리방침</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
         </View>
 
         {/* 로그아웃 버튼 */}
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <TouchableOpacity
+          className="flex-row items-center justify-center gap-2 mt-6 mx-4 py-3.5 bg-error-50 rounded-xl border border-error-200"
+          onPress={handleLogout}
+        >
           <Ionicons name="log-out-outline" size={24} color="#EF4444" />
-          <Text style={styles.logoutText}>로그아웃</Text>
+          <Text className="text-base font-semibold text-error">로그아웃</Text>
         </TouchableOpacity>
 
         {/* 앱 버전 */}
-        <Text style={styles.versionText}>PillCare v1.0.0</Text>
+        <Text className="text-center text-xs text-gray-400 mt-6 mb-8">PillCare v1.0.0</Text>
       </ScrollView>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  section: {
-    backgroundColor: '#FFFFFF',
-    marginTop: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#6B7280',
-    marginBottom: 12,
-    textTransform: 'uppercase',
-  },
-  profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  avatarContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#3B82F6',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  profileInfo: {
-    marginLeft: 16,
-    flex: 1,
-  },
-  profileName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1A1A1A',
-  },
-  profileEmail: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginTop: 2,
-  },
-  roleBadge: {
-    marginTop: 6,
-    backgroundColor: '#DBEAFE',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-  },
-  roleText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#3B82F6',
-  },
-  settingItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  settingInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    gap: 12,
-  },
-  settingLabel: {
-    fontSize: 16,
-    color: '#1A1A1A',
-  },
-  settingDescription: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    marginTop: 2,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  menuInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  menuLabel: {
-    fontSize: 16,
-    color: '#1A1A1A',
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginTop: 24,
-    marginHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: '#FEF2F2',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#FECACA',
-  },
-  logoutText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#EF4444',
-  },
-  versionText: {
-    textAlign: 'center',
-    fontSize: 12,
-    color: '#9CA3AF',
-    marginTop: 24,
-    marginBottom: 32,
-  },
-  // Connected parent styles
-  connectedParentCard: {
-    backgroundColor: '#F0FDF4',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#BBF7D0',
-  },
-  parentInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  parentAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#22C55E',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  parentAvatarText: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  parentDetails: {
-    marginLeft: 14,
-    flex: 1,
-  },
-  parentName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1A1A1A',
-  },
-  parentEmail: {
-    fontSize: 13,
-    color: '#6B7280',
-    marginTop: 2,
-  },
-  parentBadge: {
-    marginTop: 6,
-    backgroundColor: '#DCFCE7',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-  },
-  parentBadgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#16A34A',
-  },
-  disconnectButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 12,
-    paddingVertical: 10,
-    backgroundColor: '#FEF2F2',
-    borderRadius: 8,
-    gap: 6,
-  },
-  disconnectText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#EF4444',
-  },
-  noConnectionCard: {
-    alignItems: 'center',
-    paddingVertical: 24,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderStyle: 'dashed',
-  },
-  noConnectionText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#6B7280',
-    marginTop: 12,
-  },
-  noConnectionSubtext: {
-    fontSize: 13,
-    color: '#9CA3AF',
-    marginTop: 4,
-    textAlign: 'center',
-  },
-  enterCodeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    backgroundColor: '#EFF6FF',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#BFDBFE',
-    gap: 10,
-  },
-  enterCodeText: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#3B82F6',
-  },
-});
 
 export default ChildSettingsScreen;

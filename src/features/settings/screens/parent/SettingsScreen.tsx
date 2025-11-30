@@ -15,7 +15,6 @@ import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   Switch,
@@ -190,40 +189,46 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
 
   if (isLoading) {
     return (
-      <View style={styles.centerContainer}>
+      <View className="flex-1 bg-gray-50 justify-center items-center">
         <ActivityIndicator size="large" color="#22C55E" />
-        <Text style={styles.loadingText}>불러오는 중...</Text>
+        <Text className="text-xl text-gray-900 mt-4">불러오는 중...</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <ScrollView className="flex-1" contentContainerStyle={{ padding: 24 }}>
         {/* Profile card */}
-        <View style={styles.profileCard}>
-          <Text style={styles.profileIcon}>👤</Text>
-          <Text style={styles.profileName} accessibilityLabel={`이름: ${user?.name || '사용자'}`}>
+        <View className="bg-white p-8 rounded-2xl items-center mb-6 border-2 border-gray-200 shadow-sm">
+          <Text className="text-6xl mb-4">👤</Text>
+          <Text
+            className="text-3xl font-bold text-gray-900 mb-2"
+            accessibilityLabel={`이름: ${user?.name || '사용자'}`}
+          >
             {user?.name || '사용자'}
           </Text>
-          <Text style={styles.profileEmail} accessibilityLabel={`이메일: ${user?.email || ''}`}>
+          <Text
+            className="text-xl text-gray-500"
+            accessibilityLabel={`이메일: ${user?.email || ''}`}
+          >
             {user?.email || ''}
           </Text>
         </View>
 
         {/* Settings options */}
-        <View style={styles.settingsContainer}>
+        <View className="gap-4">
           {/* Voice guidance toggle */}
           <View
-            style={styles.settingItem}
+            className="bg-white h-[72px] flex-row items-center justify-between px-6 rounded-2xl border-2 border-gray-200 shadow-sm"
             accessibilityLabel="음성 안내 설정"
             accessibilityRole="adjustable"
           >
-            <View style={styles.settingLeft}>
-              <Text style={styles.settingIcon}>🔊</Text>
-              <Text style={styles.settingLabel}>음성 안내</Text>
+            <View className="flex-row items-center flex-1">
+              <Text className="text-4xl mr-4">🔊</Text>
+              <Text className="text-2xl font-semibold text-gray-900">음성 안내</Text>
             </View>
-            <View style={styles.switchContainer}>
+            <View className="justify-center items-center w-[60px] h-9">
               <Switch
                 value={voiceEnabled}
                 onValueChange={handleVoiceToggle}
@@ -239,29 +244,29 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
           {/* Voice test button - only show when voice is enabled */}
           {voiceEnabled && (
             <TouchableOpacity
-              style={styles.testVoiceButton}
+              className="bg-primary-50 h-14 flex-row items-center justify-center px-6 rounded-xl border-2 border-primary gap-2"
               onPress={handleTestVoice}
               activeOpacity={0.7}
               accessibilityLabel="음성 테스트"
               accessibilityHint="음성 안내 테스트 메시지를 재생합니다"
               accessibilityRole="button"
             >
-              <Text style={styles.testVoiceIcon}>🎧</Text>
-              <Text style={styles.testVoiceText}>음성 테스트</Text>
+              <Text className="text-2xl">🎧</Text>
+              <Text className="text-lg font-semibold text-primary">음성 테스트</Text>
             </TouchableOpacity>
           )}
 
           {/* Vibration toggle */}
           <View
-            style={styles.settingItem}
+            className="bg-white h-[72px] flex-row items-center justify-between px-6 rounded-2xl border-2 border-gray-200 shadow-sm"
             accessibilityLabel="진동 설정"
             accessibilityRole="adjustable"
           >
-            <View style={styles.settingLeft}>
-              <Text style={styles.settingIcon}>📳</Text>
-              <Text style={styles.settingLabel}>진동</Text>
+            <View className="flex-row items-center flex-1">
+              <Text className="text-4xl mr-4">📳</Text>
+              <Text className="text-2xl font-semibold text-gray-900">진동</Text>
             </View>
-            <View style={styles.switchContainer}>
+            <View className="justify-center items-center w-[60px] h-9">
               <Switch
                 value={vibrationEnabled}
                 onValueChange={handleVibrationToggle}
@@ -275,27 +280,32 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
           </View>
 
           {/* Family connections section */}
-          <View style={styles.familySection}>
-            <View style={styles.familySectionHeader}>
-              <Text style={styles.settingIcon}>👨‍👩‍👧</Text>
-              <Text style={styles.settingLabel}>가족 연결</Text>
+          <View className="bg-white p-5 rounded-2xl border-2 border-gray-200 shadow-sm">
+            <View className="flex-row items-center mb-4">
+              <Text className="text-4xl mr-4">👨‍👩‍👧</Text>
+              <Text className="text-2xl font-semibold text-gray-900">가족 연결</Text>
             </View>
 
             {/* Connected children list */}
             {connectedChildren.length > 0 ? (
-              <View style={styles.connectedList}>
+              <View className="mb-4">
                 {familyConnections.map((connection) => {
                   const child = connection.child;
                   if (!child) return null;
                   return (
-                    <View key={connection.id} style={styles.connectedItem}>
-                      <View style={styles.connectedInfo}>
-                        <View style={styles.childAvatar}>
-                          <Text style={styles.childAvatarText}>{child.name?.charAt(0) || '?'}</Text>
+                    <View
+                      key={connection.id}
+                      className="flex-row items-center justify-between py-3 border-b border-gray-100"
+                    >
+                      <View className="flex-row items-center flex-1">
+                        <View className="w-11 h-11 rounded-full bg-primary-100 justify-center items-center mr-3">
+                          <Text className="text-lg font-bold text-primary">
+                            {child.name?.charAt(0) || '?'}
+                          </Text>
                         </View>
                         <View>
-                          <Text style={styles.childName}>{child.name}</Text>
-                          <Text style={styles.childRole}>자녀</Text>
+                          <Text className="text-lg font-semibold text-gray-900">{child.name}</Text>
+                          <Text className="text-sm text-gray-500 mt-0.5">자녀</Text>
                         </View>
                       </View>
                       <TouchableOpacity
@@ -310,12 +320,12 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
                 })}
               </View>
             ) : (
-              <Text style={styles.noConnectionText}>연결된 자녀가 없습니다</Text>
+              <Text className="text-lg text-gray-400 text-center py-4">연결된 자녀가 없습니다</Text>
             )}
 
             {/* Generate invitation code button */}
             <TouchableOpacity
-              style={styles.inviteButton}
+              className="flex-row items-center justify-center bg-success-50 py-4 rounded-xl gap-2 border-2 border-success"
               onPress={handleGenerateCode}
               activeOpacity={0.7}
               accessibilityLabel="초대 코드 생성"
@@ -323,236 +333,31 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
               accessibilityRole="button"
             >
               <Ionicons name="add-circle" size={28} color="#22C55E" />
-              <Text style={styles.inviteButtonText}>초대 코드 생성</Text>
+              <Text className="text-xl font-semibold text-success">초대 코드 생성</Text>
             </TouchableOpacity>
           </View>
 
           {/* Logout button */}
           <TouchableOpacity
-            style={[styles.settingItem, styles.logoutItem]}
+            className="bg-error-50 h-[72px] flex-row items-center px-6 rounded-2xl border-2 border-error-100 shadow-sm mt-4"
             onPress={handleLogout}
             activeOpacity={0.7}
             accessibilityLabel="로그아웃"
             accessibilityHint="앱에서 로그아웃합니다"
             accessibilityRole="button"
           >
-            <View style={styles.settingLeft}>
-              <Text style={styles.settingIcon}>🚪</Text>
-              <Text style={[styles.settingLabel, styles.logoutText]}>로그아웃</Text>
+            <View className="flex-row items-center flex-1">
+              <Text className="text-4xl mr-4">🚪</Text>
+              <Text className="text-2xl font-semibold text-error">로그아웃</Text>
             </View>
           </TouchableOpacity>
         </View>
 
         {/* App version */}
-        <Text style={styles.version}>PillCare v0.1.0</Text>
+        <Text className="text-lg text-gray-400 text-center mt-8">PillCare v0.1.0</Text>
       </ScrollView>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  centerContainer: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 24,
-  },
-  loadingText: {
-    fontSize: 20,
-    color: '#1A1A1A',
-    marginTop: 16,
-  },
-  profileCard: {
-    backgroundColor: '#FFFFFF',
-    padding: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    marginBottom: 24,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  profileIcon: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  profileName: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 8,
-  },
-  profileEmail: {
-    fontSize: 20,
-    color: '#6B7280',
-  },
-  settingsContainer: {
-    gap: 16,
-  },
-  settingItem: {
-    backgroundColor: '#FFFFFF',
-    height: 72,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  settingLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  settingIcon: {
-    fontSize: 32,
-    marginRight: 16,
-  },
-  settingLabel: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#1A1A1A',
-  },
-  switchContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 60,
-    height: 36,
-  },
-  testVoiceButton: {
-    backgroundColor: '#EFF6FF',
-    height: 56,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#3B82F6',
-    gap: 8,
-  },
-  testVoiceIcon: {
-    fontSize: 24,
-  },
-  testVoiceText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#3B82F6',
-  },
-  logoutItem: {
-    marginTop: 16,
-    borderColor: '#FEE2E2',
-    backgroundColor: '#FEF2F2',
-  },
-  logoutText: {
-    color: '#EF4444',
-  },
-  version: {
-    fontSize: 18,
-    color: '#9CA3AF',
-    textAlign: 'center',
-    marginTop: 32,
-  },
-  // Family section styles
-  familySection: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  familySectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  connectedList: {
-    marginBottom: 16,
-  },
-  connectedItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  connectedInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  childAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#DBEAFE',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  childAvatarText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#3B82F6',
-  },
-  childName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1A1A1A',
-  },
-  childRole: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginTop: 2,
-  },
-  noConnectionText: {
-    fontSize: 18,
-    color: '#9CA3AF',
-    textAlign: 'center',
-    paddingVertical: 16,
-  },
-  inviteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ECFDF5',
-    paddingVertical: 16,
-    borderRadius: 12,
-    gap: 8,
-    borderWidth: 2,
-    borderColor: '#22C55E',
-  },
-  inviteButtonText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#22C55E',
-  },
-});
 
 export default ParentSettingsScreen;

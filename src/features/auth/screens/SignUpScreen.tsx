@@ -11,7 +11,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -84,51 +83,56 @@ const SignUpScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
+        className="flex-1"
       >
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingVertical: 16 }}
           keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-              <Text style={styles.backButtonText}>← 뒤로</Text>
+          <View className="mb-6">
+            <TouchableOpacity onPress={() => navigation.goBack()} className="mb-4">
+              <Text className="text-base text-primary">← 뒤로</Text>
             </TouchableOpacity>
-            <Text style={styles.title}>회원가입</Text>
-            <Text style={styles.subtitle}>PillCare 시작하기</Text>
+            <Text className="text-[32px] font-bold text-gray-900 mb-2">회원가입</Text>
+            <Text className="text-base text-gray-500">PillCare 시작하기</Text>
           </View>
 
           {/* Form */}
-          <View style={styles.form}>
+          <View className="flex-1">
             {/* Role selection */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>사용자 유형</Text>
-              <View style={styles.roleContainer}>
+            <View className="mb-4">
+              <Text className="text-sm font-semibold text-gray-900 mb-2">사용자 유형</Text>
+              <View className="flex-row gap-3">
                 <TouchableOpacity
-                  style={[styles.roleButton, role === 'parent' && styles.roleButtonActive]}
+                  className={`flex-1 h-[52px] border-2 rounded-xl items-center justify-center ${
+                    role === 'parent' ? 'border-primary bg-blue-50' : 'border-gray-200 bg-white'
+                  }`}
                   onPress={() => setRole('parent')}
                   disabled={isLoading}
                 >
                   <Text
-                    style={[
-                      styles.roleButtonText,
-                      role === 'parent' && styles.roleButtonTextActive,
-                    ]}
+                    className={`text-base font-semibold ${
+                      role === 'parent' ? 'text-primary' : 'text-gray-500'
+                    }`}
                   >
                     부모 (복약 관리)
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.roleButton, role === 'child' && styles.roleButtonActive]}
+                  className={`flex-1 h-[52px] border-2 rounded-xl items-center justify-center ${
+                    role === 'child' ? 'border-primary bg-blue-50' : 'border-gray-200 bg-white'
+                  }`}
                   onPress={() => setRole('child')}
                   disabled={isLoading}
                 >
                   <Text
-                    style={[styles.roleButtonText, role === 'child' && styles.roleButtonTextActive]}
+                    className={`text-base font-semibold ${
+                      role === 'child' ? 'text-primary' : 'text-gray-500'
+                    }`}
                   >
                     자녀 (모니터링)
                   </Text>
@@ -137,10 +141,10 @@ const SignUpScreen = ({ navigation }: Props) => {
             </View>
 
             {/* Name input */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>이름 *</Text>
+            <View className="mb-4">
+              <Text className="text-sm font-semibold text-gray-900 mb-2">이름 *</Text>
               <TextInput
-                style={styles.input}
+                className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
                 placeholder="홍길동"
                 placeholderTextColor="#9CA3AF"
                 value={name}
@@ -151,10 +155,10 @@ const SignUpScreen = ({ navigation }: Props) => {
             </View>
 
             {/* Email input */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>이메일 *</Text>
+            <View className="mb-4">
+              <Text className="text-sm font-semibold text-gray-900 mb-2">이메일 *</Text>
               <TextInput
-                style={styles.input}
+                className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
                 placeholder="example@email.com"
                 placeholderTextColor="#9CA3AF"
                 value={email}
@@ -167,10 +171,10 @@ const SignUpScreen = ({ navigation }: Props) => {
             </View>
 
             {/* Phone input */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>전화번호 (선택)</Text>
+            <View className="mb-4">
+              <Text className="text-sm font-semibold text-gray-900 mb-2">전화번호 (선택)</Text>
               <TextInput
-                style={styles.input}
+                className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
                 placeholder="010-1234-5678"
                 placeholderTextColor="#9CA3AF"
                 value={phone}
@@ -181,10 +185,12 @@ const SignUpScreen = ({ navigation }: Props) => {
             </View>
 
             {/* Password input */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>비밀번호 * (6자 이상)</Text>
+            <View className="mb-4">
+              <Text className="text-sm font-semibold text-gray-900 mb-2">
+                비밀번호 * (6자 이상)
+              </Text>
               <TextInput
-                style={styles.input}
+                className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
                 placeholder="비밀번호를 입력하세요"
                 placeholderTextColor="#9CA3AF"
                 value={password}
@@ -197,10 +203,10 @@ const SignUpScreen = ({ navigation }: Props) => {
             </View>
 
             {/* Confirm password input */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>비밀번호 확인 *</Text>
+            <View className="mb-4">
+              <Text className="text-sm font-semibold text-gray-900 mb-2">비밀번호 확인 *</Text>
               <TextInput
-                style={styles.input}
+                className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
                 placeholder="비밀번호를 다시 입력하세요"
                 placeholderTextColor="#9CA3AF"
                 value={confirmPassword}
@@ -214,22 +220,22 @@ const SignUpScreen = ({ navigation }: Props) => {
 
             {/* Sign up button */}
             <TouchableOpacity
-              style={[styles.button, styles.primaryButton, isLoading && styles.buttonDisabled]}
+              className={`h-14 rounded-xl items-center justify-center mt-2 bg-primary ${isLoading ? 'opacity-60' : ''}`}
               onPress={handleSignUp}
               disabled={isLoading}
             >
               {isLoading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.primaryButtonText}>회원가입</Text>
+                <Text className="text-lg font-semibold text-white">회원가입</Text>
               )}
             </TouchableOpacity>
 
             {/* Sign in link */}
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>이미 계정이 있으신가요? </Text>
+            <View className="flex-row justify-center items-center mt-4">
+              <Text className="text-sm text-gray-500">이미 계정이 있으신가요? </Text>
               <TouchableOpacity onPress={() => navigation.navigate('SignIn')} disabled={isLoading}>
-                <Text style={styles.link}>로그인</Text>
+                <Text className="text-sm font-semibold text-primary">로그인</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -238,121 +244,5 @@ const SignUpScreen = ({ navigation }: Props) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-  header: {
-    marginBottom: 24,
-  },
-  backButton: {
-    marginBottom: 16,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: '#3B82F6',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  form: {
-    flex: 1,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    marginBottom: 8,
-  },
-  input: {
-    height: 52,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#1A1A1A',
-    backgroundColor: '#FFFFFF',
-  },
-  roleContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  roleButton: {
-    flex: 1,
-    height: 52,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  roleButtonActive: {
-    borderColor: '#3B82F6',
-    backgroundColor: '#EFF6FF',
-  },
-  roleButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#6B7280',
-  },
-  roleButtonTextActive: {
-    color: '#3B82F6',
-  },
-  button: {
-    height: 56,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-  },
-  primaryButton: {
-    backgroundColor: '#3B82F6',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  primaryButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  link: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#3B82F6',
-  },
-});
 
 export default SignUpScreen;

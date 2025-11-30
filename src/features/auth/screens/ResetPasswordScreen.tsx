@@ -11,7 +11,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -80,33 +79,33 @@ const ResetPasswordScreen = ({ navigation, route }: Props) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
+        className="flex-1"
       >
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingVertical: 16 }}
           keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-              <Text style={styles.backButtonText}>← 뒤로</Text>
+          <View className="mb-8">
+            <TouchableOpacity onPress={() => navigation.goBack()} className="mb-6">
+              <Text className="text-base text-primary">← 뒤로</Text>
             </TouchableOpacity>
-            <Text style={styles.title}>새 비밀번호 설정</Text>
-            <Text style={styles.subtitle}>
+            <Text className="text-[32px] font-bold text-gray-900 mb-2">새 비밀번호 설정</Text>
+            <Text className="text-base text-gray-500">
               {email ? `${email} 계정의 새 비밀번호를 설정합니다` : '새 비밀번호를 설정해주세요'}
             </Text>
           </View>
 
           {/* Form */}
-          <View style={styles.form}>
+          <View className="flex-1">
             {/* New Password input */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>새 비밀번호</Text>
+            <View className="mb-5">
+              <Text className="text-sm font-semibold text-gray-900 mb-2">새 비밀번호</Text>
               <TextInput
-                style={styles.input}
+                className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
                 placeholder="새 비밀번호를 입력하세요"
                 placeholderTextColor="#9CA3AF"
                 value={newPassword}
@@ -117,12 +116,9 @@ const ResetPasswordScreen = ({ navigation, route }: Props) => {
                 editable={!isLoading}
               />
               {/* Password requirement hint */}
-              <View style={styles.hintContainer}>
+              <View className="mt-2">
                 <Text
-                  style={[
-                    styles.hintText,
-                    isPasswordLongEnough ? styles.hintValid : styles.hintInvalid,
-                  ]}
+                  className={`text-sm ${isPasswordLongEnough ? 'text-green-500' : 'text-error'}`}
                 >
                   {isPasswordLongEnough ? 'v' : 'o'} {MIN_PASSWORD_LENGTH}자 이상
                 </Text>
@@ -130,10 +126,10 @@ const ResetPasswordScreen = ({ navigation, route }: Props) => {
             </View>
 
             {/* Confirm Password input */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>비밀번호 확인</Text>
+            <View className="mb-5">
+              <Text className="text-sm font-semibold text-gray-900 mb-2">비밀번호 확인</Text>
               <TextInput
-                style={styles.input}
+                className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
                 placeholder="비밀번호를 다시 입력하세요"
                 placeholderTextColor="#9CA3AF"
                 value={confirmPassword}
@@ -145,13 +141,8 @@ const ResetPasswordScreen = ({ navigation, route }: Props) => {
               />
               {/* Password match hint */}
               {confirmPassword.length > 0 && (
-                <View style={styles.hintContainer}>
-                  <Text
-                    style={[
-                      styles.hintText,
-                      doPasswordsMatch ? styles.hintValid : styles.hintInvalid,
-                    ]}
-                  >
+                <View className="mt-2">
+                  <Text className={`text-sm ${doPasswordsMatch ? 'text-green-500' : 'text-error'}`}>
                     {doPasswordsMatch
                       ? 'v 비밀번호가 일치합니다'
                       : 'o 비밀번호가 일치하지 않습니다'}
@@ -162,26 +153,24 @@ const ResetPasswordScreen = ({ navigation, route }: Props) => {
 
             {/* Reset Password button */}
             <TouchableOpacity
-              style={[
-                styles.button,
-                styles.primaryButton,
-                (!isFormValid || isLoading) && styles.buttonDisabled,
-              ]}
+              className={`h-14 rounded-xl items-center justify-center mt-2 bg-primary ${
+                !isFormValid || isLoading ? 'opacity-60' : ''
+              }`}
               onPress={handleResetPassword}
               disabled={!isFormValid || isLoading}
             >
               {isLoading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.primaryButtonText}>비밀번호 변경</Text>
+                <Text className="text-lg font-semibold text-white">비밀번호 변경</Text>
               )}
             </TouchableOpacity>
 
             {/* Back to Sign In link */}
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>비밀번호가 기억나셨나요? </Text>
+            <View className="flex-row justify-center items-center mt-6">
+              <Text className="text-sm text-gray-500">비밀번호가 기억나셨나요? </Text>
               <TouchableOpacity onPress={() => navigation.navigate('SignIn')} disabled={isLoading}>
-                <Text style={styles.link}>로그인</Text>
+                <Text className="text-sm font-semibold text-primary">로그인</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -190,107 +179,5 @@ const ResetPasswordScreen = ({ navigation, route }: Props) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-  header: {
-    marginBottom: 32,
-  },
-  backButton: {
-    marginBottom: 24,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: '#3B82F6',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  form: {
-    flex: 1,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    marginBottom: 8,
-  },
-  input: {
-    height: 52,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#1A1A1A',
-    backgroundColor: '#FFFFFF',
-  },
-  hintContainer: {
-    marginTop: 8,
-  },
-  hintText: {
-    fontSize: 14,
-  },
-  hintValid: {
-    color: '#10B981',
-  },
-  hintInvalid: {
-    color: '#EF4444',
-  },
-  button: {
-    height: 56,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-  },
-  primaryButton: {
-    backgroundColor: '#3B82F6',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  primaryButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  link: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#3B82F6',
-  },
-});
 
 export default ResetPasswordScreen;

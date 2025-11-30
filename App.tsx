@@ -7,10 +7,11 @@
  * - Role-based routing (Parent vs Child app)
  */
 
+import './global.css';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
-import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, Text } from 'react-native';
 import { User } from '@supabase/supabase-js';
 import * as Notifications from 'expo-notifications';
 import * as Linking from 'expo-linking';
@@ -296,9 +297,9 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View className="flex-1 justify-center items-center bg-white">
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text style={styles.loadingText}>PillCare 로딩 중...</Text>
+        <Text className="mt-4 text-base text-gray-900">PillCare 로딩 중...</Text>
       </View>
     );
   }
@@ -340,9 +341,9 @@ export default function App() {
           <AuthNavigator />
         ) : !userRole ? (
           // Logged in but no role assigned yet
-          <View style={styles.loadingContainer}>
+          <View className="flex-1 justify-center items-center bg-white">
             <ActivityIndicator size="large" color="#3B82F6" />
-            <Text style={styles.loadingText}>프로필 설정 중...</Text>
+            <Text className="mt-4 text-base text-gray-900">프로필 설정 중...</Text>
           </View>
         ) : userRole === 'parent' ? (
           // Parent app (elderly-optimized UI)
@@ -352,8 +353,8 @@ export default function App() {
           <ChildNavigator />
         ) : (
           // Unknown role
-          <View style={styles.container}>
-            <Text style={styles.errorText}>
+          <View className="flex-1 bg-white items-center justify-center p-6">
+            <Text className="text-lg text-error text-center leading-relaxed">
               알 수 없는 사용자 역할입니다.{'\n'}
               설정을 확인해주세요.
             </Text>
@@ -363,44 +364,3 @@ export default function App() {
     </SettingsProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#1A1A1A',
-  },
-  title: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
-  subtitle: {
-    fontSize: 20,
-    color: '#1A1A1A',
-    marginBottom: 8,
-  },
-  note: {
-    fontSize: 14,
-    color: '#9CA3AF',
-    marginTop: 16,
-  },
-  errorText: {
-    fontSize: 18,
-    color: '#EF4444',
-    textAlign: 'center',
-    lineHeight: 26,
-  },
-});

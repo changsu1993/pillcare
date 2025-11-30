@@ -19,7 +19,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
@@ -43,23 +42,6 @@ import {
   TimeSlotPattern,
   WeeklyTrend,
 } from '../../../../shared/types/database.types';
-
-// Color constants
-const COLORS = {
-  primary: '#3B82F6',
-  success: '#22C55E',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  background: '#F9FAFB',
-  white: '#FFFFFF',
-  gray100: '#F3F4F6',
-  gray200: '#E5E7EB',
-  gray300: '#D1D5DB',
-  gray400: '#9CA3AF',
-  gray500: '#6B7280',
-  gray700: '#374151',
-  gray900: '#1A1A1A',
-};
 
 interface WeeklyData {
   date: string;
@@ -164,9 +146,15 @@ const ReportsScreen = () => {
   };
 
   const getRateColor = (rate: number): string => {
-    if (rate >= 80) return COLORS.success;
-    if (rate >= 50) return COLORS.warning;
-    return COLORS.error;
+    if (rate >= 80) return 'text-success';
+    if (rate >= 50) return 'text-warning';
+    return 'text-error';
+  };
+
+  const getRateBgColor = (rate: number): string => {
+    if (rate >= 80) return 'bg-success';
+    if (rate >= 50) return 'bg-warning';
+    return 'bg-error';
   };
 
   const getDayName = (dateStr: string): string => {
@@ -203,28 +191,26 @@ const ReportsScreen = () => {
     return grid;
   };
 
-  const getCalendarDayStyle = (
-    day: number | null
-  ): { backgroundColor: string; textColor: string } => {
+  const getCalendarDayStyle = (day: number | null): { bgClass: string; textClass: string } => {
     if (!day) {
-      return { backgroundColor: 'transparent', textColor: COLORS.gray400 };
+      return { bgClass: 'bg-transparent', textClass: 'text-gray-400' };
     }
 
     const dateStr = `${selectedMonth.year}-${String(selectedMonth.month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayData = monthlyData[dateStr];
 
     if (!dayData || dayData.total === 0) {
-      return { backgroundColor: COLORS.gray100, textColor: COLORS.gray700 };
+      return { bgClass: 'bg-gray-100', textClass: 'text-gray-700' };
     }
 
     const rate = dayData.rate;
     if (rate >= 80) {
-      return { backgroundColor: COLORS.success + '30', textColor: COLORS.success };
+      return { bgClass: 'bg-success/30', textClass: 'text-success' };
     }
     if (rate >= 50) {
-      return { backgroundColor: COLORS.warning + '30', textColor: COLORS.warning };
+      return { bgClass: 'bg-warning/30', textClass: 'text-warning' };
     }
-    return { backgroundColor: COLORS.error + '30', textColor: COLORS.error };
+    return { bgClass: 'bg-error/30', textClass: 'text-error' };
   };
 
   // Helper to get time slot data safely
@@ -239,9 +225,9 @@ const ReportsScreen = () => {
   // Loading state
   if (isLoading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>불러오는 중...</Text>
+      <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+        <ActivityIndicator size="large" color="#3B82F6" />
+        <Text className="text-base text-gray-500 mt-3">불러오는 중...</Text>
       </View>
     );
   }
@@ -249,11 +235,11 @@ const ReportsScreen = () => {
   // Error state
   if (error) {
     return (
-      <View style={styles.centerContainer}>
-        <Ionicons name="alert-circle-outline" size={48} color={COLORS.error} />
-        <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={loadData}>
-          <Text style={styles.retryButtonText}>다시 시도</Text>
+      <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+        <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
+        <Text className="text-base text-error text-center mt-3 mb-4">{error}</Text>
+        <TouchableOpacity className="bg-primary px-6 py-3 rounded-lg" onPress={loadData}>
+          <Text className="text-base font-semibold text-white">다시 시도</Text>
         </TouchableOpacity>
       </View>
     );
@@ -262,11 +248,11 @@ const ReportsScreen = () => {
   // No parent connected
   if (!parentInfo) {
     return (
-      <SafeAreaView style={styles.container} edges={['bottom']}>
-        <View style={styles.emptyContainer}>
-          <Ionicons name="people-outline" size={64} color={COLORS.gray400} />
-          <Text style={styles.emptyTitle}>부모님을 연결해주세요</Text>
-          <Text style={styles.emptySubtitle}>
+      <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
+        <View className="flex-1 justify-center items-center p-6">
+          <Ionicons name="people-outline" size={64} color="#9CA3AF" />
+          <Text className="text-xl font-bold text-gray-900 mt-4 mb-2">부모님을 연결해주세요</Text>
+          <Text className="text-sm text-gray-500 text-center leading-5">
             부모님의 복약 리포트를 확인하려면{'\n'}먼저 가족 연결을 해주세요
           </Text>
         </View>
@@ -277,33 +263,27 @@ const ReportsScreen = () => {
   const calendarGrid = generateCalendarGrid();
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        className="flex-1"
+        contentContainerClassName="p-4 pb-8"
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={COLORS.primary}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3B82F6" />
         }
       >
         {/* Summary Cards */}
-        <View style={styles.summaryRow}>
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryLabel}>주간 복약률</Text>
-            <Text style={[styles.summaryValue, { color: getRateColor(weeklyRate) }]}>
-              {weeklyRate}%
-            </Text>
-            <Text style={styles.summaryPeriod}>최근 7일</Text>
+        <View className="flex-row gap-3 mb-4">
+          <View className="flex-1 bg-white rounded-xl p-4 items-center shadow-sm">
+            <Text className="text-sm text-gray-500 mb-2">주간 복약률</Text>
+            <Text className={`text-3xl font-bold ${getRateColor(weeklyRate)}`}>{weeklyRate}%</Text>
+            <Text className="text-xs text-gray-400 mt-1">최근 7일</Text>
           </View>
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryLabel}>월간 복약률</Text>
-            <Text style={[styles.summaryValue, { color: getRateColor(monthlyRate) }]}>
+          <View className="flex-1 bg-white rounded-xl p-4 items-center shadow-sm">
+            <Text className="text-sm text-gray-500 mb-2">월간 복약률</Text>
+            <Text className={`text-3xl font-bold ${getRateColor(monthlyRate)}`}>
               {monthlyRate}%
             </Text>
-            <Text style={styles.summaryPeriod}>최근 30일</Text>
+            <Text className="text-xs text-gray-400 mt-1">최근 30일</Text>
           </View>
         </View>
 
@@ -312,8 +292,8 @@ const ReportsScreen = () => {
 
         {/* Per-Medication Adherence Cards */}
         {medicationAdherences.length > 0 && (
-          <View style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>약별 복약률</Text>
+          <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
+            <Text className="text-base font-bold text-gray-900 mb-4">약별 복약률</Text>
             {medicationAdherences.map((med) => (
               <MedicationAdherenceCard
                 key={med.medication_id}
@@ -342,73 +322,63 @@ const ReportsScreen = () => {
         )}
 
         {/* Weekly Bar Chart */}
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>주간 복약률</Text>
-          <View style={styles.weeklyChart}>
+        <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
+          <Text className="text-base font-bold text-gray-900 mb-4">주간 복약률</Text>
+          <View className="flex-row justify-between h-40 pt-5">
             {weeklyData.map((day) => (
-              <View key={day.date} style={styles.barContainer}>
-                <View style={styles.barWrapper}>
+              <View key={day.date} className="flex-1 items-center">
+                <View className="flex-1 w-[60%] justify-end mb-2">
                   <View
-                    style={[
-                      styles.bar,
-                      {
-                        height: `${Math.max(day.rate, 5)}%`,
-                        backgroundColor: getRateColor(day.rate),
-                      },
-                    ]}
+                    className={`w-full rounded min-h-[4px] ${getRateBgColor(day.rate)}`}
+                    style={{ height: `${Math.max(day.rate, 5)}%` }}
                   />
                 </View>
-                <Text style={styles.barLabel}>{getDayName(day.date)}</Text>
-                <Text style={styles.barValue}>{day.rate}%</Text>
+                <Text className="text-xs text-gray-500 mb-0.5">{getDayName(day.date)}</Text>
+                <Text className="text-[10px] text-gray-400">{day.rate}%</Text>
               </View>
             ))}
           </View>
         </View>
 
         {/* Monthly Calendar */}
-        <View style={styles.sectionCard}>
-          <View style={styles.calendarHeader}>
-            <TouchableOpacity onPress={goToPreviousMonth} style={styles.calendarNav}>
-              <Ionicons name="chevron-back" size={24} color={COLORS.gray700} />
+        <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
+          <View className="flex-row justify-between items-center mb-4">
+            <TouchableOpacity onPress={goToPreviousMonth} className="p-1">
+              <Ionicons name="chevron-back" size={24} color="#374151" />
             </TouchableOpacity>
-            <Text style={styles.calendarTitle}>
+            <Text className="text-base font-bold text-gray-900">
               {selectedMonth.year}년 {selectedMonth.month}월
             </Text>
-            <TouchableOpacity onPress={goToNextMonth} style={styles.calendarNav}>
-              <Ionicons name="chevron-forward" size={24} color={COLORS.gray700} />
+            <TouchableOpacity onPress={goToNextMonth} className="p-1">
+              <Ionicons name="chevron-forward" size={24} color="#374151" />
             </TouchableOpacity>
           </View>
 
-          <View style={styles.calendarWeekHeader}>
+          <View className="flex-row mb-2">
             {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
               <Text
                 key={day}
-                style={[
-                  styles.calendarDayName,
-                  day === '일' && styles.calendarDaySunday,
-                  day === '토' && styles.calendarDaySaturday,
-                ]}
+                className={`flex-1 text-center text-xs font-semibold ${
+                  day === '일' ? 'text-error' : day === '토' ? 'text-primary' : 'text-gray-500'
+                }`}
               >
                 {day}
               </Text>
             ))}
           </View>
 
-          <View style={styles.calendarGrid}>
+          <View className="gap-1">
             {calendarGrid.map((week, weekIndex) => (
-              <View key={weekIndex} style={styles.calendarWeek}>
+              <View key={weekIndex} className="flex-row gap-1">
                 {week.map((day, dayIndex) => {
                   const dayStyle = getCalendarDayStyle(day);
                   return (
                     <View
                       key={`${weekIndex}-${dayIndex}`}
-                      style={[styles.calendarDay, { backgroundColor: dayStyle.backgroundColor }]}
+                      className={`flex-1 aspect-square rounded-lg justify-center items-center ${dayStyle.bgClass}`}
                     >
                       <Text
-                        style={[
-                          styles.calendarDayText,
-                          { color: day ? dayStyle.textColor : 'transparent' },
-                        ]}
+                        className={`text-sm font-medium ${day ? dayStyle.textClass : 'text-transparent'}`}
                       >
                         {day || ''}
                       </Text>
@@ -419,50 +389,50 @@ const ReportsScreen = () => {
             ))}
           </View>
 
-          <View style={styles.legend}>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: COLORS.success + '30' }]} />
-              <Text style={styles.legendText}>80% 이상</Text>
+          <View className="flex-row flex-wrap justify-center gap-3 mt-4 pt-4 border-t border-gray-200">
+            <View className="flex-row items-center gap-1">
+              <View className="w-3 h-3 rounded bg-success/30" />
+              <Text className="text-[11px] text-gray-500">80% 이상</Text>
             </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: COLORS.warning + '30' }]} />
-              <Text style={styles.legendText}>50-79%</Text>
+            <View className="flex-row items-center gap-1">
+              <View className="w-3 h-3 rounded bg-warning/30" />
+              <Text className="text-[11px] text-gray-500">50-79%</Text>
             </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: COLORS.error + '30' }]} />
-              <Text style={styles.legendText}>50% 미만</Text>
+            <View className="flex-row items-center gap-1">
+              <View className="w-3 h-3 rounded bg-error/30" />
+              <Text className="text-[11px] text-gray-500">50% 미만</Text>
             </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: COLORS.gray100 }]} />
-              <Text style={styles.legendText}>기록 없음</Text>
+            <View className="flex-row items-center gap-1">
+              <View className="w-3 h-3 rounded bg-gray-100" />
+              <Text className="text-[11px] text-gray-500">기록 없음</Text>
             </View>
           </View>
         </View>
 
         {/* Statistics Summary */}
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>이번 주 통계</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statItem}>
-              <Ionicons name="checkmark-circle" size={24} color={COLORS.success} />
-              <Text style={styles.statValue}>
+        <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
+          <Text className="text-base font-bold text-gray-900 mb-4">이번 주 통계</Text>
+          <View className="flex-row justify-around">
+            <View className="items-center">
+              <Ionicons name="checkmark-circle" size={24} color="#22C55E" />
+              <Text className="text-xl font-bold text-gray-900 mt-2 mb-1">
                 {weeklyData.reduce((sum, d) => sum + d.taken, 0)}회
               </Text>
-              <Text style={styles.statLabel}>복용 완료</Text>
+              <Text className="text-xs text-gray-500">복용 완료</Text>
             </View>
-            <View style={styles.statItem}>
-              <Ionicons name="close-circle" size={24} color={COLORS.error} />
-              <Text style={styles.statValue}>
+            <View className="items-center">
+              <Ionicons name="close-circle" size={24} color="#EF4444" />
+              <Text className="text-xl font-bold text-gray-900 mt-2 mb-1">
                 {weeklyData.reduce((sum, d) => sum + (d.total - d.taken), 0)}회
               </Text>
-              <Text style={styles.statLabel}>미복용</Text>
+              <Text className="text-xs text-gray-500">미복용</Text>
             </View>
-            <View style={styles.statItem}>
-              <Ionicons name="medical" size={24} color={COLORS.primary} />
-              <Text style={styles.statValue}>
+            <View className="items-center">
+              <Ionicons name="medical" size={24} color="#3B82F6" />
+              <Text className="text-xl font-bold text-gray-900 mt-2 mb-1">
                 {weeklyData.reduce((sum, d) => sum + d.total, 0)}회
               </Text>
-              <Text style={styles.statLabel}>총 예정</Text>
+              <Text className="text-xs text-gray-500">총 예정</Text>
             </View>
           </View>
         </View>
@@ -470,237 +440,5 @@ const ReportsScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.background,
-    padding: 24,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 32,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: COLORS.gray500,
-    marginTop: 12,
-  },
-  errorText: {
-    fontSize: 16,
-    color: COLORS.error,
-    textAlign: 'center',
-    marginTop: 12,
-    marginBottom: 16,
-  },
-  retryButton: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.white,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.gray900,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: COLORS.gray500,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
-  },
-  summaryCard: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  summaryLabel: {
-    fontSize: 14,
-    color: COLORS.gray500,
-    marginBottom: 8,
-  },
-  summaryValue: {
-    fontSize: 32,
-    fontWeight: '700',
-  },
-  summaryPeriod: {
-    fontSize: 12,
-    color: COLORS.gray400,
-    marginTop: 4,
-  },
-  sectionCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.gray900,
-    marginBottom: 16,
-  },
-  weeklyChart: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    height: 160,
-    paddingTop: 20,
-  },
-  barContainer: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  barWrapper: {
-    flex: 1,
-    width: '60%',
-    justifyContent: 'flex-end',
-    marginBottom: 8,
-  },
-  bar: {
-    width: '100%',
-    borderRadius: 4,
-    minHeight: 4,
-  },
-  barLabel: {
-    fontSize: 12,
-    color: COLORS.gray500,
-    marginBottom: 2,
-  },
-  barValue: {
-    fontSize: 10,
-    color: COLORS.gray400,
-  },
-  calendarHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  calendarNav: {
-    padding: 4,
-  },
-  calendarTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.gray900,
-  },
-  calendarWeekHeader: {
-    flexDirection: 'row',
-    marginBottom: 8,
-  },
-  calendarDayName: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.gray500,
-  },
-  calendarDaySunday: {
-    color: COLORS.error,
-  },
-  calendarDaySaturday: {
-    color: COLORS.primary,
-  },
-  calendarGrid: {
-    gap: 4,
-  },
-  calendarWeek: {
-    flexDirection: 'row',
-    gap: 4,
-  },
-  calendarDay: {
-    flex: 1,
-    aspectRatio: 1,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  calendarDayText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  legend: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 12,
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.gray200,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  legendDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 4,
-  },
-  legendText: {
-    fontSize: 11,
-    color: COLORS.gray500,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.gray900,
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: COLORS.gray500,
-  },
-});
 
 export default ReportsScreen;

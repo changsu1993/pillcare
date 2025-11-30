@@ -12,7 +12,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
@@ -146,22 +145,22 @@ const EnterCodeScreen = ({ navigation }: Props) => {
   // Success State
   if (isSuccess) {
     return (
-      <SafeAreaView style={styles.container} edges={['bottom']}>
-        <View style={styles.successContainer}>
-          <View style={styles.successIconContainer}>
+      <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
+        <View className="flex-1 justify-center items-center p-8">
+          <View className="mb-6">
             <Ionicons name="checkmark-circle" size={100} color="#22C55E" />
           </View>
-          <Text style={styles.successTitle}>연결 완료!</Text>
-          <Text style={styles.successMessage}>
+          <Text className="text-4xl font-bold text-success mb-4">연결 완료!</Text>
+          <Text className="text-lg text-gray-600 text-center leading-7 mb-10">
             {parentName}님과 가족으로 연결되었습니다.{'\n'}
             이제 부모님의 복약 현황을 확인할 수 있습니다.
           </Text>
           <TouchableOpacity
-            style={styles.successButton}
+            className="bg-success px-12 py-4 rounded-2xl shadow-lg"
             onPress={handleSuccessContinue}
             activeOpacity={0.8}
           >
-            <Text style={styles.successButtonText}>확인</Text>
+            <Text className="text-lg font-bold text-white">확인</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -169,37 +168,39 @@ const EnterCodeScreen = ({ navigation }: Props) => {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
       <KeyboardAvoidingView
-        style={styles.keyboardView}
+        className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.content}>
+        <View className="flex-1 p-6">
           {/* Header */}
-          <View style={styles.header}>
-            <View style={styles.iconContainer}>
+          <View className="items-center mb-10">
+            <View className="w-20 h-20 rounded-full bg-blue-100 justify-center items-center mb-5">
               <Ionicons name="people" size={48} color="#3B82F6" />
             </View>
-            <Text style={styles.title}>가족 연결</Text>
-            <Text style={styles.subtitle}>
+            <Text className="text-3xl font-bold text-gray-900 mb-3">가족 연결</Text>
+            <Text className="text-base text-gray-500 text-center leading-6">
               부모님이 알려주신 6자리 초대 코드를{'\n'}입력해 주세요
             </Text>
           </View>
 
           {/* Code Input */}
-          <View style={styles.codeContainer}>
-            <View style={styles.codeInputRow}>
+          <View className="mb-8">
+            <View className="flex-row justify-center gap-2">
               {code.map((digit, index) => (
                 <TextInput
                   key={index}
                   ref={(ref) => {
                     inputRefs.current[index] = ref;
                   }}
-                  style={[
-                    styles.codeInput,
-                    digit && styles.codeInputFilled,
-                    errorMessage && styles.codeInputError,
-                  ]}
+                  className={`w-12 h-16 border-2 rounded-xl bg-white text-3xl font-bold text-center text-gray-900 ${
+                    digit
+                      ? 'border-primary bg-blue-50'
+                      : errorMessage
+                        ? 'border-error bg-red-50'
+                        : 'border-gray-300'
+                  }`}
                   value={digit}
                   onChangeText={(value) => handleCodeChange(value, index)}
                   onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
@@ -213,31 +214,30 @@ const EnterCodeScreen = ({ navigation }: Props) => {
 
             {/* Error Message */}
             {errorMessage && (
-              <View style={styles.errorContainer}>
+              <View className="flex-row items-center justify-center mt-4 gap-2">
                 <Ionicons name="alert-circle" size={20} color="#EF4444" />
-                <Text style={styles.errorText}>{errorMessage}</Text>
+                <Text className="text-sm text-error text-center">{errorMessage}</Text>
               </View>
             )}
 
             {/* Clear Button */}
             {code.some((d) => d) && (
               <TouchableOpacity
-                style={styles.clearButton}
+                className="flex-row items-center justify-center mt-4 gap-1.5"
                 onPress={handleClearCode}
                 activeOpacity={0.7}
               >
                 <Ionicons name="close-circle" size={20} color="#6B7280" />
-                <Text style={styles.clearButtonText}>코드 지우기</Text>
+                <Text className="text-sm text-gray-500">코드 지우기</Text>
               </TouchableOpacity>
             )}
           </View>
 
           {/* Connect Button */}
           <TouchableOpacity
-            style={[
-              styles.connectButton,
-              code.join('').length !== CODE_LENGTH && styles.connectButtonDisabled,
-            ]}
+            className={`flex-row items-center justify-center h-14 rounded-2xl gap-2.5 shadow-md ${
+              code.join('').length !== CODE_LENGTH ? 'bg-gray-400' : 'bg-primary'
+            }`}
             onPress={() => handleConnect()}
             disabled={isLoading || code.join('').length !== CODE_LENGTH}
             activeOpacity={0.8}
@@ -247,15 +247,15 @@ const EnterCodeScreen = ({ navigation }: Props) => {
             ) : (
               <>
                 <Ionicons name="link" size={24} color="#FFFFFF" />
-                <Text style={styles.connectButtonText}>연결하기</Text>
+                <Text className="text-lg font-bold text-white">연결하기</Text>
               </>
             )}
           </TouchableOpacity>
 
           {/* Help Text */}
-          <View style={styles.helpContainer}>
+          <View className="flex-row items-start justify-center mt-6 gap-2">
             <Ionicons name="information-circle-outline" size={20} color="#9CA3AF" />
-            <Text style={styles.helpText}>
+            <Text className="text-xs text-gray-400 leading-5">
               코드는 24시간 동안만 유효합니다.{'\n'}
               부모님께 새 코드를 요청해 주세요.
             </Text>
@@ -265,169 +265,5 @@ const EnterCodeScreen = ({ navigation }: Props) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    padding: 24,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#DBEAFE',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 12,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#6B7280',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  codeContainer: {
-    marginBottom: 32,
-  },
-  codeInputRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  codeInput: {
-    width: 48,
-    height: 64,
-    borderWidth: 2,
-    borderColor: '#D1D5DB',
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    fontSize: 28,
-    fontWeight: '700',
-    textAlign: 'center',
-    color: '#1A1A1A',
-  },
-  codeInputFilled: {
-    borderColor: '#3B82F6',
-    backgroundColor: '#EFF6FF',
-  },
-  codeInputError: {
-    borderColor: '#EF4444',
-    backgroundColor: '#FEF2F2',
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 16,
-    gap: 8,
-  },
-  errorText: {
-    fontSize: 14,
-    color: '#EF4444',
-    textAlign: 'center',
-  },
-  clearButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 16,
-    gap: 6,
-  },
-  clearButtonText: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  connectButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#3B82F6',
-    height: 56,
-    borderRadius: 14,
-    gap: 10,
-    shadowColor: '#3B82F6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  connectButtonDisabled: {
-    backgroundColor: '#9CA3AF',
-    shadowOpacity: 0,
-  },
-  connectButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  helpContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-    marginTop: 24,
-    gap: 8,
-  },
-  helpText: {
-    fontSize: 13,
-    color: '#9CA3AF',
-    lineHeight: 20,
-  },
-  // Success State Styles
-  successContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-  successIconContainer: {
-    marginBottom: 24,
-  },
-  successTitle: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#22C55E',
-    marginBottom: 16,
-  },
-  successMessage: {
-    fontSize: 18,
-    color: '#4B5563',
-    textAlign: 'center',
-    lineHeight: 28,
-    marginBottom: 40,
-  },
-  successButton: {
-    backgroundColor: '#22C55E',
-    paddingHorizontal: 48,
-    paddingVertical: 16,
-    borderRadius: 14,
-    shadowColor: '#22C55E',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  successButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-});
 
 export default EnterCodeScreen;

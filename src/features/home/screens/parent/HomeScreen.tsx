@@ -15,7 +15,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
@@ -119,19 +118,22 @@ const ParentHomeScreen = ({ navigation }: Props) => {
 
   if (isLoading) {
     return (
-      <View style={styles.centerContainer}>
+      <View className="flex-1 justify-center items-center bg-gray-50 p-6">
         <ActivityIndicator size="large" color="#22C55E" />
-        <Text style={styles.loadingText}>불러오는 중...</Text>
+        <Text className="text-xl text-gray-900 mt-4">불러오는 중...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={loadTodayMedications}>
-          <Text style={styles.retryButtonText}>다시 시도</Text>
+      <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+        <Text className="text-xl text-error text-center mb-6">{error}</Text>
+        <TouchableOpacity
+          className="bg-blue-500 px-8 py-4 rounded-xl"
+          onPress={loadTodayMedications}
+        >
+          <Text className="text-xl font-semibold text-white">다시 시도</Text>
         </TouchableOpacity>
       </View>
     );
@@ -140,43 +142,48 @@ const ParentHomeScreen = ({ navigation }: Props) => {
   // Empty state (no medications scheduled)
   if (medications.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <SafeAreaView className="flex-1 bg-gray-50">
+        <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, gap: 16 }}>
           {/* 알림 권한 경고 (권한이 없을 때만 표시) */}
           {!hasNotificationPermission && (
-            <View style={styles.permissionWarning}>
-              <Text style={styles.permissionWarningText}>⚠️ 알림 권한이 필요합니다</Text>
-              <Text style={styles.permissionWarningSubtext}>
+            <View className="bg-yellow-100 rounded-xl p-5 mb-4 border-2 border-warning">
+              <Text className="text-xl font-bold text-yellow-900 mb-2 text-center">
+                ⚠️ 알림 권한이 필요합니다
+              </Text>
+              <Text className="text-base text-yellow-900 mb-4 text-center leading-5">
                 약 복용 알림을 받으려면 설정에서 권한을 허용해주세요.
               </Text>
               <TouchableOpacity
-                style={styles.permissionButton}
+                className="bg-warning px-6 py-3 rounded-lg self-center"
                 onPress={() => Linking.openSettings()}
               >
-                <Text style={styles.permissionButtonText}>설정으로 이동</Text>
+                <Text className="text-base font-semibold text-white">설정으로 이동</Text>
               </TouchableOpacity>
             </View>
           )}
 
           {/* 개발/테스트용 버튼 */}
-          <View style={styles.devContainer}>
-            <Text style={styles.devTitle}>개발자 도구</Text>
-            <View style={styles.devButtons}>
-              <TouchableOpacity style={styles.devButton} onPress={handleTestNotification}>
-                <Text style={styles.devButtonText}>테스트 알림</Text>
+          <View className="bg-gray-100 rounded-xl p-4 mb-4 border border-gray-300">
+            <Text className="text-sm font-semibold text-gray-600 mb-3">개발자 도구</Text>
+            <View className="flex-row gap-2">
+              <TouchableOpacity
+                className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
+                onPress={handleTestNotification}
+              >
+                <Text className="text-xs font-semibold text-white">테스트 알림</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.devButton}
+                className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
                 onPress={handleCheckScheduledNotifications}
               >
-                <Text style={styles.devButtonText}>예약된 알림 확인</Text>
+                <Text className="text-xs font-semibold text-white">예약된 알림 확인</Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyEmoji}>✓</Text>
-            <Text style={styles.emptyText}>
+          <View className="justify-center items-center py-16">
+            <Text className="text-8xl mb-6">✓</Text>
+            <Text className="text-3xl text-gray-600 text-center leading-10">
               오늘 드실 약이{'\n'}
               없습니다
             </Text>
@@ -184,13 +191,13 @@ const ParentHomeScreen = ({ navigation }: Props) => {
 
           {/* 약 추가하기 버튼 */}
           <TouchableOpacity
-            style={styles.addMedicationButton}
+            className="bg-success rounded-2xl py-6 px-8 items-center justify-center min-h-[72px] mt-4 shadow-lg"
             onPress={() => navigation.navigate('AddMedication')}
             accessibilityLabel="약 추가하기"
             accessibilityHint="탭하여 새로운 약을 등록합니다"
             accessibilityRole="button"
           >
-            <Text style={styles.addMedicationButtonText}>+ 약 추가하기</Text>
+            <Text className="text-3xl font-bold text-white">+ 약 추가하기</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
@@ -198,33 +205,41 @@ const ParentHomeScreen = ({ navigation }: Props) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, gap: 16 }}>
         {/* 알림 권한 경고 (권한이 없을 때만 표시) */}
         {!hasNotificationPermission && (
-          <View style={styles.permissionWarning}>
-            <Text style={styles.permissionWarningText}>⚠️ 알림 권한이 필요합니다</Text>
-            <Text style={styles.permissionWarningSubtext}>
+          <View className="bg-yellow-100 rounded-xl p-5 mb-4 border-2 border-warning">
+            <Text className="text-xl font-bold text-yellow-900 mb-2 text-center">
+              ⚠️ 알림 권한이 필요합니다
+            </Text>
+            <Text className="text-base text-yellow-900 mb-4 text-center leading-5">
               약 복용 알림을 받으려면 설정에서 권한을 허용해주세요.
             </Text>
             <TouchableOpacity
-              style={styles.permissionButton}
+              className="bg-warning px-6 py-3 rounded-lg self-center"
               onPress={() => Linking.openSettings()}
             >
-              <Text style={styles.permissionButtonText}>설정으로 이동</Text>
+              <Text className="text-base font-semibold text-white">설정으로 이동</Text>
             </TouchableOpacity>
           </View>
         )}
 
         {/* 개발/테스트용 버튼 */}
-        <View style={styles.devContainer}>
-          <Text style={styles.devTitle}>개발자 도구</Text>
-          <View style={styles.devButtons}>
-            <TouchableOpacity style={styles.devButton} onPress={handleTestNotification}>
-              <Text style={styles.devButtonText}>테스트 알림</Text>
+        <View className="bg-gray-100 rounded-xl p-4 mb-4 border border-gray-300">
+          <Text className="text-sm font-semibold text-gray-600 mb-3">개발자 도구</Text>
+          <View className="flex-row gap-2">
+            <TouchableOpacity
+              className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
+              onPress={handleTestNotification}
+            >
+              <Text className="text-xs font-semibold text-white">테스트 알림</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.devButton} onPress={handleCheckScheduledNotifications}>
-              <Text style={styles.devButtonText}>예약된 알림 확인</Text>
+            <TouchableOpacity
+              className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
+              onPress={handleCheckScheduledNotifications}
+            >
+              <Text className="text-xs font-semibold text-white">예약된 알림 확인</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -233,7 +248,9 @@ const ParentHomeScreen = ({ navigation }: Props) => {
         {medications.map((med) => (
           <TouchableOpacity
             key={med.id}
-            style={[styles.medicationCard, med.taken && styles.medicationCardTaken]}
+            className={`bg-white rounded-2xl p-6 border-[3px] shadow-sm ${
+              med.taken ? 'border-success opacity-60' : 'border-yellow-400'
+            }`}
             onPress={() =>
               navigation.navigate('MedicationDetail', { medicationId: med.medication_id })
             }
@@ -243,224 +260,38 @@ const ParentHomeScreen = ({ navigation }: Props) => {
             accessibilityRole="button"
           >
             {/* Medication name */}
-            <Text style={styles.medicationName}>{med.medication_name}</Text>
+            <Text className="text-3xl font-bold text-gray-900 mb-2">{med.medication_name}</Text>
 
             {/* Dosage */}
-            <Text style={styles.medicationDosage}>{med.dosage}</Text>
+            <Text className="text-2xl text-gray-600 mb-4">{med.dosage}</Text>
 
             {/* Status */}
-            <View style={styles.statusContainer}>
+            <View className="mb-3">
               {med.taken ? (
-                <Text style={styles.statusTaken}>복용 완료 ✓</Text>
+                <Text className="text-2xl font-semibold text-success">복용 완료 ✓</Text>
               ) : (
-                <Text style={styles.statusPending}>복용 대기 중</Text>
+                <Text className="text-2xl font-semibold text-warning">복용 대기 중</Text>
               )}
             </View>
 
             {/* Scheduled time */}
-            <Text style={styles.scheduledTime}>{med.scheduled_time}</Text>
+            <Text className="text-xl text-gray-400">{med.scheduled_time}</Text>
           </TouchableOpacity>
         ))}
 
         {/* 약 추가하기 버튼 */}
         <TouchableOpacity
-          style={styles.addMedicationButton}
+          className="bg-success rounded-2xl py-6 px-8 items-center justify-center min-h-[72px] mt-4 shadow-lg"
           onPress={() => navigation.navigate('AddMedication')}
           accessibilityLabel="약 추가하기"
           accessibilityHint="탭하여 새로운 약을 등록합니다"
           accessibilityRole="button"
         >
-          <Text style={styles.addMedicationButtonText}>+ 약 추가하기</Text>
+          <Text className="text-3xl font-bold text-white">+ 약 추가하기</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    padding: 24,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    gap: 16,
-  },
-  loadingText: {
-    fontSize: 20,
-    color: '#1A1A1A',
-    marginTop: 16,
-  },
-  errorText: {
-    fontSize: 20,
-    color: '#EF4444',
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  retryButton: {
-    backgroundColor: '#3B82F6',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 12,
-  },
-  retryButtonText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  emptyContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 60,
-  },
-  emptyEmoji: {
-    fontSize: 80,
-    marginBottom: 24,
-  },
-  emptyText: {
-    fontSize: 28,
-    color: '#6B7280',
-    textAlign: 'center',
-    lineHeight: 40,
-  },
-  medicationCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    borderWidth: 3,
-    borderColor: '#FCD34D', // Yellow for pending
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  medicationCardTaken: {
-    borderColor: '#22C55E', // Green for taken
-    opacity: 0.6,
-  },
-  medicationName: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 8,
-  },
-  medicationDosage: {
-    fontSize: 22,
-    color: '#6B7280',
-    marginBottom: 16,
-  },
-  statusContainer: {
-    marginBottom: 12,
-  },
-  statusTaken: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#22C55E',
-  },
-  statusPending: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#F59E0B',
-  },
-  scheduledTime: {
-    fontSize: 20,
-    color: '#9CA3AF',
-  },
-  permissionWarning: {
-    backgroundColor: '#FEF3C7',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 2,
-    borderColor: '#F59E0B',
-  },
-  permissionWarningText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#92400E',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  permissionWarningSubtext: {
-    fontSize: 16,
-    color: '#92400E',
-    marginBottom: 16,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  permissionButton: {
-    backgroundColor: '#F59E0B',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignSelf: 'center',
-  },
-  permissionButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  devContainer: {
-    backgroundColor: '#F3F4F6',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-  },
-  devTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#6B7280',
-    marginBottom: 12,
-  },
-  devButtons: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  devButton: {
-    flex: 1,
-    backgroundColor: '#3B82F6',
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  devButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  addMedicationButton: {
-    backgroundColor: '#22C55E',
-    borderRadius: 16,
-    paddingVertical: 24,
-    paddingHorizontal: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 72,
-    marginTop: 16,
-    shadowColor: '#22C55E',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  addMedicationButtonText: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-});
 
 export default ParentHomeScreen;

@@ -17,23 +17,8 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
-// Color constants
-const COLORS = {
-  primary: '#3B82F6',
-  success: '#22C55E',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  white: '#FFFFFF',
-  gray100: '#F3F4F6',
-  gray200: '#E5E7EB',
-  gray400: '#9CA3AF',
-  gray500: '#6B7280',
-  gray700: '#374151',
-  gray900: '#1A1A1A',
-};
 
 interface TimePeriodData {
   missed: number;
@@ -104,20 +89,29 @@ const TimePatternChart: React.FC<TimePatternChartProps> = ({ data, isLoading = f
   };
 
   /**
-   * Get bar color based on missed rate
+   * Get bar color class based on missed rate
    */
-  const getBarColor = (rate: number): string => {
-    if (rate >= 30) return COLORS.error;
-    if (rate >= 15) return COLORS.warning;
-    return COLORS.success;
+  const getBarColorClass = (rate: number): string => {
+    if (rate >= 30) return 'bg-error';
+    if (rate >= 15) return 'bg-warning';
+    return 'bg-success';
+  };
+
+  /**
+   * Get text color based on missed rate
+   */
+  const getTextColor = (rate: number): string => {
+    if (rate >= 30) return '#EF4444'; // error
+    if (rate >= 15) return '#F59E0B'; // warning
+    return '#22C55E'; // success
   };
 
   if (isLoading) {
     return (
-      <View style={styles.card}>
-        <Text style={styles.title}>시간대별 미복약 패턴</Text>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color={COLORS.primary} />
+      <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
+        <Text className="text-base font-bold text-gray-900">시간대별 미복약 패턴</Text>
+        <View className="h-40 justify-center items-center">
+          <ActivityIndicator size="small" color="#3B82F6" />
         </View>
       </View>
     );
@@ -125,59 +119,60 @@ const TimePatternChart: React.FC<TimePatternChartProps> = ({ data, isLoading = f
 
   return (
     <View
-      style={styles.card}
+      className="bg-white rounded-xl p-4 mb-4 shadow-sm"
       accessibilityRole="summary"
       accessibilityLabel="시간대별 미복약 패턴 차트"
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>시간대별 미복약 패턴</Text>
+      <View className="flex-row justify-between items-center mb-4">
+        <Text className="text-base font-bold text-gray-900">시간대별 미복약 패턴</Text>
         {mostMissedPeriod && (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>
+          <View className="px-2 py-1 rounded-md" style={{ backgroundColor: '#EF444420' }}>
+            <Text className="text-[11px] font-semibold text-error">
               {TIME_PERIODS.find((p) => p.key === mostMissedPeriod)?.label} 주의
             </Text>
           </View>
         )}
       </View>
 
-      <View style={styles.chartContainer}>
+      <View className="gap-3">
         {TIME_PERIODS.map((period) => {
           const periodData = data[period.key];
           const missedRate = calculateMissedRate(periodData);
           const barWidth = getBarWidth(periodData);
-          const barColor = getBarColor(missedRate);
+          const barColorClass = getBarColorClass(missedRate);
+          const textColor = getTextColor(missedRate);
           const isHighlighted = period.key === mostMissedPeriod;
 
           return (
             <View
               key={period.key}
-              style={[styles.barRow, isHighlighted && styles.barRowHighlighted]}
+              className={`flex-row items-center py-2 px-2 rounded-lg ${isHighlighted ? 'bg-gray-100' : ''}`}
               accessibilityLabel={`${period.label} 시간대, 미복약률 ${missedRate}%, ${periodData.total}회 중 ${periodData.missed}회 미복용`}
             >
               {/* Icon & Label */}
-              <View style={styles.labelSection}>
+              <View className="flex-row items-center gap-1.5" style={{ width: 70 }}>
                 <Ionicons name={period.icon as any} size={20} color={period.color} />
-                <Text style={styles.periodLabel}>{period.label}</Text>
+                <Text className="text-sm font-semibold text-gray-700">{period.label}</Text>
               </View>
 
               {/* Bar */}
-              <View style={styles.barSection}>
-                <View style={styles.barBackground}>
+              <View className="flex-1 flex-row items-center mx-2">
+                <View className="flex-1 h-5 bg-gray-200 rounded-full overflow-hidden mr-2">
                   <View
-                    style={[
-                      styles.barFill,
-                      {
-                        width: barWidth as any,
-                        backgroundColor: barColor,
-                      },
-                    ]}
+                    className={`h-full rounded-full ${barColorClass}`}
+                    style={{ width: barWidth as any, minWidth: 2 }}
                   />
                 </View>
-                <Text style={[styles.rateText, { color: barColor }]}>{missedRate}%</Text>
+                <Text
+                  className="text-sm font-bold"
+                  style={{ color: textColor, minWidth: 40, textAlign: 'right' }}
+                >
+                  {missedRate}%
+                </Text>
               </View>
 
               {/* Count */}
-              <Text style={styles.countText}>
+              <Text className="text-xs text-gray-500" style={{ minWidth: 40, textAlign: 'right' }}>
                 {periodData.missed}/{periodData.total}
               </Text>
             </View>
@@ -186,121 +181,12 @@ const TimePatternChart: React.FC<TimePatternChartProps> = ({ data, isLoading = f
       </View>
 
       {/* Footer Note */}
-      <View style={styles.footer}>
-        <Ionicons name="information-circle-outline" size={14} color={COLORS.gray400} />
-        <Text style={styles.footerText}>미복약 비율이 높은 시간대를 확인하세요</Text>
+      <View className="flex-row items-center gap-1 mt-3 pt-3 border-t border-gray-200">
+        <Ionicons name="information-circle-outline" size={14} color="#9CA3AF" />
+        <Text className="text-[11px] text-gray-500">미복약 비율이 높은 시간대를 확인하세요</Text>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.gray900,
-  },
-  badge: {
-    backgroundColor: COLORS.error + '20',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: COLORS.error,
-  },
-  loadingContainer: {
-    height: 160,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  chartContainer: {
-    gap: 12,
-  },
-  barRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-  },
-  barRowHighlighted: {
-    backgroundColor: COLORS.gray100,
-  },
-  labelSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: 70,
-    gap: 6,
-  },
-  periodLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.gray700,
-  },
-  barSection: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 8,
-  },
-  barBackground: {
-    flex: 1,
-    height: 20,
-    backgroundColor: COLORS.gray200,
-    borderRadius: 10,
-    overflow: 'hidden',
-    marginRight: 8,
-  },
-  barFill: {
-    height: '100%',
-    borderRadius: 10,
-    minWidth: 2,
-  },
-  rateText: {
-    fontSize: 14,
-    fontWeight: '700',
-    minWidth: 40,
-    textAlign: 'right',
-  },
-  countText: {
-    fontSize: 12,
-    color: COLORS.gray500,
-    minWidth: 40,
-    textAlign: 'right',
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.gray200,
-  },
-  footerText: {
-    fontSize: 11,
-    color: COLORS.gray500,
-  },
-});
 
 export default TimePatternChart;

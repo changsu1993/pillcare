@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthScreenProps } from '../../../shared/types/navigation.types';
 
@@ -14,115 +14,48 @@ type Props = AuthScreenProps<'Welcome'>;
 
 const WelcomeScreen = ({ navigation }: Props) => {
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+    <SafeAreaView className="flex-1 bg-white">
+      <View className="flex-1 items-center justify-center px-6">
         {/* Logo/Icon */}
-        <Text style={styles.logo}>💊</Text>
+        <Text className="text-[80px] mb-6">💊</Text>
 
         {/* App Name */}
-        <Text style={styles.title}>PillCare</Text>
+        <Text className="text-4xl font-bold text-gray-900 mb-3">PillCare</Text>
 
         {/* Tagline */}
-        <Text style={styles.subtitle}>
+        <Text className="text-lg text-gray-500 text-center leading-relaxed mb-12">
           부모님의 건강한 복약 습관,{'\n'}
           자녀가 함께 지킵니다
         </Text>
 
         {/* Feature highlights */}
-        <View style={styles.features}>
-          <Text style={styles.feature}>✓ 알림 놓치지 않는 큰 화면</Text>
-          <Text style={styles.feature}>✓ 음성으로 안내하는 복약 시간</Text>
-          <Text style={styles.feature}>✓ 자녀에게 실시간 알림</Text>
+        <View className="items-start mb-12">
+          <Text className="text-base text-gray-900 mb-3 leading-6">✓ 알림 놓치지 않는 큰 화면</Text>
+          <Text className="text-base text-gray-900 mb-3 leading-6">
+            ✓ 음성으로 안내하는 복약 시간
+          </Text>
+          <Text className="text-base text-gray-900 leading-6">✓ 자녀에게 실시간 알림</Text>
         </View>
 
         {/* Action buttons */}
-        <View style={styles.actions}>
+        <View className="w-full gap-3">
           <TouchableOpacity
-            style={[styles.button, styles.primaryButton]}
+            className="w-full h-14 rounded-xl items-center justify-center bg-primary"
             onPress={() => navigation.navigate('SignUp')}
           >
-            <Text style={styles.primaryButtonText}>시작하기</Text>
+            <Text className="text-lg font-semibold text-white">시작하기</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
+            className="w-full h-14 rounded-xl items-center justify-center bg-white border-2 border-gray-200"
             onPress={() => navigation.navigate('SignIn')}
           >
-            <Text style={styles.secondaryButtonText}>로그인</Text>
+            <Text className="text-lg font-semibold text-gray-900">로그인</Text>
           </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  content: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  logo: {
-    fontSize: 80,
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 12,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: '#6B7280',
-    textAlign: 'center',
-    lineHeight: 26,
-    marginBottom: 48,
-  },
-  features: {
-    alignItems: 'flex-start',
-    marginBottom: 48,
-  },
-  feature: {
-    fontSize: 16,
-    color: '#1A1A1A',
-    marginBottom: 12,
-    lineHeight: 24,
-  },
-  actions: {
-    width: '100%',
-    gap: 12,
-  },
-  button: {
-    width: '100%',
-    height: 56,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  primaryButton: {
-    backgroundColor: '#3B82F6',
-  },
-  primaryButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  secondaryButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-  },
-  secondaryButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1A1A1A',
-  },
-});
 
 export default WelcomeScreen;

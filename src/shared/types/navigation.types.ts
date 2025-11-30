@@ -63,6 +63,7 @@ export type ParentScreenProps<T extends keyof ParentStackParamList> = StackScree
 export type ChildTabParamList = {
   HomeTab: undefined;
   MedicationsTab: undefined;
+  AppointmentsTab: undefined;
   ReportsTab: undefined;
   SettingsTab: undefined;
 };
@@ -77,6 +78,11 @@ export type ChildStackParamList = {
   Reports: undefined;
   Settings: undefined;
   EnterCode: undefined;
+  // Appointments
+  AppointmentList: undefined;
+  AppointmentDetail: { appointmentId: string };
+  AddAppointment: { parentId: string };
+  EditAppointment: { appointmentId: string };
 };
 
 export type ChildTabScreenProps<T extends keyof ChildTabParamList> = BottomTabScreenProps<

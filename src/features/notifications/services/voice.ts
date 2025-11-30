@@ -13,11 +13,12 @@
  */
 
 import * as Speech from 'expo-speech';
+import { getVoiceSpeed } from '../../settings/services/settings';
 
 // Voice configuration optimized for elderly users
 const VOICE_CONFIG: Speech.SpeechOptions = {
   language: 'ko-KR',
-  rate: 0.85, // Slower for elderly users (default is 1.0)
+  rate: 0.85, // Default slower for elderly users (will be overridden by settings)
   pitch: 1.0,
 };
 
@@ -38,9 +39,13 @@ export const speak = async (
       await Speech.stop();
     }
 
+    // Get current voice speed from settings
+    const speed = await getVoiceSpeed();
+
     // Speak with merged options
     Speech.speak(text, {
       ...VOICE_CONFIG,
+      rate: speed, // Use speed from settings
       ...options,
     });
   } catch (error) {

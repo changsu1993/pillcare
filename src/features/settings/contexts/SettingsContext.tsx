@@ -25,7 +25,13 @@ import React, {
   useCallback,
   ReactNode,
 } from 'react';
-import { AppSettings, DEFAULT_SETTINGS, getSettings, saveSettings } from '../services/settings';
+import {
+  AppSettings,
+  DEFAULT_SETTINGS,
+  getSettings,
+  saveSettings,
+  VoiceSpeed,
+} from '../services/settings';
 
 /**
  * Settings context value type
@@ -43,6 +49,10 @@ interface SettingsContextValue {
   isVoiceEnabled: boolean;
   /** Check if vibration is enabled */
   isVibrationEnabled: boolean;
+  /** Current voice speed */
+  voiceSpeed: VoiceSpeed;
+  /** Update voice speed */
+  updateVoiceSpeed: (speed: VoiceSpeed) => Promise<void>;
 }
 
 // Create context with undefined initial value
@@ -91,6 +101,13 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     await loadSettings();
   }, []);
 
+  const updateVoiceSpeed = useCallback(
+    async (speed: VoiceSpeed) => {
+      await updateSettings({ voiceSpeed: speed });
+    },
+    [updateSettings]
+  );
+
   const value: SettingsContextValue = {
     settings,
     isLoading,
@@ -98,6 +115,8 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     reloadSettings,
     isVoiceEnabled: settings.voiceGuidanceEnabled,
     isVibrationEnabled: settings.vibrationEnabled,
+    voiceSpeed: settings.voiceSpeed,
+    updateVoiceSpeed,
   };
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
@@ -135,9 +154,19 @@ export const useVibrationEnabled = (): boolean => {
   return isVibrationEnabled;
 };
 
+/**
+ * Hook to get current voice speed
+ * Convenience hook for common use case
+ */
+export const useVoiceSpeed = (): VoiceSpeed => {
+  const { voiceSpeed } = useSettings();
+  return voiceSpeed;
+};
+
 export default {
   SettingsProvider,
   useSettings,
   useVoiceEnabled,
   useVibrationEnabled,
+  useVoiceSpeed,
 };

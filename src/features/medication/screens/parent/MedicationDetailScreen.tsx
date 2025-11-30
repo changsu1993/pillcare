@@ -11,15 +11,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ParentScreenProps } from '../../../../shared/types/navigation.types';
 import {
@@ -93,33 +85,38 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
 
   if (isLoading) {
     return (
-      <View style={styles.centerContainer}>
+      <View className="flex-1 bg-gray-50 justify-center items-center p-6">
         <ActivityIndicator size="large" color="#22C55E" />
-        <Text style={styles.loadingText}>불러오는 중...</Text>
+        <Text className="text-xl text-gray-900 mt-4">불러오는 중...</Text>
       </View>
     );
   }
 
   if (error || !medication) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>{error || '약을 찾을 수 없습니다'}</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.backButtonText}>뒤로</Text>
+      <View className="flex-1 bg-gray-50 justify-center items-center p-6">
+        <Text className="text-2xl text-error text-center mb-6">
+          {error || '약을 찾을 수 없습니다'}
+        </Text>
+        <TouchableOpacity
+          className="bg-blue-500 px-8 py-4 rounded-xl"
+          onPress={() => navigation.goBack()}
+        >
+          <Text className="text-xl font-semibold text-white text-center">뒤로</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <ScrollView className="flex-1" contentContainerStyle={{ padding: 24, paddingBottom: 100 }}>
         {/* Medication icon */}
-        <Text style={styles.icon}>💊</Text>
+        <Text className="text-6xl text-center mb-4">💊</Text>
 
         {/* Medication name */}
         <Text
-          style={styles.medicationName}
+          className="text-4xl font-bold text-gray-900 text-center mb-6"
           accessibilityLabel={`약 이름: ${medication.name}`}
           accessibilityRole="header"
         >
@@ -127,27 +124,27 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
         </Text>
 
         {/* Dosage */}
-        <View style={styles.infoCard}>
-          <Text style={styles.infoLabel}>복용량</Text>
-          <Text style={styles.infoValue}>{medication.dosage}</Text>
+        <View className="bg-white p-6 rounded-2xl mb-4 border-2 border-gray-200">
+          <Text className="text-xl font-semibold text-gray-600 mb-2">복용량</Text>
+          <Text className="text-2xl font-semibold text-gray-900">{medication.dosage}</Text>
         </View>
 
         {/* Reminder times */}
-        <View style={styles.infoCard}>
-          <Text style={styles.infoLabel}>복용 시간</Text>
-          <View style={styles.timeBadgesContainer}>
+        <View className="bg-white p-6 rounded-2xl mb-4 border-2 border-gray-200">
+          <Text className="text-xl font-semibold text-gray-600 mb-2">복용 시간</Text>
+          <View className="flex-row flex-wrap gap-3">
             {medication.reminder_times.map((time, index) => (
-              <View key={index} style={styles.timeBadge}>
-                <Text style={styles.timeBadgeText}>{time}</Text>
+              <View key={index} className="bg-blue-100 px-5 py-3 rounded-xl">
+                <Text className="text-2xl font-semibold text-blue-900">{time}</Text>
               </View>
             ))}
           </View>
         </View>
 
         {/* Duration */}
-        <View style={styles.infoCard}>
-          <Text style={styles.infoLabel}>복용 기간</Text>
-          <Text style={styles.infoValue}>
+        <View className="bg-white p-6 rounded-2xl mb-4 border-2 border-gray-200">
+          <Text className="text-xl font-semibold text-gray-600 mb-2">복용 기간</Text>
+          <Text className="text-2xl font-semibold text-gray-900">
             {new Date(medication.start_date).toLocaleDateString('ko-KR')}
             {medication.end_date && (
               <Text> ~ {new Date(medication.end_date).toLocaleDateString('ko-KR')}</Text>
@@ -157,16 +154,16 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
 
         {/* Notes */}
         {medication.notes && (
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>메모</Text>
-            <Text style={styles.infoValue}>{medication.notes}</Text>
+          <View className="bg-white p-6 rounded-2xl mb-4 border-2 border-gray-200">
+            <Text className="text-xl font-semibold text-gray-600 mb-2">메모</Text>
+            <Text className="text-2xl font-semibold text-gray-900">{medication.notes}</Text>
           </View>
         )}
 
         {/* 7-day history */}
-        <View style={styles.historyCard}>
-          <Text style={styles.historyTitle}>최근 7일 복약 이력</Text>
-          <View style={styles.historyGrid}>
+        <View className="bg-white p-6 rounded-2xl mt-2 border-2 border-gray-200">
+          <Text className="text-2xl font-bold text-gray-900 mb-4">최근 7일 복약 이력</Text>
+          <View className="flex-row justify-between flex-wrap">
             {Array.from({ length: 7 }).map((_, index) => {
               const date = new Date();
               date.setDate(date.getDate() - (6 - index));
@@ -186,12 +183,12 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
               const isPending = dayLogs.length === 0 && date <= new Date();
 
               return (
-                <View key={index} style={styles.historyDay}>
-                  <Text style={styles.historyDate}>{dateStr}</Text>
-                  <View style={styles.historyStatus}>
-                    {allTaken && <Text style={styles.statusTaken}>✓</Text>}
-                    {someMissed && <Text style={styles.statusMissed}>✗</Text>}
-                    {isPending && <Text style={styles.statusPending}>○</Text>}
+                <View key={index} className="items-center w-[14%]">
+                  <Text className="text-sm text-gray-600 mb-2">{dateStr}</Text>
+                  <View className="w-10 h-10 justify-center items-center">
+                    {allTaken && <Text className="text-3xl text-success">✓</Text>}
+                    {someMissed && <Text className="text-3xl text-error">✗</Text>}
+                    {isPending && <Text className="text-3xl text-gray-400">○</Text>}
                   </View>
                 </View>
               );
@@ -201,244 +198,39 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
       </ScrollView>
 
       {/* Action buttons */}
-      <View style={styles.bottomButtonContainer}>
-        <View style={styles.buttonRow}>
+      <View className="absolute bottom-0 left-0 right-0 bg-gray-50 p-6 border-t border-gray-200">
+        <View className="flex-row gap-3">
           <TouchableOpacity
-            style={styles.backButtonLarge}
+            className="flex-1 bg-blue-500 h-[60px] justify-center items-center rounded-2xl shadow-sm"
             onPress={() => navigation.goBack()}
             activeOpacity={0.7}
             accessibilityLabel="뒤로 가기"
             accessibilityRole="button"
           >
-            <Text style={styles.backButtonLargeText}>뒤로</Text>
+            <Text className="text-2xl font-bold text-white">뒤로</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.editButton}
+            className="flex-1 bg-success h-[60px] justify-center items-center rounded-2xl shadow-sm"
             onPress={() => navigation.navigate('EditMedication', { medicationId })}
             activeOpacity={0.7}
             accessibilityLabel="약 수정"
             accessibilityRole="button"
           >
-            <Text style={styles.editButtonText}>수정</Text>
+            <Text className="text-2xl font-bold text-white">수정</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.deleteButton}
+            className="flex-1 bg-error h-[60px] justify-center items-center rounded-2xl shadow-sm"
             onPress={handleDelete}
             activeOpacity={0.7}
             accessibilityLabel="약 삭제"
             accessibilityRole="button"
           >
-            <Text style={styles.deleteButtonText}>삭제</Text>
+            <Text className="text-2xl font-bold text-white">삭제</Text>
           </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  centerContainer: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 24,
-    paddingBottom: 100, // Space for bottom button
-  },
-  loadingText: {
-    fontSize: 20,
-    color: '#1A1A1A',
-    marginTop: 16,
-  },
-  errorText: {
-    fontSize: 24,
-    color: '#EF4444',
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  icon: {
-    fontSize: 64,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  medicationName: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  infoCard: {
-    backgroundColor: '#FFFFFF',
-    padding: 24,
-    borderRadius: 16,
-    marginBottom: 16,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-  },
-  infoLabel: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#6B7280',
-    marginBottom: 8,
-  },
-  infoValue: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#1A1A1A',
-  },
-  timeBadgesContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  timeBadge: {
-    backgroundColor: '#DBEAFE',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  timeBadgeText: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: '#1E40AF',
-  },
-  historyCard: {
-    backgroundColor: '#FFFFFF',
-    padding: 24,
-    borderRadius: 16,
-    marginTop: 8,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-  },
-  historyTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 16,
-  },
-  historyGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-  },
-  historyDay: {
-    alignItems: 'center',
-    width: '14%',
-  },
-  historyDate: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginBottom: 8,
-  },
-  historyStatus: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  statusTaken: {
-    fontSize: 28,
-    color: '#22C55E',
-  },
-  statusMissed: {
-    fontSize: 28,
-    color: '#EF4444',
-  },
-  statusPending: {
-    fontSize: 28,
-    color: '#9CA3AF',
-  },
-  bottomButtonContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#F9FAFB',
-    padding: 24,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-  },
-  backButton: {
-    backgroundColor: '#3B82F6',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 12,
-  },
-  backButtonText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    textAlign: 'center',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  backButtonLarge: {
-    flex: 1,
-    backgroundColor: '#3B82F6',
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  backButtonLargeText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  editButton: {
-    flex: 1,
-    backgroundColor: '#22C55E',
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  editButtonText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  deleteButton: {
-    flex: 1,
-    backgroundColor: '#EF4444',
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  deleteButtonText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-});
 
 export default MedicationDetailScreen;

@@ -15,7 +15,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
@@ -35,23 +34,6 @@ import {
 } from '../../../../shared/services/api';
 import { User, Medication } from '../../../../shared/types/database.types';
 import { ChildStackParamList } from '../../../../shared/types/navigation.types';
-
-// Color constants
-const COLORS = {
-  primary: '#3B82F6',
-  success: '#22C55E',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  background: '#F9FAFB',
-  white: '#FFFFFF',
-  gray100: '#F3F4F6',
-  gray200: '#E5E7EB',
-  gray300: '#D1D5DB',
-  gray400: '#9CA3AF',
-  gray500: '#6B7280',
-  gray700: '#374151',
-  gray900: '#1A1A1A',
-};
 
 type NavigationProp = NativeStackNavigationProp<ChildStackParamList>;
 
@@ -176,9 +158,9 @@ const MedicationManageScreen = () => {
   // Loading state
   if (isLoading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>불러오는 중...</Text>
+      <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+        <ActivityIndicator size="large" color="#3B82F6" />
+        <Text className="text-base text-gray-500 mt-3">불러오는 중...</Text>
       </View>
     );
   }
@@ -186,11 +168,11 @@ const MedicationManageScreen = () => {
   // Error state
   if (error) {
     return (
-      <View style={styles.centerContainer}>
-        <Ionicons name="alert-circle-outline" size={48} color={COLORS.error} />
-        <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={loadData}>
-          <Text style={styles.retryButtonText}>다시 시도</Text>
+      <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+        <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
+        <Text className="text-base text-error text-center mt-3 mb-4">{error}</Text>
+        <TouchableOpacity className="bg-primary px-6 py-3 rounded-lg" onPress={loadData}>
+          <Text className="text-base font-semibold text-white">다시 시도</Text>
         </TouchableOpacity>
       </View>
     );
@@ -199,11 +181,11 @@ const MedicationManageScreen = () => {
   // No parent connected
   if (!parentInfo) {
     return (
-      <SafeAreaView style={styles.container} edges={['bottom']}>
-        <View style={styles.emptyContainer}>
-          <Ionicons name="people-outline" size={64} color={COLORS.gray400} />
-          <Text style={styles.emptyTitle}>부모님을 연결해주세요</Text>
-          <Text style={styles.emptySubtitle}>
+      <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
+        <View className="flex-1 justify-center items-center p-6">
+          <Ionicons name="people-outline" size={64} color="#9CA3AF" />
+          <Text className="text-xl font-bold text-gray-900 mt-4 mb-2">부모님을 연결해주세요</Text>
+          <Text className="text-sm text-gray-500 text-center leading-5">
             부모님의 약을 관리하려면{'\n'}먼저 가족 연결을 해주세요
           </Text>
         </View>
@@ -212,67 +194,69 @@ const MedicationManageScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        className="flex-1"
+        contentContainerClassName="p-4 pb-20"
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={COLORS.primary}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3B82F6" />
         }
       >
         {/* Header Info */}
-        <View style={styles.headerCard}>
-          <Text style={styles.headerTitle}>{parentInfo.name}님의 약</Text>
-          <Text style={styles.headerSubtitle}>
+        <View className="bg-white rounded-xl p-4 mb-4">
+          <Text className="text-lg font-bold text-gray-900 mb-1">{parentInfo.name}님의 약</Text>
+          <Text className="text-sm text-gray-500">
             총 {medications.length}개의 약이 등록되어 있습니다
           </Text>
         </View>
 
         {/* Medication List */}
         {medications.length === 0 ? (
-          <View style={styles.emptyMedicationsCard}>
-            <Ionicons name="medical-outline" size={48} color={COLORS.gray400} />
-            <Text style={styles.emptyMedicationsTitle}>등록된 약이 없습니다</Text>
-            <Text style={styles.emptyMedicationsText}>부모님이 드시는 약을 등록해주세요</Text>
+          <View className="bg-white rounded-xl p-10 items-center">
+            <Ionicons name="medical-outline" size={48} color="#9CA3AF" />
+            <Text className="text-base font-semibold text-gray-900 mt-4 mb-2">
+              등록된 약이 없습니다
+            </Text>
+            <Text className="text-sm text-gray-500 text-center">
+              부모님이 드시는 약을 등록해주세요
+            </Text>
           </View>
         ) : (
-          <View style={styles.medicationList}>
+          <View className="gap-3">
             {medications.map((medication) => (
-              <View key={medication.id} style={styles.medicationCard}>
+              <View key={medication.id} className="bg-white rounded-xl p-4 shadow-sm">
                 {/* Header with name and toggle */}
-                <View style={styles.medicationHeader}>
-                  <View style={styles.medicationInfo}>
-                    <Text style={styles.medicationName}>{medication.name}</Text>
-                    <Text style={styles.medicationDosage}>{medication.dosage}</Text>
+                <View className="flex-row justify-between items-start mb-3">
+                  <View className="flex-1 mr-3">
+                    <Text className="text-lg font-bold text-gray-900 mb-1">{medication.name}</Text>
+                    <Text className="text-sm text-gray-500">{medication.dosage}</Text>
                   </View>
                   <Switch
                     value={medication.active}
                     onValueChange={(value) => handleToggleActive(medication, value)}
-                    trackColor={{ false: COLORS.gray300, true: COLORS.success + '60' }}
-                    thumbColor={medication.active ? COLORS.success : COLORS.gray400}
+                    trackColor={{ false: '#D1D5DB', true: '#22C55E99' }}
+                    thumbColor={medication.active ? '#22C55E' : '#9CA3AF'}
                   />
                 </View>
 
                 {/* Details */}
-                <View style={styles.medicationDetails}>
-                  <View style={styles.detailRow}>
-                    <Ionicons name="repeat-outline" size={16} color={COLORS.gray500} />
-                    <Text style={styles.detailText}>{formatFrequency(medication.frequency)}</Text>
+                <View className="bg-gray-100 rounded-lg p-3 gap-2 mb-3">
+                  <View className="flex-row items-center gap-2">
+                    <Ionicons name="repeat-outline" size={16} color="#6B7280" />
+                    <Text className="text-sm text-gray-700 flex-1">
+                      {formatFrequency(medication.frequency)}
+                    </Text>
                   </View>
-                  <View style={styles.detailRow}>
-                    <Ionicons name="time-outline" size={16} color={COLORS.gray500} />
-                    <Text style={styles.detailText}>
+                  <View className="flex-row items-center gap-2">
+                    <Ionicons name="time-outline" size={16} color="#6B7280" />
+                    <Text className="text-sm text-gray-700 flex-1">
                       {formatReminderTimes(medication.reminder_times)}
                     </Text>
                   </View>
                   {medication.notes && (
-                    <View style={styles.detailRow}>
-                      <Ionicons name="document-text-outline" size={16} color={COLORS.gray500} />
-                      <Text style={styles.detailText} numberOfLines={1}>
+                    <View className="flex-row items-center gap-2">
+                      <Ionicons name="document-text-outline" size={16} color="#6B7280" />
+                      <Text className="text-sm text-gray-700 flex-1" numberOfLines={1}>
                         {medication.notes}
                       </Text>
                     </View>
@@ -280,18 +264,16 @@ const MedicationManageScreen = () => {
                 </View>
 
                 {/* Status badge */}
-                <View style={styles.statusRow}>
+                <View className="mb-3">
                   <View
-                    style={[
-                      styles.statusBadge,
-                      medication.active ? styles.statusActive : styles.statusInactive,
-                    ]}
+                    className={`self-start px-2.5 py-1 rounded ${
+                      medication.active ? 'bg-success/20' : 'bg-gray-200'
+                    }`}
                   >
                     <Text
-                      style={[
-                        styles.statusText,
-                        medication.active ? styles.statusTextActive : styles.statusTextInactive,
-                      ]}
+                      className={`text-xs font-semibold ${
+                        medication.active ? 'text-success' : 'text-gray-500'
+                      }`}
                     >
                       {medication.active ? '알림 활성화' : '알림 비활성화'}
                     </Text>
@@ -299,22 +281,20 @@ const MedicationManageScreen = () => {
                 </View>
 
                 {/* Action buttons */}
-                <View style={styles.actionRow}>
+                <View className="flex-row gap-3 border-t border-gray-200 pt-3">
                   <TouchableOpacity
-                    style={styles.actionButton}
+                    className="flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-lg bg-primary/10"
                     onPress={() => handleEditMedication(medication.id)}
                   >
-                    <Ionicons name="create-outline" size={18} color={COLORS.primary} />
-                    <Text style={styles.actionButtonText}>수정</Text>
+                    <Ionicons name="create-outline" size={18} color="#3B82F6" />
+                    <Text className="text-sm font-semibold text-primary">수정</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.actionButton, styles.actionButtonDanger]}
+                    className="flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-lg bg-error/10"
                     onPress={() => handleDeleteMedication(medication)}
                   >
-                    <Ionicons name="trash-outline" size={18} color={COLORS.error} />
-                    <Text style={[styles.actionButtonText, styles.actionButtonTextDanger]}>
-                      삭제
-                    </Text>
+                    <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                    <Text className="text-sm font-semibold text-error">삭제</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -324,227 +304,15 @@ const MedicationManageScreen = () => {
       </ScrollView>
 
       {/* Add Medication FAB */}
-      <TouchableOpacity style={styles.fab} onPress={handleAddMedication} activeOpacity={0.8}>
-        <Ionicons name="add" size={28} color={COLORS.white} />
+      <TouchableOpacity
+        className="absolute bottom-4 right-4 w-14 h-14 rounded-full bg-primary justify-center items-center shadow-lg"
+        onPress={handleAddMedication}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="add" size={28} color="#FFFFFF" />
       </TouchableOpacity>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.background,
-    padding: 24,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 80,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: COLORS.gray500,
-    marginTop: 12,
-  },
-  errorText: {
-    fontSize: 16,
-    color: COLORS.error,
-    textAlign: 'center',
-    marginTop: 12,
-    marginBottom: 16,
-  },
-  retryButton: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.white,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.gray900,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: COLORS.gray500,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  headerCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.gray900,
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: COLORS.gray500,
-  },
-  emptyMedicationsCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    padding: 40,
-    alignItems: 'center',
-  },
-  emptyMedicationsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.gray900,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyMedicationsText: {
-    fontSize: 14,
-    color: COLORS.gray500,
-    textAlign: 'center',
-  },
-  medicationList: {
-    gap: 12,
-  },
-  medicationCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  medicationHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  medicationInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  medicationName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.gray900,
-    marginBottom: 4,
-  },
-  medicationDosage: {
-    fontSize: 14,
-    color: COLORS.gray500,
-  },
-  medicationDetails: {
-    backgroundColor: COLORS.gray100,
-    borderRadius: 8,
-    padding: 12,
-    gap: 8,
-    marginBottom: 12,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  detailText: {
-    fontSize: 14,
-    color: COLORS.gray700,
-    flex: 1,
-  },
-  statusRow: {
-    marginBottom: 12,
-  },
-  statusBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  statusActive: {
-    backgroundColor: COLORS.success + '20',
-  },
-  statusInactive: {
-    backgroundColor: COLORS.gray200,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  statusTextActive: {
-    color: COLORS.success,
-  },
-  statusTextInactive: {
-    color: COLORS.gray500,
-  },
-  actionRow: {
-    flexDirection: 'row',
-    gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.gray200,
-    paddingTop: 12,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: COLORS.primary + '10',
-  },
-  actionButtonDanger: {
-    backgroundColor: COLORS.error + '10',
-  },
-  actionButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.primary,
-  },
-  actionButtonTextDanger: {
-    color: COLORS.error,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 16,
-    right: 16,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-});
 
 export default MedicationManageScreen;

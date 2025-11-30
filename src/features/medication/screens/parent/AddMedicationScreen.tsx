@@ -15,7 +15,6 @@ import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TextInput,
   TouchableOpacity,
@@ -276,23 +275,23 @@ const AddMedicationScreen = ({ navigation }: Props) => {
   const timesPerDay = FREQUENCY_OPTIONS.find((opt) => opt.value === frequency)?.timesPerDay || 0;
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
       <KeyboardAvoidingView
-        style={styles.keyboardAvoidingView}
+        className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+          className="flex-1"
+          contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
           keyboardShouldPersistTaps="handled"
         >
           {/* 약 이름 */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              약 이름 <Text style={styles.required}>*</Text>
+          <View className="mb-6">
+            <Text className="text-2xl font-bold text-gray-900 mb-3">
+              약 이름 <Text className="text-error">*</Text>
             </Text>
             <TextInput
-              style={styles.textInput}
+              className="bg-white border-2 border-gray-300 rounded-xl px-5 py-4 text-2xl text-gray-900 min-h-[64px]"
               value={name}
               onChangeText={setName}
               placeholder="예: 혈압약, 당뇨약"
@@ -304,12 +303,12 @@ const AddMedicationScreen = ({ navigation }: Props) => {
           </View>
 
           {/* 복용량 */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              복용량 <Text style={styles.required}>*</Text>
+          <View className="mb-6">
+            <Text className="text-2xl font-bold text-gray-900 mb-3">
+              복용량 <Text className="text-error">*</Text>
             </Text>
             <TextInput
-              style={styles.textInput}
+              className="bg-white border-2 border-gray-300 rounded-xl px-5 py-4 text-2xl text-gray-900 min-h-[64px]"
               value={dosage}
               onChangeText={setDosage}
               placeholder="예: 1정, 2알, 5ml"
@@ -321,28 +320,28 @@ const AddMedicationScreen = ({ navigation }: Props) => {
           </View>
 
           {/* 복용 횟수 */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              복용 횟수 <Text style={styles.required}>*</Text>
+          <View className="mb-6">
+            <Text className="text-2xl font-bold text-gray-900 mb-3">
+              복용 횟수 <Text className="text-error">*</Text>
             </Text>
             <TouchableOpacity
-              style={styles.selectButton}
+              className="bg-white border-2 border-gray-300 rounded-xl px-5 py-4 min-h-[64px] justify-center"
               onPress={() => setShowFrequencyPicker(true)}
               accessibilityLabel={`복용 횟수: ${selectedFrequencyLabel}`}
               accessibilityHint="탭하여 복용 횟수를 변경합니다"
               accessibilityRole="button"
             >
-              <Text style={styles.selectButtonText}>{selectedFrequencyLabel}</Text>
+              <Text className="text-2xl text-gray-900">{selectedFrequencyLabel}</Text>
             </TouchableOpacity>
           </View>
 
           {/* 알림 시간 (필요시 제외) */}
           {frequency !== 'as_needed' && timesPerDay > 0 && (
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>
-                알림 시간 <Text style={styles.required}>*</Text>
+            <View className="mb-6">
+              <Text className="text-2xl font-bold text-gray-900 mb-3">
+                알림 시간 <Text className="text-error">*</Text>
               </Text>
-              <View style={styles.timePickersContainer}>
+              <View className="gap-3">
                 {Array.from({ length: timesPerDay }).map((_, index) => (
                   <TimePickerButton
                     key={`time-${index}`}
@@ -357,25 +356,27 @@ const AddMedicationScreen = ({ navigation }: Props) => {
           )}
 
           {/* 시작일 */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>시작일</Text>
+          <View className="mb-6">
+            <Text className="text-2xl font-bold text-gray-900 mb-3">시작일</Text>
             <TouchableOpacity
-              style={styles.selectButton}
+              className="bg-white border-2 border-gray-300 rounded-xl px-5 py-4 min-h-[64px] justify-center"
               onPress={() => setShowStartDatePicker(true)}
               accessibilityLabel={`시작일: ${formatDateKorean(startDate)}`}
               accessibilityHint="탭하여 시작일을 변경합니다"
               accessibilityRole="button"
             >
-              <Text style={styles.selectButtonText}>{formatDateKorean(startDate)}</Text>
+              <Text className="text-2xl text-gray-900">{formatDateKorean(startDate)}</Text>
             </TouchableOpacity>
           </View>
 
           {/* 종료일 */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>종료일 (선택)</Text>
-            <View style={styles.endDateContainer}>
+          <View className="mb-6">
+            <Text className="text-2xl font-bold text-gray-900 mb-3">종료일 (선택)</Text>
+            <View className="flex-row items-center gap-3">
               <TouchableOpacity
-                style={[styles.toggleButton, hasEndDate && styles.toggleButtonActive]}
+                className={`border-2 rounded-xl px-5 py-4 min-h-[64px] justify-center ${
+                  hasEndDate ? 'bg-green-100 border-success' : 'bg-gray-100 border-gray-300'
+                }`}
                 onPress={() => {
                   if (hasEndDate) {
                     setHasEndDate(false);
@@ -392,7 +393,9 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                 accessibilityRole="switch"
               >
                 <Text
-                  style={[styles.toggleButtonText, hasEndDate && styles.toggleButtonTextActive]}
+                  className={`text-xl ${
+                    hasEndDate ? 'text-green-700 font-semibold' : 'text-gray-600'
+                  }`}
                 >
                   {hasEndDate ? '설정됨' : '설정 안함'}
                 </Text>
@@ -400,13 +403,13 @@ const AddMedicationScreen = ({ navigation }: Props) => {
 
               {hasEndDate && (
                 <TouchableOpacity
-                  style={[styles.selectButton, styles.endDateButton]}
+                  className="flex-1 bg-white border-2 border-gray-300 rounded-xl px-5 py-4 min-h-[64px] justify-center"
                   onPress={() => setShowEndDatePicker(true)}
                   accessibilityLabel={`종료일: ${endDate ? formatDateKorean(endDate) : '선택'}`}
                   accessibilityHint="탭하여 종료일을 변경합니다"
                   accessibilityRole="button"
                 >
-                  <Text style={styles.selectButtonText}>
+                  <Text className="text-2xl text-gray-900">
                     {endDate ? formatDateKorean(endDate) : '날짜 선택'}
                   </Text>
                 </TouchableOpacity>
@@ -415,10 +418,10 @@ const AddMedicationScreen = ({ navigation }: Props) => {
           </View>
 
           {/* 메모 */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>메모 (선택)</Text>
+          <View className="mb-6">
+            <Text className="text-2xl font-bold text-gray-900 mb-3">메모 (선택)</Text>
             <TextInput
-              style={[styles.textInput, styles.textArea]}
+              className="bg-white border-2 border-gray-300 rounded-xl px-5 py-4 text-2xl text-gray-900 min-h-[120px]"
               value={notes}
               onChangeText={setNotes}
               placeholder="예: 식후 30분, 물과 함께 복용"
@@ -434,20 +437,22 @@ const AddMedicationScreen = ({ navigation }: Props) => {
         </ScrollView>
 
         {/* 하단 버튼 */}
-        <View style={styles.buttonContainer}>
+        <View className="flex-row p-5 gap-3 bg-white border-t border-gray-200">
           <TouchableOpacity
-            style={styles.cancelButton}
+            className="flex-1 bg-gray-100 rounded-xl py-5 items-center justify-center min-h-[72px]"
             onPress={handleCancel}
             disabled={isLoading}
             accessibilityLabel="취소"
             accessibilityHint="약 등록을 취소하고 이전 화면으로 돌아갑니다"
             accessibilityRole="button"
           >
-            <Text style={styles.cancelButtonText}>취소</Text>
+            <Text className="text-2xl font-bold text-gray-600">취소</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.saveButton, isLoading && styles.saveButtonDisabled]}
+            className={`flex-[2] rounded-xl py-5 items-center justify-center min-h-[72px] ${
+              isLoading ? 'bg-gray-400' : 'bg-success'
+            }`}
             onPress={handleSave}
             disabled={isLoading}
             accessibilityLabel="저장"
@@ -457,7 +462,7 @@ const AddMedicationScreen = ({ navigation }: Props) => {
             {isLoading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.saveButtonText}>저장</Text>
+              <Text className="text-2xl font-bold text-white">저장</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -470,41 +475,41 @@ const AddMedicationScreen = ({ navigation }: Props) => {
         animationType="slide"
         onRequestClose={() => setShowFrequencyPicker(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>복용 횟수 선택</Text>
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-white rounded-t-3xl pb-8">
+            <View className="flex-row justify-between items-center px-5 py-4 border-b border-gray-200">
+              <Text className="text-2xl font-bold text-gray-900">복용 횟수 선택</Text>
               <TouchableOpacity
-                style={styles.modalCloseButton}
+                className="px-4 py-2"
                 onPress={() => setShowFrequencyPicker(false)}
                 accessibilityLabel="닫기"
                 accessibilityRole="button"
               >
-                <Text style={styles.modalCloseButtonText}>닫기</Text>
+                <Text className="text-xl text-gray-600">닫기</Text>
               </TouchableOpacity>
             </View>
 
             {FREQUENCY_OPTIONS.map((option) => (
               <TouchableOpacity
                 key={option.value}
-                style={[
-                  styles.frequencyOption,
-                  frequency === option.value && styles.frequencyOptionSelected,
-                ]}
+                className={`flex-row justify-between items-center px-5 py-5 border-b border-gray-200 min-h-[72px] ${
+                  frequency === option.value ? 'bg-green-100' : ''
+                }`}
                 onPress={() => handleFrequencyChange(option.value)}
                 accessibilityLabel={option.label}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: frequency === option.value }}
               >
                 <Text
-                  style={[
-                    styles.frequencyOptionText,
-                    frequency === option.value && styles.frequencyOptionTextSelected,
-                  ]}
+                  className={`text-2xl ${
+                    frequency === option.value ? 'font-bold text-green-700' : 'text-gray-900'
+                  }`}
                 >
                   {option.label}
                 </Text>
-                {frequency === option.value && <Text style={styles.checkmark}>OK</Text>}
+                {frequency === option.value && (
+                  <Text className="text-2xl font-bold text-success">OK</Text>
+                )}
               </TouchableOpacity>
             ))}
           </View>
@@ -541,27 +546,27 @@ const AddMedicationScreen = ({ navigation }: Props) => {
           animationType="slide"
           onRequestClose={() => setShowStartDatePicker(false)}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
+          <View className="flex-1 bg-black/50 justify-end">
+            <View className="bg-white rounded-t-3xl pb-8">
+              <View className="flex-row justify-between items-center px-5 py-4 border-b border-gray-200">
                 <TouchableOpacity
-                  style={styles.modalButton}
+                  className="px-4 py-2 min-w-[60px]"
                   onPress={() => setShowStartDatePicker(false)}
                   accessibilityLabel="취소"
                   accessibilityRole="button"
                 >
-                  <Text style={styles.modalButtonTextCancel}>취소</Text>
+                  <Text className="text-xl text-gray-600">취소</Text>
                 </TouchableOpacity>
 
-                <Text style={styles.modalTitle}>시작일 선택</Text>
+                <Text className="text-2xl font-bold text-gray-900">시작일 선택</Text>
 
                 <TouchableOpacity
-                  style={styles.modalButton}
+                  className="px-4 py-2 min-w-[60px]"
                   onPress={handleStartDateConfirm}
                   accessibilityLabel="확인"
                   accessibilityRole="button"
                 >
-                  <Text style={styles.modalButtonTextConfirm}>확인</Text>
+                  <Text className="text-xl font-semibold text-success">확인</Text>
                 </TouchableOpacity>
               </View>
 
@@ -571,7 +576,7 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                 display="spinner"
                 onChange={handleStartDateChange}
                 minimumDate={new Date()}
-                style={styles.datePicker}
+                style={{ height: 200 }}
               />
             </View>
           </View>
@@ -586,27 +591,27 @@ const AddMedicationScreen = ({ navigation }: Props) => {
           animationType="slide"
           onRequestClose={() => setShowEndDatePicker(false)}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
+          <View className="flex-1 bg-black/50 justify-end">
+            <View className="bg-white rounded-t-3xl pb-8">
+              <View className="flex-row justify-between items-center px-5 py-4 border-b border-gray-200">
                 <TouchableOpacity
-                  style={styles.modalButton}
+                  className="px-4 py-2 min-w-[60px]"
                   onPress={() => setShowEndDatePicker(false)}
                   accessibilityLabel="취소"
                   accessibilityRole="button"
                 >
-                  <Text style={styles.modalButtonTextCancel}>취소</Text>
+                  <Text className="text-xl text-gray-600">취소</Text>
                 </TouchableOpacity>
 
-                <Text style={styles.modalTitle}>종료일 선택</Text>
+                <Text className="text-2xl font-bold text-gray-900">종료일 선택</Text>
 
                 <TouchableOpacity
-                  style={styles.modalButton}
+                  className="px-4 py-2 min-w-[60px]"
                   onPress={handleEndDateConfirm}
                   accessibilityLabel="확인"
                   accessibilityRole="button"
                 >
-                  <Text style={styles.modalButtonTextConfirm}>확인</Text>
+                  <Text className="text-xl font-semibold text-success">확인</Text>
                 </TouchableOpacity>
               </View>
 
@@ -616,7 +621,7 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                 display="spinner"
                 onChange={handleEndDateChange}
                 minimumDate={startDate}
-                style={styles.datePicker}
+                style={{ height: 200 }}
               />
             </View>
           </View>
@@ -625,212 +630,5 @@ const AddMedicationScreen = ({ navigation }: Props) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  keyboardAvoidingView: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  inputGroup: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 12,
-  },
-  required: {
-    color: '#EF4444',
-  },
-  textInput: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#D1D5DB',
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    fontSize: 24,
-    color: '#1A1A1A',
-    minHeight: 64,
-  },
-  textArea: {
-    minHeight: 120,
-    paddingTop: 16,
-  },
-  selectButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#D1D5DB',
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    minHeight: 64,
-    justifyContent: 'center',
-  },
-  selectButtonText: {
-    fontSize: 24,
-    color: '#1A1A1A',
-  },
-  timePickersContainer: {
-    gap: 12,
-  },
-  endDateContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  toggleButton: {
-    backgroundColor: '#F3F4F6',
-    borderWidth: 2,
-    borderColor: '#D1D5DB',
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    minHeight: 64,
-    justifyContent: 'center',
-  },
-  toggleButtonActive: {
-    backgroundColor: '#DCFCE7',
-    borderColor: '#22C55E',
-  },
-  toggleButtonText: {
-    fontSize: 20,
-    color: '#6B7280',
-  },
-  toggleButtonTextActive: {
-    color: '#16A34A',
-    fontWeight: '600',
-  },
-  endDateButton: {
-    flex: 1,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    padding: 20,
-    gap: 12,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-  },
-  cancelButton: {
-    flex: 1,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 12,
-    paddingVertical: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 72,
-  },
-  cancelButtonText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#6B7280',
-  },
-  saveButton: {
-    flex: 2,
-    backgroundColor: '#22C55E',
-    borderRadius: 12,
-    paddingVertical: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 72,
-  },
-  saveButtonDisabled: {
-    backgroundColor: '#9CA3AF',
-  },
-  saveButtonText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: 34,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1A1A1A',
-  },
-  modalCloseButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  modalCloseButtonText: {
-    fontSize: 20,
-    color: '#6B7280',
-  },
-  modalButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    minWidth: 60,
-  },
-  modalButtonTextCancel: {
-    fontSize: 20,
-    color: '#6B7280',
-  },
-  modalButtonTextConfirm: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#22C55E',
-  },
-  frequencyOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    minHeight: 72,
-  },
-  frequencyOptionSelected: {
-    backgroundColor: '#DCFCE7',
-  },
-  frequencyOptionText: {
-    fontSize: 24,
-    color: '#1A1A1A',
-  },
-  frequencyOptionTextSelected: {
-    fontWeight: '700',
-    color: '#16A34A',
-  },
-  checkmark: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#22C55E',
-  },
-  datePicker: {
-    height: 200,
-  },
-});
 
 export default AddMedicationScreen;

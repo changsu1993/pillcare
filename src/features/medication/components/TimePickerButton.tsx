@@ -12,7 +12,7 @@
  */
 
 import React, { useState } from 'react';
-import { TouchableOpacity, Text, StyleSheet, View, Modal, Platform } from 'react-native';
+import { TouchableOpacity, Text, View, Modal, Platform } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
 interface TimePickerButtonProps {
@@ -118,11 +118,13 @@ const TimePickerButton = ({
   };
 
   return (
-    <View style={styles.container}>
-      {label && <Text style={styles.label}>{label}</Text>}
+    <View className="mb-4">
+      {label && <Text className="text-xl font-semibold text-gray-900 mb-2">{label}</Text>}
 
       <TouchableOpacity
-        style={[styles.button, disabled && styles.buttonDisabled]}
+        className={`bg-white border-2 rounded-xl px-5 py-4 min-h-[60px] justify-center items-center ${
+          disabled ? 'bg-gray-100 border-gray-200' : 'border-gray-300'
+        }`}
         onPress={handlePress}
         disabled={disabled}
         accessibilityLabel={`시간 선택: ${formatTimeKorean(value)}`}
@@ -130,7 +132,7 @@ const TimePickerButton = ({
         accessibilityRole="button"
         testID={testID}
       >
-        <Text style={[styles.timeText, disabled && styles.timeTextDisabled]}>
+        <Text className={`text-2xl font-semibold ${disabled ? 'text-gray-400' : 'text-gray-900'}`}>
           {formatTimeKorean(value)}
         </Text>
       </TouchableOpacity>
@@ -155,27 +157,27 @@ const TimePickerButton = ({
           animationType="slide"
           onRequestClose={handleCancel}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
+          <View className="flex-1 bg-black/50 justify-end">
+            <View className="bg-white rounded-t-3xl pb-8">
+              <View className="flex-row justify-between items-center px-4 py-4 border-b border-gray-200">
                 <TouchableOpacity
-                  style={styles.modalButton}
+                  className="px-4 py-2 min-w-[60px]"
                   onPress={handleCancel}
                   accessibilityLabel="취소"
                   accessibilityRole="button"
                 >
-                  <Text style={styles.modalButtonTextCancel}>취소</Text>
+                  <Text className="text-lg text-gray-500">취소</Text>
                 </TouchableOpacity>
 
-                <Text style={styles.modalTitle}>시간 선택</Text>
+                <Text className="text-xl font-bold text-gray-900">시간 선택</Text>
 
                 <TouchableOpacity
-                  style={styles.modalButton}
+                  className="px-4 py-2 min-w-[60px]"
                   onPress={handleConfirm}
                   accessibilityLabel="확인"
                   accessibilityRole="button"
                 >
-                  <Text style={styles.modalButtonTextConfirm}>확인</Text>
+                  <Text className="text-lg font-semibold text-success">확인</Text>
                 </TouchableOpacity>
               </View>
 
@@ -186,7 +188,7 @@ const TimePickerButton = ({
                 display="spinner"
                 onChange={handleTimeChange}
                 minuteInterval={5}
-                style={styles.picker}
+                style={{ height: 200 }}
               />
             </View>
           </View>
@@ -195,83 +197,5 @@ const TimePickerButton = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    marginBottom: 8,
-  },
-  button: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#D1D5DB',
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    minHeight: 60, // 노인 친화적 최소 터치 영역
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    backgroundColor: '#F3F4F6',
-    borderColor: '#E5E7EB',
-  },
-  timeText: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#1A1A1A',
-  },
-  timeTextDisabled: {
-    color: '#9CA3AF',
-  },
-  // iOS Modal Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: 34, // Safe area bottom
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1A1A1A',
-  },
-  modalButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    minWidth: 60,
-  },
-  modalButtonTextCancel: {
-    fontSize: 18,
-    color: '#6B7280',
-  },
-  modalButtonTextConfirm: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#22C55E',
-  },
-  picker: {
-    height: 200,
-  },
-});
 
 export default TimePickerButton;

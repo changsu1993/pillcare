@@ -12,7 +12,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Vibration } from 'react-native';
+import { View, Text, TouchableOpacity, Vibration } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ParentScreenProps } from '../../../../shared/types/navigation.types';
 import { speakMedicationReminder, stopSpeaking } from '../../../notifications/services/voice';
@@ -80,15 +80,15 @@ const FullScreenReminderScreen = ({ route, navigation }: Props) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-warning items-center justify-center p-6">
       {/* Medication icon */}
-      <View style={styles.iconContainer}>
-        <Text style={styles.icon}>💊</Text>
+      <View className="mb-8">
+        <Text className="text-8xl">💊</Text>
       </View>
 
       {/* Medication name */}
       <Text
-        style={styles.medicationName}
+        className="text-5xl font-bold text-gray-900 text-center mb-4"
         accessibilityLabel={`약 이름: ${medicationName}`}
         accessibilityRole="header"
       >
@@ -96,13 +96,16 @@ const FullScreenReminderScreen = ({ route, navigation }: Props) => {
       </Text>
 
       {/* Dosage */}
-      <Text style={styles.dosage} accessibilityLabel={`복용량: ${dosage}`}>
+      <Text
+        className="text-4xl font-semibold text-gray-900 text-center mb-3"
+        accessibilityLabel={`복용량: ${dosage}`}
+      >
         {dosage}
       </Text>
 
       {/* Time */}
       <Text
-        style={styles.time}
+        className="text-3xl font-medium text-gray-900 text-center mb-12"
         accessibilityLabel={`복용 시간: ${new Date(scheduledTime).toLocaleTimeString('ko-KR', {
           hour: '2-digit',
           minute: '2-digit',
@@ -115,105 +118,31 @@ const FullScreenReminderScreen = ({ route, navigation }: Props) => {
       </Text>
 
       {/* Action buttons */}
-      <View style={styles.buttonContainer}>
+      <View className="flex-row w-full justify-between gap-4">
         <TouchableOpacity
-          style={styles.buttonTaken}
+          className="flex-1 bg-success h-[72px] rounded-2xl justify-center items-center shadow-lg"
           onPress={handleTaken}
           activeOpacity={0.7}
           accessibilityLabel="먹었어요 버튼"
           accessibilityHint="약을 복용했을 때 누르세요"
           accessibilityRole="button"
         >
-          <Text style={styles.buttonText}>먹었어요</Text>
+          <Text className="text-xl font-bold text-white">먹었어요</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.buttonSkipped}
+          className="flex-1 bg-gray-600 h-[72px] rounded-2xl justify-center items-center shadow-lg"
           onPress={handleSkipped}
           activeOpacity={0.7}
           accessibilityLabel="못 먹었어요 버튼"
           accessibilityHint="약을 복용하지 못했을 때 누르세요"
           accessibilityRole="button"
         >
-          <Text style={styles.buttonText}>못 먹었어요</Text>
+          <Text className="text-xl font-bold text-white">못 먹었어요</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FCD34D', // Warning yellow
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  iconContainer: {
-    marginBottom: 32,
-  },
-  icon: {
-    fontSize: 80,
-  },
-  medicationName: {
-    fontSize: 48,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  dosage: {
-    fontSize: 32,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  time: {
-    fontSize: 28,
-    fontWeight: '500',
-    color: '#1A1A1A',
-    textAlign: 'center',
-    marginBottom: 48,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    width: '100%',
-    justifyContent: 'space-between',
-    gap: 16,
-  },
-  buttonTaken: {
-    flex: 1,
-    backgroundColor: '#22C55E', // Success green
-    height: 72,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  buttonSkipped: {
-    flex: 1,
-    backgroundColor: '#6B7280', // Gray
-    height: 72,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  buttonText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-});
 
 export default FullScreenReminderScreen;

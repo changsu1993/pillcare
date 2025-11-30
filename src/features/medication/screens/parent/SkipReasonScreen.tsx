@@ -12,7 +12,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ParentScreenProps } from '../../../../shared/types/navigation.types';
 import {
@@ -107,119 +107,54 @@ const SkipReasonScreen = ({ route, navigation }: Props) => {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View className="flex-1 bg-gray-50 justify-center items-center">
         <ActivityIndicator size="large" color="#22C55E" />
-        <Text style={styles.loadingText}>저장 중...</Text>
+        <Text className="text-xl text-gray-900 mt-4">저장 중...</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-gray-50 p-6">
       {/* Title */}
-      <Text style={styles.title} accessibilityLabel="왜 못 드셨나요?" accessibilityRole="header">
+      <Text
+        className="text-4xl font-bold text-gray-900 text-center mb-8 mt-4"
+        accessibilityLabel="왜 못 드셨나요?"
+        accessibilityRole="header"
+      >
         왜 못 드셨나요?
       </Text>
 
       {/* Reason buttons */}
-      <View style={styles.buttonsContainer}>
+      <View className="flex-1 gap-4">
         {REASONS.map((reason) => (
           <TouchableOpacity
             key={reason.key}
-            style={styles.reasonButton}
+            className="bg-white h-[72px] flex-row items-center px-6 rounded-2xl border-2 border-gray-200 shadow-sm"
             onPress={() => handleReasonSelect(reason.key)}
             activeOpacity={0.7}
             accessibilityLabel={`${reason.label} 선택`}
             accessibilityHint={`${reason.label}을 이유로 선택합니다`}
             accessibilityRole="button"
           >
-            <Text style={styles.reasonIcon}>{reason.icon}</Text>
-            <Text style={styles.reasonText}>{reason.label}</Text>
+            <Text className="text-3xl mr-4">{reason.icon}</Text>
+            <Text className="text-2xl font-semibold text-gray-900 flex-1">{reason.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
       {/* Back button */}
       <TouchableOpacity
-        style={styles.backButton}
+        className="bg-gray-200 h-[60px] justify-center items-center rounded-xl mt-4"
         onPress={() => navigation.goBack()}
         activeOpacity={0.7}
         accessibilityLabel="뒤로 가기"
         accessibilityRole="button"
       >
-        <Text style={styles.backButtonText}>뒤로</Text>
+        <Text className="text-xl font-semibold text-gray-900">뒤로</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-    padding: 24,
-  },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 20,
-    color: '#1A1A1A',
-    marginTop: 16,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    textAlign: 'center',
-    marginBottom: 32,
-    marginTop: 16,
-  },
-  buttonsContainer: {
-    flex: 1,
-    gap: 16,
-  },
-  reasonButton: {
-    backgroundColor: '#FFFFFF',
-    height: 72,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  reasonIcon: {
-    fontSize: 32,
-    marginRight: 16,
-  },
-  reasonText: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    flex: 1,
-  },
-  backButton: {
-    backgroundColor: '#E5E7EB',
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 12,
-    marginTop: 16,
-  },
-  backButtonText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#1A1A1A',
-  },
-});
 
 export default SkipReasonScreen;

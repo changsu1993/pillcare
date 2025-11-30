@@ -11,10 +11,11 @@ A healthcare service that automatically manages medication schedules and hospita
 ## Tech Stack
 
 ### Frontend
-- **React Native**: Cross-platform iOS/Android development
+- **React Native + Expo**: Cross-platform iOS/Android development
 - **TypeScript**: Type safety and better developer experience
+- **NativeWind v4**: Tailwind CSS for React Native styling
 - **React Navigation**: Screen routing and navigation
-- **React Native Push Notification**: Local and remote notifications
+- **Expo Notifications**: Local and remote push notifications
 
 ### Backend
 - **Supabase**:
@@ -36,32 +37,53 @@ A healthcare service that automatically manages medication schedules and hospita
 ```
 PillCare/
 ├── src/
-│   ├── features/              # Feature-based modules
-│   │   ├── auth/              # Authentication feature
-│   │   ├── medications/       # Medication management
-│   │   ├── home/              # Home screens
-│   │   └── settings/          # Settings feature
-│   │       ├── components/    # Feature-specific components
+│   ├── features/                    # Feature-based modules
+│   │   ├── auth/                    # Authentication feature
+│   │   │   ├── navigation/          # Auth navigator
+│   │   │   └── screens/             # Login, signup, password reset
+│   │   ├── home/                    # Home/dashboard feature
+│   │   │   ├── screens/
+│   │   │   │   ├── parent/          # Parent home screen
+│   │   │   │   └── child/           # Child home screen
+│   │   │   └── components/          # Adherence cards, charts
+│   │   ├── medication/              # Medication management
+│   │   │   ├── screens/
+│   │   │   │   ├── parent/          # Add/edit medications
+│   │   │   │   └── child/           # Medication list view
+│   │   │   ├── components/          # Medication cards, forms
+│   │   │   ├── hooks/               # useMedications, etc.
+│   │   │   └── services/            # Medication API
+│   │   ├── family/                  # Family connections
+│   │   │   └── screens/
+│   │   │       ├── parent/          # Family code display
+│   │   │       └── child/           # Connect to parent
+│   │   ├── notifications/           # Push notifications
+│   │   │   ├── hooks/               # useNotifications
+│   │   │   └── services/            # Notification scheduling
+│   │   └── settings/                # App settings
 │   │       ├── screens/
-│   │       │   ├── parent/    # Parent-facing screens
-│   │       │   └── child/     # Child-facing screens
-│   │       ├── hooks/         # Feature-specific hooks
-│   │       ├── services/      # Feature services
-│   │       ├── contexts/      # React contexts
-│   │       └── types/         # TypeScript types
-│   ├── components/            # Shared components
-│   ├── services/              # Global services (Supabase, etc.)
-│   ├── hooks/                 # Global hooks
-│   ├── navigation/            # Navigation configuration
-│   ├── types/                 # Global TypeScript types
-│   └── utils/                 # Utility functions
-├── ios/
-├── android/
+│   │       │   ├── parent/          # Parent settings
+│   │       │   └── child/           # Child settings
+│   │       ├── contexts/            # SettingsContext
+│   │       └── services/            # Settings storage
+│   ├── navigation/                  # Root navigators
+│   │   ├── ParentNavigator.tsx      # Parent tab navigator
+│   │   └── ChildNavigator.tsx       # Child tab navigator
+│   ├── shared/                      # Shared across features
+│   │   ├── components/              # Common UI components
+│   │   ├── services/                # Supabase, API clients
+│   │   ├── types/                   # TypeScript types
+│   │   └── utils/                   # Helper functions
+│   └── assets/                      # Images, fonts
+├── ios/                             # iOS native code
+├── android/                         # Android native code
 ├── .claude/
-│   ├── agents/                # Custom AI agents (16 specialists)
-│   ├── skills/                # Reusable skills (12 skills)
-│   └── commands/              # Slash commands
-└── tests/                     # E2E tests
+│   ├── agents/                      # Custom AI agents (16 specialists)
+│   ├── skills/                      # Reusable skills (12 skills)
+│   └── commands/                    # Slash commands
+├── tailwind.config.js               # NativeWind configuration
+├── global.css                       # Tailwind base styles
+└── metro.config.js                  # Metro bundler config
 ```
 
 ## Database Schema
@@ -115,24 +137,25 @@ PillCare/
 ## MVP Feature List
 
 ### Parent App
-- [ ] Medication reminder notifications (large text, vibration, voice)
-- [ ] Simple "Took it / Missed it" 2-button UI
+- [x] Medication reminder notifications (large text, vibration)
+- [x] Simple "Took it / Missed it" 2-button UI
 - [ ] Medication history view (calendar)
 - [ ] Voice guidance feature
-- [ ] Large, high-contrast UI design
+- [x] Large, high-contrast UI design (NativeWind)
 
 ### Child App
-- [ ] Parent's medication timeline view
-- [ ] Push notifications on missed medications
+- [x] Parent's medication timeline view
+- [x] Push notifications on missed medications
 - [ ] Hospital appointment management
-- [ ] Configure medication reminder times
-- [ ] Weekly/monthly adherence reports
+- [x] Configure medication reminder times
+- [x] Weekly/monthly adherence reports (charts)
 
 ### Common Features
-- [ ] Sign up / Login (email, social auth)
-- [ ] Family connection (invitation code system)
-- [ ] Profile management
-- [ ] Settings (notification preferences, etc.)
+- [x] Sign up / Login (email)
+- [x] Password reset with deep linking
+- [x] Family connection (invitation code system)
+- [x] Profile management
+- [x] Settings (notification preferences, etc.)
 
 ## Monetization Strategy
 
@@ -172,26 +195,38 @@ PillCare/
 
 ### Local Development Setup
 ```bash
-# Install MCP servers
-./setup-mcp.sh
-
 # Install dependencies
-cd mobile && npm install
+npm install
 
-# Run iOS
-npm run ios
+# Start Expo development server (Expo Go)
+npx expo start
 
-# Run Android
-npm run android
+# Start with Development Build (for native features)
+npx expo start --dev-client
+
+# Create Development Build (first time setup)
+npx expo prebuild --platform ios
+npx expo run:ios
+```
+
+### Styling with NativeWind
+```tsx
+// Use Tailwind classes via className prop
+<View className="flex-1 bg-white p-4">
+  <Text className="text-2xl font-bold text-gray-900">Title</Text>
+</View>
+
+// Custom colors defined in tailwind.config.js
+// primary, success, warning, error, gray-50 to gray-900
 ```
 
 ### Testing
 ```bash
-# Unit tests
-npm test
+# TypeScript type check
+npx tsc --noEmit
 
-# E2E tests (Playwright)
-npm run test:e2e
+# Lint and auto-fix
+npm run lint:fix
 ```
 
 ### Deployment
@@ -304,5 +339,5 @@ All agents use **Opus** model for best performance.
 MIT License
 
 ---
-**Last Updated**: 2025-11-27
-**Version**: 0.2.0 (Feature-based Architecture)
+**Last Updated**: 2025-11-30
+**Version**: 0.3.0 (NativeWind + Feature-based Architecture)

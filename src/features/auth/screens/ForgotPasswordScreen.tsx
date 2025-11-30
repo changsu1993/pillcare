@@ -1,7 +1,7 @@
 /**
- * SignInScreen - User Login
+ * ForgotPasswordScreen - Password Reset Request
  *
- * Allows users to sign in with email and password.
+ * Allows users to request a password reset email.
  * Integrates with Supabase authentication.
  */
 
@@ -19,35 +19,50 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { signIn } from '../../../shared/services/supabase';
+import { resetPasswordForEmail } from '../../../shared/services/supabase';
 import { AuthScreenProps } from '../../../shared/types/navigation.types';
 
-type Props = AuthScreenProps<'SignIn'>;
+type Props = AuthScreenProps<'ForgotPassword'>;
 
-const SignInScreen = ({ navigation }: Props) => {
+const ForgotPasswordScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleSignIn = async (): Promise<void> => {
+  const handleResetPassword = async (): Promise<void> => {
     // Validation
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('입력 오류', '이메일과 비밀번호를 입력해주세요.');
+    if (!email.trim()) {
+      Alert.alert('입력 오류', '이메일을 입력해주세요.');
+      return;
+    }
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      Alert.alert('입력 오류', '올바른 이메일 형식을 입력해주세요.');
       return;
     }
 
     try {
       setIsLoading(true);
-      await signIn(email.trim(), password);
-      // Navigation will be handled automatically by App.js auth state change
+      await resetPasswordForEmail(email.trim());
+      Alert.alert(
+        '이메일 전송 완료',
+        '비밀번호 재설정 링크가 이메일로 전송되었습니다. 이메일을 확인해주세요.',
+        [
+          {
+            text: '확인',
+            onPress: () => navigation.navigate('SignIn'),
+          },
+        ]
+      );
     } catch (error) {
-      console.error('Sign in error:', error);
+      console.error('Password reset error:', error);
       const errorMessage =
         error instanceof Error
           ? error.message
-          : '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.';
+          : '비밀번호 재설정 이메일 전송에 실패했습니다. 이메일 주소를 확인해주세요.';
 
-      Alert.alert('로그인 실패', errorMessage);
+      Alert.alert('전송 실패', errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -68,8 +83,10 @@ const SignInScreen = ({ navigation }: Props) => {
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
               <Text style={styles.backButtonText}>← 뒤로</Text>
             </TouchableOpacity>
-            <Text style={styles.title}>로그인</Text>
-            <Text style={styles.subtitle}>PillCare에 오신 것을 환영합니다</Text>
+            <Text style={styles.title}>비밀번호 찾기</Text>
+            <Text style={styles.subtitle}>
+              가입하신 이메일 주소를 입력하시면{'\n'}비밀번호 재설정 링크를 보내드립니다
+            </Text>
           </View>
 
           {/* Form */}
@@ -87,60 +104,31 @@ const SignInScreen = ({ navigation }: Props) => {
                 autoCapitalize="none"
                 autoCorrect={false}
                 editable={!isLoading}
+                accessibilityLabel="이메일 입력"
+                accessibilityHint="비밀번호 재설정을 위한 이메일 주소를 입력하세요"
               />
             </View>
 
-            {/* Password input */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>비밀번호</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="비밀번호를 입력하세요"
-                placeholderTextColor="#9CA3AF"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={!isLoading}
-              />
-            </View>
-
-            {/* Forgot credentials links */}
-            <View style={styles.forgotLinks}>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('FindEmail')}
-                disabled={isLoading}
-              >
-                <Text style={styles.forgotLink}>아이디 찾기</Text>
-              </TouchableOpacity>
-              <Text style={styles.forgotDivider}>|</Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('ForgotPassword')}
-                disabled={isLoading}
-              >
-                <Text style={styles.forgotLink}>비밀번호 찾기</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Sign in button */}
+            {/* Reset password button */}
             <TouchableOpacity
               style={[styles.button, styles.primaryButton, isLoading && styles.buttonDisabled]}
-              onPress={handleSignIn}
+              onPress={handleResetPassword}
               disabled={isLoading}
+              accessibilityLabel="비밀번호 재설정 이메일 보내기"
+              accessibilityRole="button"
             >
               {isLoading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.primaryButtonText}>로그인</Text>
+                <Text style={styles.primaryButtonText}>비밀번호 재설정 이메일 보내기</Text>
               )}
             </TouchableOpacity>
 
-            {/* Sign up link */}
+            {/* Back to sign in link */}
             <View style={styles.footer}>
-              <Text style={styles.footerText}>계정이 없으신가요? </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('SignUp')} disabled={isLoading}>
-                <Text style={styles.link}>회원가입</Text>
+              <Text style={styles.footerText}>비밀번호가 기억나셨나요? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('SignIn')} disabled={isLoading}>
+                <Text style={styles.link}>로그인하기</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -182,6 +170,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: '#6B7280',
+    lineHeight: 24,
   },
   form: {
     flex: 1,
@@ -238,22 +227,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#3B82F6',
   },
-  forgotLinks: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  forgotLink: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  forgotDivider: {
-    fontSize: 14,
-    color: '#D1D5DB',
-    marginHorizontal: 12,
-  },
 });
 
-export default SignInScreen;
+export default ForgotPasswordScreen;

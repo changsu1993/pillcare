@@ -47,6 +47,7 @@ export type ParentStackParamList = {
     medicationId: string;
   };
   InvitationCode: undefined;
+  MedicationCalendar: undefined;
 };
 
 export type ParentTabParamList = {

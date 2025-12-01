@@ -48,6 +48,7 @@ export type ParentStackParamList = {
   };
   InvitationCode: undefined;
   MedicationCalendar: undefined;
+  ProfileEdit: undefined;
 };
 
 export type ParentTabParamList = {
@@ -84,6 +85,8 @@ export type ChildStackParamList = {
   AppointmentDetail: { appointmentId: string };
   AddAppointment: { parentId: string };
   EditAppointment: { appointmentId: string };
+  // Profile
+  ProfileEdit: undefined;
 };
 
 export type ChildTabScreenProps<T extends keyof ChildTabParamList> = BottomTabScreenProps<

@@ -19,6 +19,7 @@ import {
   logMedicationMissed,
   getMedication,
   createMissedMedicationEvent,
+  sendMissedMedicationPushNotification,
 } from '../../../../shared/services/api';
 import { speakSkipPrompt, stopSpeaking } from '../../../notifications/services/voice';
 import { isVoiceGuidanceEnabled } from '../../../settings/services/settings';
@@ -81,14 +82,15 @@ const SkipReasonScreen = ({ route, navigation }: Props) => {
         const medication = await getMedication(medicationId);
 
         // Create missed medication event for child notifications
-        await createMissedMedicationEvent(
+        const missedEvent = await createMissedMedicationEvent(
           medicationId,
           medication.name,
           new Date(scheduledTime),
           reason
         );
 
-        console.log('미복용 이벤트 생성 완료 - 자녀에게 알림 전송됨');
+        // Send push notification to connected children
+        await sendMissedMedicationPushNotification(missedEvent);
       } catch (eventError) {
         // Log error but don't block the main flow
         console.error('미복용 이벤트 생성 실패:', eventError);

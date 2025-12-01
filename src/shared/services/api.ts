@@ -1070,8 +1070,35 @@ export const createMissedMedicationEvent = async (
     .single();
 
   if (error) throw error;
-  console.log('미복용 이벤트 생성:', data.id);
   return data;
+};
+
+/**
+ * Send push notification to children about missed medication
+ * Calls Supabase Edge Function
+ * @param event - Missed medication event
+ */
+export const sendMissedMedicationPushNotification = async (
+  event: MissedMedicationEvent
+): Promise<void> => {
+  try {
+    const { error } = await supabase.functions.invoke('send-push-notification', {
+      body: {
+        parent_id: event.parent_id,
+        medication_name: event.medication_name,
+        scheduled_time: event.scheduled_time,
+        skip_reason: event.skip_reason,
+        event_id: event.id,
+      },
+    });
+
+    if (error) {
+      throw error;
+    }
+  } catch (err) {
+    // Silently fail - push notification is not critical
+    // The missed event is already recorded in the database
+  }
 };
 
 /**

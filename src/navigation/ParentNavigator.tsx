@@ -130,6 +130,14 @@ const SettingsStack = () => {
       }}
     >
       <Stack.Screen name="Settings" component={ParentSettingsScreen} options={{ title: '설정' }} />
+      <Stack.Screen
+        name="InvitationCode"
+        component={InvitationCodeScreen}
+        options={{
+          title: '가족 초대',
+          headerShown: true,
+        }}
+      />
     </Stack.Navigator>
   );
 };

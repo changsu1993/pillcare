@@ -22,6 +22,10 @@ import MedicationManageScreen from '../features/medication/screens/child/Medicat
 import ReportsScreen from '../features/home/screens/child/ReportsScreen';
 import ChildSettingsScreen from '../features/settings/screens/child/SettingsScreen';
 import EnterCodeScreen from '../features/family/screens/child/EnterCodeScreen';
+import AppointmentListScreen from '../features/appointments/screens/child/AppointmentListScreen';
+import AppointmentDetailScreen from '../features/appointments/screens/child/AppointmentDetailScreen';
+import AddAppointmentScreen from '../features/appointments/screens/child/AddAppointmentScreen';
+import EditAppointmentScreen from '../features/appointments/screens/child/EditAppointmentScreen';
 
 const Tab = createBottomTabNavigator<ChildTabParamList>();
 const Stack = createNativeStackNavigator<ChildStackParamList>();
@@ -56,6 +60,40 @@ const MedicationsStack = () => (
       name="MedicationManage"
       component={MedicationManageScreen}
       options={{ title: '약 관리' }}
+    />
+  </Stack.Navigator>
+);
+
+/**
+ * 예약 탭 스택
+ */
+const AppointmentsStack = () => (
+  <Stack.Navigator
+    screenOptions={{
+      headerStyle: { backgroundColor: '#FFFFFF' },
+      headerTitleStyle: { fontSize: 18, fontWeight: '700' },
+      headerTintColor: '#1A1A1A',
+    }}
+  >
+    <Stack.Screen
+      name="AppointmentList"
+      component={AppointmentListScreen}
+      options={{ title: '병원 예약' }}
+    />
+    <Stack.Screen
+      name="AppointmentDetail"
+      component={AppointmentDetailScreen}
+      options={{ title: '예약 상세' }}
+    />
+    <Stack.Screen
+      name="AddAppointment"
+      component={AddAppointmentScreen}
+      options={{ title: '예약 추가' }}
+    />
+    <Stack.Screen
+      name="EditAppointment"
+      component={EditAppointmentScreen}
+      options={{ title: '예약 수정' }}
     />
   </Stack.Navigator>
 );
@@ -136,6 +174,16 @@ const ChildNavigator = () => {
           tabBarLabel: '약 관리',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="medical-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="AppointmentsTab"
+        component={AppointmentsStack}
+        options={{
+          tabBarLabel: '예약',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={size} color={color} />
           ),
         }}
       />

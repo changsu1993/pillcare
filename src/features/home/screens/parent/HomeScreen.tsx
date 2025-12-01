@@ -199,6 +199,18 @@ const ParentHomeScreen = ({ navigation }: Props) => {
           >
             <Text className="text-3xl font-bold text-white">+ 약 추가하기</Text>
           </TouchableOpacity>
+
+          {/* 복약 이력 보기 버튼 */}
+          <TouchableOpacity
+            className="bg-blue-500 rounded-2xl py-6 px-8 items-center justify-center min-h-[72px] mt-4 shadow-lg flex-row"
+            onPress={() => navigation.navigate('MedicationCalendar')}
+            accessibilityLabel="복약 이력 보기"
+            accessibilityHint="탭하여 복약 이력 캘린더를 확인합니다"
+            accessibilityRole="button"
+          >
+            <Text className="text-4xl mr-3">&#128197;</Text>
+            <Text className="text-3xl font-bold text-white">복약 이력 보기</Text>
+          </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
     );
@@ -288,6 +300,18 @@ const ParentHomeScreen = ({ navigation }: Props) => {
           accessibilityRole="button"
         >
           <Text className="text-3xl font-bold text-white">+ 약 추가하기</Text>
+        </TouchableOpacity>
+
+        {/* 복약 이력 보기 버튼 */}
+        <TouchableOpacity
+          className="bg-blue-500 rounded-2xl py-6 px-8 items-center justify-center min-h-[72px] mt-4 shadow-lg flex-row"
+          onPress={() => navigation.navigate('MedicationCalendar')}
+          accessibilityLabel="복약 이력 보기"
+          accessibilityHint="탭하여 복약 이력 캘린더를 확인합니다"
+          accessibilityRole="button"
+        >
+          <Text className="text-4xl mr-3">&#128197;</Text>
+          <Text className="text-3xl font-bold text-white">복약 이력 보기</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

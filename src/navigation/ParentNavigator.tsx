@@ -30,6 +30,7 @@ import MedicationDetailScreen from '../features/medication/screens/parent/Medica
 import AddMedicationScreen from '../features/medication/screens/parent/AddMedicationScreen';
 import EditMedicationScreen from '../features/medication/screens/parent/EditMedicationScreen';
 import InvitationCodeScreen from '../features/family/screens/parent/InvitationCodeScreen';
+import MedicationCalendarScreen from '../features/home/screens/parent/MedicationCalendarScreen';
 
 const Tab = createBottomTabNavigator<ParentTabParamList>();
 const Stack = createStackNavigator<ParentStackParamList>();
@@ -101,6 +102,14 @@ const HomeStack = () => {
         component={InvitationCodeScreen}
         options={{
           title: '가족 초대',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="MedicationCalendar"
+        component={MedicationCalendarScreen}
+        options={{
+          title: '복약 이력',
           headerShown: true,
         }}
       />

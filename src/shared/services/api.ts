@@ -457,7 +457,6 @@ export const connectWithCode = async (
       child_id: user.id,
       status: 'active',
       invitation_code: null, // Clear code after use
-      updated_at: new Date().toISOString(),
     })
     .eq('id', invitation.id);
 

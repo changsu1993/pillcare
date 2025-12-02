@@ -19,6 +19,8 @@ import { ChildTabParamList, ChildStackParamList } from '../shared/types/navigati
 // Screens
 import ChildHomeScreen from '../features/home/screens/child/HomeScreen';
 import MedicationManageScreen from '../features/medication/screens/child/MedicationManageScreen';
+import AddMedicationScreen from '../features/medication/screens/child/AddMedicationScreen';
+import EditMedicationScreen from '../features/medication/screens/child/EditMedicationScreen';
 import ReportsScreen from '../features/home/screens/child/ReportsScreen';
 import ChildSettingsScreen from '../features/settings/screens/child/SettingsScreen';
 import EnterCodeScreen from '../features/family/screens/child/EnterCodeScreen';
@@ -61,6 +63,16 @@ const MedicationsStack = () => (
       name="MedicationManage"
       component={MedicationManageScreen}
       options={{ title: '약 관리' }}
+    />
+    <Stack.Screen
+      name="AddMedication"
+      component={AddMedicationScreen}
+      options={{ title: '약 추가' }}
+    />
+    <Stack.Screen
+      name="EditMedication"
+      component={EditMedicationScreen}
+      options={{ title: '약 수정' }}
     />
   </Stack.Navigator>
 );

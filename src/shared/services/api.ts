@@ -719,6 +719,39 @@ export const createMedicationFromForm = async (
 };
 
 /**
+ * 자녀가 부모님 약을 등록 (parentId 지정)
+ *
+ * @example
+ * const result = await createMedicationForParent('parent-uuid', {
+ *   name: '혈압약',
+ *   dosage: '1정',
+ *   frequency: 'daily_2',
+ *   reminder_times: ['09:00', '21:00'],
+ *   start_date: '2024-01-01',
+ * });
+ */
+export const createMedicationForParent = async (
+  parentId: string,
+  formData: MedicationFormData
+): Promise<{ medication: Medication; notificationIds: string[] }> => {
+  // 폼 데이터를 Medication 타입으로 변환
+  const medicationData: Omit<Medication, 'id' | 'created_at'> = {
+    user_id: parentId,
+    name: formData.name.trim(),
+    dosage: formData.dosage.trim(),
+    frequency: formData.frequency,
+    reminder_times: formData.reminder_times,
+    start_date: formData.start_date,
+    end_date: formData.end_date || undefined,
+    notes: formData.notes?.trim() || undefined,
+    active: true,
+  };
+
+  // 약 생성 및 알림 예약
+  return createMedicationWithNotifications(medicationData);
+};
+
+/**
  * 모든 활성 약에 대해 알림 일괄 예약
  * (앱 재시작 시 또는 권한 허용 직후 사용)
  */
@@ -943,32 +976,6 @@ export const getMonthlyAdherenceData = async (
   });
 
   return result;
-};
-
-/**
- * Create medication for parent (by child)
- * @param parentId - Parent user ID
- * @param formData - Medication form data
- * @returns Created medication
- */
-export const createMedicationForParent = async (
-  parentId: string,
-  formData: MedicationFormData
-): Promise<Medication> => {
-  const medicationData: Omit<Medication, 'id' | 'created_at'> = {
-    user_id: parentId,
-    name: formData.name.trim(),
-    dosage: formData.dosage.trim(),
-    frequency: formData.frequency,
-    reminder_times: formData.reminder_times,
-    start_date: formData.start_date,
-    end_date: formData.end_date || undefined,
-    notes: formData.notes?.trim() || undefined,
-    active: true,
-  };
-
-  const medication = await createMedication(medicationData);
-  return medication;
 };
 
 /**

@@ -248,7 +248,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
             {user?.name || '사용자'}
           </Text>
           <Text
-            className="text-xl text-gray-500 mb-4"
+            className="text-xl text-gray-700 mb-4"
             accessibilityLabel={`이메일: ${user?.email || ''}`}
           >
             {user?.email || ''}
@@ -272,6 +272,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
             className="bg-white h-[72px] flex-row items-center justify-between px-6 rounded-2xl border-2 border-gray-200 shadow-sm"
             accessibilityLabel="음성 안내 설정"
             accessibilityRole="adjustable"
+            accessibilityState={{ checked: voiceEnabled }}
           >
             <View className="flex-row items-center flex-1">
               <Text className="text-4xl mr-4">🔊</Text>
@@ -293,7 +294,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
           {/* Voice test button - only show when voice is enabled */}
           {voiceEnabled && (
             <TouchableOpacity
-              className="bg-primary-50 h-14 flex-row items-center justify-center px-6 rounded-xl border-2 border-primary gap-2"
+              className="bg-primary h-14 flex-row items-center justify-center px-6 rounded-xl border-2 border-primary gap-2"
               onPress={handleTestVoice}
               activeOpacity={0.7}
               accessibilityLabel="음성 테스트"
@@ -301,7 +302,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
               accessibilityRole="button"
             >
               <Text className="text-2xl">🎧</Text>
-              <Text className="text-lg font-semibold text-primary">음성 테스트</Text>
+              <Text className="text-lg font-semibold text-white">음성 테스트</Text>
             </TouchableOpacity>
           )}
 
@@ -387,6 +388,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
             className="bg-white h-[72px] flex-row items-center justify-between px-6 rounded-2xl border-2 border-gray-200 shadow-sm"
             accessibilityLabel="진동 설정"
             accessibilityRole="adjustable"
+            accessibilityState={{ checked: vibrationEnabled }}
           >
             <View className="flex-row items-center flex-1">
               <Text className="text-4xl mr-4">📳</Text>
@@ -431,7 +433,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
                         </View>
                         <View>
                           <Text className="text-lg font-semibold text-gray-900">{child.name}</Text>
-                          <Text className="text-sm text-gray-500 mt-0.5">자녀</Text>
+                          <Text className="text-sm text-gray-700 mt-0.5">자녀</Text>
                         </View>
                       </View>
                       <TouchableOpacity
@@ -446,7 +448,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
                 })}
               </View>
             ) : (
-              <Text className="text-lg text-gray-400 text-center py-4">연결된 자녀가 없습니다</Text>
+              <Text className="text-lg text-gray-700 text-center py-4">연결된 자녀가 없습니다</Text>
             )}
 
             {/* Generate invitation code button */}
@@ -480,7 +482,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
         </View>
 
         {/* App version */}
-        <Text className="text-lg text-gray-400 text-center mt-8">PillCare v0.1.0</Text>
+        <Text className="text-lg text-gray-700 text-center mt-8">PillCare v0.1.0</Text>
       </ScrollView>
     </SafeAreaView>
   );

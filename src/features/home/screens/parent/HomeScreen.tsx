@@ -287,7 +287,7 @@ const ParentHomeScreen = ({ navigation }: Props) => {
             </View>
 
             {/* Scheduled time */}
-            <Text className="text-xl text-gray-400">{med.scheduled_time}</Text>
+            <Text className="text-xl text-gray-700">{med.scheduled_time}</Text>
           </TouchableOpacity>
         ))}
 

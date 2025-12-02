@@ -26,6 +26,7 @@ import AppointmentListScreen from '../features/appointments/screens/child/Appoin
 import AppointmentDetailScreen from '../features/appointments/screens/child/AppointmentDetailScreen';
 import AddAppointmentScreen from '../features/appointments/screens/child/AddAppointmentScreen';
 import EditAppointmentScreen from '../features/appointments/screens/child/EditAppointmentScreen';
+import ProfileEditScreen from '../features/settings/screens/child/ProfileEditScreen';
 
 const Tab = createBottomTabNavigator<ChildTabParamList>();
 const Stack = createNativeStackNavigator<ChildStackParamList>();
@@ -129,6 +130,11 @@ const SettingsStack = () => (
       name="EnterCode"
       component={EnterCodeScreen}
       options={{ title: '초대 코드 입력' }}
+    />
+    <Stack.Screen
+      name="ProfileEdit"
+      component={ProfileEditScreen}
+      options={{ title: '프로필 수정' }}
     />
   </Stack.Navigator>
 );

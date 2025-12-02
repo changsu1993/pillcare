@@ -248,11 +248,21 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
             {user?.name || '사용자'}
           </Text>
           <Text
-            className="text-xl text-gray-500"
+            className="text-xl text-gray-500 mb-4"
             accessibilityLabel={`이메일: ${user?.email || ''}`}
           >
             {user?.email || ''}
           </Text>
+          <TouchableOpacity
+            className="flex-row items-center gap-2 bg-gray-100 px-6 py-3 rounded-xl"
+            onPress={() => navigation.navigate('ProfileEdit')}
+            activeOpacity={0.7}
+            accessibilityLabel="프로필 수정"
+            accessibilityRole="button"
+          >
+            <Ionicons name="create-outline" size={24} color="#374151" />
+            <Text className="text-xl font-semibold text-gray-700">프로필 수정</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Settings options */}

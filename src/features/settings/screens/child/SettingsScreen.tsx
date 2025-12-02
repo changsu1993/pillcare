@@ -240,6 +240,14 @@ const ChildSettingsScreen = () => {
                 <Text className="text-xs font-semibold text-primary">자녀</Text>
               </View>
             </View>
+            <TouchableOpacity
+              className="w-10 h-10 rounded-full bg-gray-100 justify-center items-center"
+              onPress={() => navigation.navigate('ProfileEdit')}
+              accessibilityLabel="프로필 수정"
+              accessibilityRole="button"
+            >
+              <Ionicons name="create-outline" size={20} color="#6B7280" />
+            </TouchableOpacity>
           </View>
         </View>
 

@@ -172,7 +172,11 @@ export const scheduleMedicationNotifications = async (
       });
 
       notificationIds.push(notificationId);
-      console.log(`알림 예약됨: ${medication.name} - ${timeString} (ID: ${notificationId})`);
+      // SECURITY: Only log in development mode to prevent data leakage
+      // Reference: OWASP - Security Logging and Monitoring Failures (A09:2021)
+      if (__DEV__) {
+        console.log(`알림 예약됨: ${medication.name} - ${timeString} (ID: ${notificationId})`);
+      }
     }
 
     return notificationIds;
@@ -198,7 +202,9 @@ export const cancelMedicationNotifications = async (notificationIds: string[]): 
   try {
     for (const id of notificationIds) {
       await Notifications.cancelScheduledNotificationAsync(id);
-      console.log(`알림 취소됨: ${id}`);
+      if (__DEV__) {
+        console.log(`알림 취소됨: ${id}`);
+      }
     }
   } catch (error) {
     console.error('알림 취소 실패:', error);
@@ -218,7 +224,9 @@ export const cancelMedicationNotifications = async (notificationIds: string[]): 
 export const cancelAllNotifications = async (): Promise<void> => {
   try {
     await Notifications.cancelAllScheduledNotificationsAsync();
-    console.log('모든 알림이 취소되었습니다.');
+    if (__DEV__) {
+      console.log('모든 알림이 취소되었습니다.');
+    }
   } catch (error) {
     console.error('모든 알림 취소 실패:', error);
     throw error;
@@ -242,7 +250,9 @@ export const getAllScheduledNotifications = async (): Promise<
 > => {
   try {
     const notifications = await Notifications.getAllScheduledNotificationsAsync();
-    console.log(`예약된 알림 개수: ${notifications.length}`);
+    if (__DEV__) {
+      console.log(`예약된 알림 개수: ${notifications.length}`);
+    }
     return notifications;
   } catch (error) {
     console.error('예약된 알림 조회 실패:', error);
@@ -278,7 +288,9 @@ export const rescheduleMedicationNotifications = async (
     // 새로운 알림 예약
     const newIds = await scheduleMedicationNotifications(medication);
 
-    console.log(`알림 재예약 완료: ${medication.name} (${newIds.length}개 알림)`);
+    if (__DEV__) {
+      console.log(`알림 재예약 완료: ${medication.name} (${newIds.length}개 알림)`);
+    }
     return newIds;
   } catch (error) {
     console.error('알림 재예약 실패:', error);
@@ -322,7 +334,9 @@ export const getExpoPushToken = async (): Promise<string | null> => {
       projectId,
     });
 
-    console.log('Expo Push Token:', token.data);
+    if (__DEV__) {
+      console.log('Expo Push Token:', token.data);
+    }
     return token.data;
   } catch (error) {
     console.error('Push Token 가져오기 실패:', error);
@@ -388,7 +402,9 @@ export const sendMissedMedicationNotificationToChild = async ({
       trigger: null, // 즉시 전송
     });
 
-    console.log(`미복용 알림 전송 (로컬): ${parentName} - ${medicationName}`);
+    if (__DEV__) {
+      console.log(`미복용 알림 전송 (로컬): ${parentName} - ${medicationName}`);
+    }
   } catch (error) {
     console.error('미복용 알림 전송 실패:', error);
     // 에러가 발생해도 앱이 중단되지 않도록 함
@@ -476,7 +492,9 @@ export const sendTestNotification = async (): Promise<void> => {
       },
     });
 
-    console.log('테스트 알림이 5초 후 전송됩니다.');
+    if (__DEV__) {
+      console.log('테스트 알림이 5초 후 전송됩니다.');
+    }
   } catch (error) {
     console.error('테스트 알림 전송 실패:', error);
     throw error;

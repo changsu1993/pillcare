@@ -139,23 +139,47 @@ PillCare/
 ### Parent App
 - [x] Medication reminder notifications (large text, vibration)
 - [x] Simple "Took it / Missed it" 2-button UI
-- [ ] Medication history view (calendar)
-- [ ] Voice guidance feature
+- [x] Medication history view (calendar)
+- [x] Voice guidance feature
 - [x] Large, high-contrast UI design (NativeWind)
 
 ### Child App
 - [x] Parent's medication timeline view
 - [x] Push notifications on missed medications
-- [ ] Hospital appointment management
+- [x] Hospital appointment management
 - [x] Configure medication reminder times
 - [x] Weekly/monthly adherence reports (charts)
 
 ### Common Features
 - [x] Sign up / Login (email)
+- [ ] Social login (Google, Apple) - 코드 구현 완료, Provider 설정 필요
 - [x] Password reset with deep linking
 - [x] Family connection (invitation code system)
 - [x] Profile management
 - [x] Settings (notification preferences, etc.)
+
+## Pending Setup (설정 대기)
+
+### Social Login OAuth Provider 설정
+소셜 로그인 코드는 구현 완료. 아래 설정이 완료되면 동작함.
+
+#### Google OAuth
+1. **Google Cloud Console** (https://console.cloud.google.com)
+   - OAuth 동의 화면 설정
+   - OAuth 2.0 Client ID 생성 (Web application)
+   - Redirect URI: `https://pdvqnafeogbyrqdorxie.supabase.co/auth/v1/callback`
+
+2. **Supabase Console** → Authentication → Providers → Google
+   - Client ID, Client Secret 입력
+
+#### Apple OAuth
+1. **Apple Developer** (https://developer.apple.com)
+   - App ID에 Sign in with Apple capability 추가
+   - Services ID 생성 (com.pillcare.app.web)
+   - Key 생성 및 .p8 파일 다운로드
+
+2. **Supabase Console** → Authentication → Providers → Apple
+   - Service ID, Team ID, Key ID, Private Key 입력
 
 ## Monetization Strategy
 

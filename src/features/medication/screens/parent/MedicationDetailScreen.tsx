@@ -184,11 +184,11 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
 
               return (
                 <View key={index} className="items-center w-[14%]">
-                  <Text className="text-sm text-gray-600 mb-2">{dateStr}</Text>
+                  <Text className="text-sm text-gray-700 mb-2">{dateStr}</Text>
                   <View className="w-10 h-10 justify-center items-center">
                     {allTaken && <Text className="text-3xl text-success">✓</Text>}
                     {someMissed && <Text className="text-3xl text-error">✗</Text>}
-                    {isPending && <Text className="text-3xl text-gray-400">○</Text>}
+                    {isPending && <Text className="text-3xl text-gray-700">○</Text>}
                   </View>
                 </View>
               );
@@ -205,6 +205,7 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
             onPress={() => navigation.goBack()}
             activeOpacity={0.7}
             accessibilityLabel="뒤로 가기"
+            accessibilityHint="이전 화면으로 돌아갑니다"
             accessibilityRole="button"
           >
             <Text className="text-2xl font-bold text-white">뒤로</Text>
@@ -223,6 +224,7 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
             onPress={handleDelete}
             activeOpacity={0.7}
             accessibilityLabel="약 삭제"
+            accessibilityHint="삭제 확인 화면이 표시됩니다"
             accessibilityRole="button"
           >
             <Text className="text-2xl font-bold text-white">삭제</Text>

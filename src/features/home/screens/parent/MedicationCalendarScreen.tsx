@@ -311,13 +311,13 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
               <Text className={`text-5xl font-bold ${getRateTextColor(monthlyStats.rate)}`}>
                 {monthlyStats.rate}%
               </Text>
-              <Text className="text-base text-gray-500 mt-2">복약률</Text>
+              <Text className="text-base text-gray-700 mt-2">복약률</Text>
             </View>
             <View className="items-center">
               <Text className="text-3xl font-bold text-gray-900">
                 {monthlyStats.taken}/{monthlyStats.total}
               </Text>
-              <Text className="text-base text-gray-500 mt-2">복용/예정</Text>
+              <Text className="text-base text-gray-700 mt-2">복용/예정</Text>
             </View>
           </View>
         </View>
@@ -328,8 +328,9 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
           <View className="flex-row justify-between items-center mb-5">
             <TouchableOpacity
               onPress={goToPreviousMonth}
-              className="p-3 rounded-xl bg-gray-100 min-h-[52px] min-w-[52px] items-center justify-center"
+              className="p-3 rounded-xl bg-gray-100 min-h-[60px] min-w-[60px] items-center justify-center"
               accessibilityLabel="이전 달"
+              accessibilityHint="이전 달의 복약 이력을 확인합니다"
               accessibilityRole="button"
             >
               <Ionicons name="chevron-back" size={28} color="#374151" />
@@ -339,8 +340,9 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
             </Text>
             <TouchableOpacity
               onPress={goToNextMonth}
-              className="p-3 rounded-xl bg-gray-100 min-h-[52px] min-w-[52px] items-center justify-center"
+              className="p-3 rounded-xl bg-gray-100 min-h-[60px] min-w-[60px] items-center justify-center"
               accessibilityLabel="다음 달"
+              accessibilityHint="다음 달의 복약 이력을 확인합니다"
               accessibilityRole="button"
             >
               <Ionicons name="chevron-forward" size={28} color="#374151" />
@@ -377,7 +379,7 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
                         ]
                       }
                       onPress={() => day && handleDayPress(day)}
-                      className={`flex-1 aspect-square rounded-xl justify-center items-center ${dayStyle.bgClass} ${dayStyle.borderClass} min-h-[44px]`}
+                      className={`flex-1 aspect-square rounded-xl justify-center items-center ${dayStyle.bgClass} ${dayStyle.borderClass} min-h-[60px]`}
                       accessibilityLabel={day ? `${day}일` : ''}
                       accessibilityRole="button"
                     >
@@ -424,7 +426,7 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
 
             {selectedDayLogs.length === 0 ? (
               <View className="py-8 items-center">
-                <Text className="text-xl text-gray-500">이날은 복약 기록이 없습니다</Text>
+                <Text className="text-xl text-gray-700">이날은 복약 기록이 없습니다</Text>
               </View>
             ) : (
               <View className="gap-4">
@@ -444,7 +446,7 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
                       )}
                     </View>
                     <Text className="text-lg text-gray-700 mb-1">{log.dosage}</Text>
-                    <Text className="text-lg text-gray-500">{log.scheduledTime}</Text>
+                    <Text className="text-lg text-gray-700">{log.scheduledTime}</Text>
                     <Text
                       className={`text-lg font-semibold mt-2 ${
                         log.taken ? 'text-success' : 'text-error'

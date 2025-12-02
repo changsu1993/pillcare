@@ -127,7 +127,7 @@ const InvitationCodeScreen = (_props: Props) => {
 
         {/* Code Display */}
         <View className="bg-white p-8 rounded-3xl items-center mb-6 border-[3px] border-success shadow-lg">
-          <Text className="text-lg font-semibold text-gray-500 mb-4">초대 코드</Text>
+          <Text className="text-lg font-semibold text-gray-700 mb-4">초대 코드</Text>
           <Text
             className="text-5xl font-bold text-gray-900 tracking-[8px] mb-4"
             accessibilityLabel={`초대 코드 ${invitationCode?.split('').join(' ')}`}
@@ -136,7 +136,7 @@ const InvitationCodeScreen = (_props: Props) => {
           </Text>
           <View className="flex-row items-center gap-2">
             <Ionicons name="time-outline" size={20} color="#6B7280" />
-            <Text className="text-base text-gray-500">24시간 후 만료됩니다</Text>
+            <Text className="text-base text-gray-700">24시간 후 만료됩니다</Text>
           </View>
         </View>
 
@@ -178,7 +178,7 @@ const InvitationCodeScreen = (_props: Props) => {
                 </View>
                 <View className="flex-1 ml-4">
                   <Text className="text-lg font-semibold text-gray-900">{child.name}</Text>
-                  <Text className="text-sm text-gray-500 mt-0.5">{child.email}</Text>
+                  <Text className="text-sm text-gray-700 mt-0.5">{child.email}</Text>
                 </View>
                 <Ionicons name="checkmark-circle" size={28} color="#22C55E" />
               </View>

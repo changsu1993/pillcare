@@ -226,11 +226,11 @@ describe('Notifications Service', () => {
         reminder_times: ['09:00'],
       });
 
-      mockNotifications.scheduleNotificationAsync.mockRejectedValue(
-        new Error('Scheduling failed')
-      );
+      mockNotifications.scheduleNotificationAsync.mockRejectedValue(new Error('Scheduling failed'));
 
-      await expect(scheduleMedicationNotifications(medication)).rejects.toThrow('Scheduling failed');
+      await expect(scheduleMedicationNotifications(medication)).rejects.toThrow(
+        'Scheduling failed'
+      );
     });
 
     it('should handle empty reminder times', async () => {

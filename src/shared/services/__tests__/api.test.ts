@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * API Service Tests
  *
@@ -647,12 +648,7 @@ describe('Child App API', () => {
         gte: jest.fn().mockReturnThis(),
         lte: jest.fn().mockReturnThis(),
         order: jest.fn().mockResolvedValue({
-          data: [
-            { taken: true },
-            { taken: true },
-            { taken: true },
-            { taken: false },
-          ],
+          data: [{ taken: true }, { taken: true }, { taken: true }, { taken: false }],
           error: null,
         }),
       };

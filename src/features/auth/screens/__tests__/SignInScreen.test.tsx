@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 /**
  * SignInScreen Tests
  *
@@ -44,7 +45,9 @@ describe('SignInScreen', () => {
 
       expect(getByText('sign')).toBeTruthy();
       expect(getByPlaceholderText('example@email.com')).toBeTruthy();
-      expect(getByPlaceholderText(expect.stringContaining('password') || expect.stringContaining('비밀'))).toBeTruthy();
+      expect(
+        getByPlaceholderText(expect.stringContaining('password') || expect.stringContaining('비밀'))
+      ).toBeTruthy();
     });
 
     it('should render back button', () => {
@@ -52,7 +55,9 @@ describe('SignInScreen', () => {
         <SignInScreen navigation={mockNavigation as any} route={mockRoute as any} />
       );
 
-      expect(getByText(expect.stringContaining('back') || expect.stringContaining('뒤로'))).toBeTruthy();
+      expect(
+        getByText(expect.stringContaining('back') || expect.stringContaining('뒤로'))
+      ).toBeTruthy();
     });
 
     it('should render forgot password link', () => {
@@ -60,7 +65,9 @@ describe('SignInScreen', () => {
         <SignInScreen navigation={mockNavigation as any} route={mockRoute as any} />
       );
 
-      expect(getByText(expect.stringContaining('password') || expect.stringContaining('비밀번호'))).toBeTruthy();
+      expect(
+        getByText(expect.stringContaining('password') || expect.stringContaining('비밀번호'))
+      ).toBeTruthy();
     });
 
     it('should render sign up link', () => {
@@ -68,7 +75,9 @@ describe('SignInScreen', () => {
         <SignInScreen navigation={mockNavigation as any} route={mockRoute as any} />
       );
 
-      expect(getByText(expect.stringContaining('signup') || expect.stringContaining('회원가입'))).toBeTruthy();
+      expect(
+        getByText(expect.stringContaining('signup') || expect.stringContaining('회원가입'))
+      ).toBeTruthy();
     });
   });
 
@@ -200,7 +209,18 @@ describe('SignInScreen', () => {
 
     it('should show loading indicator during sign in', async () => {
       mockSignIn.mockImplementation(
-        () => new Promise((resolve) => setTimeout(resolve, 100))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  user: { id: 'test' } as any,
+                  session: {} as any,
+                  weakPassword: undefined,
+                }),
+              100
+            )
+          )
       );
 
       const { getByPlaceholderText, getByText, getByTestId } = render(

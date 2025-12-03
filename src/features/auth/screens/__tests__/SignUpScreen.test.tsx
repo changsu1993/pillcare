@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 /**
  * SignUpScreen Tests
  *
@@ -115,7 +116,10 @@ describe('SignUpScreen', () => {
 
       fireEvent.changeText(getByPlaceholderText('홍길동'), 'Test User');
       fireEvent.changeText(getByPlaceholderText('example@email.com'), 'test@example.com');
-      fireEvent.changeText(getByPlaceholderText(expect.stringContaining('비밀번호를 입력')), 'short1');
+      fireEvent.changeText(
+        getByPlaceholderText(expect.stringContaining('비밀번호를 입력')),
+        'short1'
+      );
       fireEvent.changeText(getByPlaceholderText(expect.stringContaining('다시 입력')), 'short1');
 
       const signupButton = getByText('회원가입');
@@ -139,7 +143,10 @@ describe('SignUpScreen', () => {
 
       fireEvent.changeText(getByPlaceholderText('홍길동'), 'Test User');
       fireEvent.changeText(getByPlaceholderText('example@email.com'), 'test@example.com');
-      fireEvent.changeText(getByPlaceholderText(expect.stringContaining('비밀번호를 입력')), '12345678');
+      fireEvent.changeText(
+        getByPlaceholderText(expect.stringContaining('비밀번호를 입력')),
+        '12345678'
+      );
       fireEvent.changeText(getByPlaceholderText(expect.stringContaining('다시 입력')), '12345678');
 
       const signupButton = getByText('회원가입');
@@ -163,7 +170,10 @@ describe('SignUpScreen', () => {
 
       fireEvent.changeText(getByPlaceholderText('홍길동'), 'Test User');
       fireEvent.changeText(getByPlaceholderText('example@email.com'), 'test@example.com');
-      fireEvent.changeText(getByPlaceholderText(expect.stringContaining('비밀번호를 입력')), 'abcdefgh');
+      fireEvent.changeText(
+        getByPlaceholderText(expect.stringContaining('비밀번호를 입력')),
+        'abcdefgh'
+      );
       fireEvent.changeText(getByPlaceholderText(expect.stringContaining('다시 입력')), 'abcdefgh');
 
       const signupButton = getByText('회원가입');
@@ -187,7 +197,10 @@ describe('SignUpScreen', () => {
 
       fireEvent.changeText(getByPlaceholderText('홍길동'), 'Test User');
       fireEvent.changeText(getByPlaceholderText('example@email.com'), 'test@example.com');
-      fireEvent.changeText(getByPlaceholderText(expect.stringContaining('비밀번호를 입력')), 'password1');
+      fireEvent.changeText(
+        getByPlaceholderText(expect.stringContaining('비밀번호를 입력')),
+        'password1'
+      );
       fireEvent.changeText(getByPlaceholderText(expect.stringContaining('다시 입력')), 'password2');
 
       const signupButton = getByText('회원가입');
@@ -206,11 +219,18 @@ describe('SignUpScreen', () => {
   });
 
   describe('Sign Up Flow', () => {
-    const fillValidForm = (getByPlaceholderText: any, getByText: any, role: 'parent' | 'child' = 'child') => {
+    const fillValidForm = (
+      getByPlaceholderText: any,
+      getByText: any,
+      role: 'parent' | 'child' = 'child'
+    ) => {
       fireEvent.changeText(getByPlaceholderText('홍길동'), 'Test User');
       fireEvent.changeText(getByPlaceholderText('example@email.com'), 'test@example.com');
       fireEvent.changeText(getByPlaceholderText('010-1234-5678'), '010-1234-5678');
-      fireEvent.changeText(getByPlaceholderText(expect.stringContaining('비밀번호를 입력')), 'password1');
+      fireEvent.changeText(
+        getByPlaceholderText(expect.stringContaining('비밀번호를 입력')),
+        'password1'
+      );
       fireEvent.changeText(getByPlaceholderText(expect.stringContaining('다시 입력')), 'password1');
 
       if (role === 'parent') {
@@ -401,7 +421,10 @@ describe('SignUpScreen', () => {
 
       fireEvent.changeText(getByPlaceholderText('홍길동'), '  Test User  ');
       fireEvent.changeText(getByPlaceholderText('example@email.com'), '  test@example.com  ');
-      fireEvent.changeText(getByPlaceholderText(expect.stringContaining('비밀번호를 입력')), 'password1');
+      fireEvent.changeText(
+        getByPlaceholderText(expect.stringContaining('비밀번호를 입력')),
+        'password1'
+      );
       fireEvent.changeText(getByPlaceholderText(expect.stringContaining('다시 입력')), 'password1');
 
       const signupButton = getByText('회원가입');
@@ -434,7 +457,10 @@ describe('SignUpScreen', () => {
       // Fill only required fields (no phone)
       fireEvent.changeText(getByPlaceholderText('홍길동'), 'Test User');
       fireEvent.changeText(getByPlaceholderText('example@email.com'), 'test@example.com');
-      fireEvent.changeText(getByPlaceholderText(expect.stringContaining('비밀번호를 입력')), 'password1');
+      fireEvent.changeText(
+        getByPlaceholderText(expect.stringContaining('비밀번호를 입력')),
+        'password1'
+      );
       fireEvent.changeText(getByPlaceholderText(expect.stringContaining('다시 입력')), 'password1');
 
       const signupButton = getByText('회원가입');
@@ -452,7 +478,8 @@ describe('SignUpScreen', () => {
   describe('Loading State', () => {
     it('should disable form during loading', async () => {
       mockSignUp.mockImplementation(
-        () => new Promise((resolve) => setTimeout(resolve, 500))
+        () =>
+          new Promise((resolve) => setTimeout(() => resolve({ user: null, session: null }), 500))
       );
 
       const { getByPlaceholderText, getByText } = render(
@@ -461,7 +488,10 @@ describe('SignUpScreen', () => {
 
       fireEvent.changeText(getByPlaceholderText('홍길동'), 'Test User');
       fireEvent.changeText(getByPlaceholderText('example@email.com'), 'test@example.com');
-      fireEvent.changeText(getByPlaceholderText(expect.stringContaining('비밀번호를 입력')), 'password1');
+      fireEvent.changeText(
+        getByPlaceholderText(expect.stringContaining('비밀번호를 입력')),
+        'password1'
+      );
       fireEvent.changeText(getByPlaceholderText(expect.stringContaining('다시 입력')), 'password1');
 
       const signupButton = getByText('회원가입');

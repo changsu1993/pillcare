@@ -174,7 +174,30 @@ export const createMockRoute = <T extends object>(params?: T) => ({
 
 // Supabase query builder mock helpers
 export const createMockQueryBuilder = <T,>(resolvedData: T | null, error: Error | null = null) => {
-  const builder = {
+  type QueryBuilder = {
+    select: jest.Mock;
+    insert: jest.Mock;
+    update: jest.Mock;
+    delete: jest.Mock;
+    upsert: jest.Mock;
+    eq: jest.Mock;
+    neq: jest.Mock;
+    gt: jest.Mock;
+    gte: jest.Mock;
+    lt: jest.Mock;
+    lte: jest.Mock;
+    like: jest.Mock;
+    ilike: jest.Mock;
+    is: jest.Mock;
+    in: jest.Mock;
+    or: jest.Mock;
+    order: jest.Mock;
+    limit: jest.Mock;
+    single: jest.Mock;
+    then?: (resolve: (value: { data: unknown[]; error: Error | null }) => void) => void;
+  };
+
+  const builder: QueryBuilder = {
     select: jest.fn().mockReturnThis(),
     insert: jest.fn().mockReturnThis(),
     update: jest.fn().mockReturnThis(),
@@ -198,9 +221,10 @@ export const createMockQueryBuilder = <T,>(resolvedData: T | null, error: Error 
 
   // Also return data directly for queries without .single()
   builder.select = jest.fn().mockImplementation(() => {
-    const chainableBuilder = { ...builder };
+    const chainableBuilder: QueryBuilder = { ...builder };
     // Override to return array data
-    chainableBuilder.then = (resolve: (value: { data: unknown[]; error: Error | null }) => void) => resolve({ data: resolvedData ? [resolvedData] : [], error });
+    chainableBuilder.then = (resolve: (value: { data: unknown[]; error: Error | null }) => void) =>
+      resolve({ data: resolvedData ? [resolvedData] : [], error });
     return chainableBuilder;
   });
 

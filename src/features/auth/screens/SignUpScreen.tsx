@@ -40,8 +40,19 @@ const SignUpScreen = ({ navigation }: Props) => {
       return;
     }
 
-    if (password.length < 6) {
-      Alert.alert('비밀번호 오류', '비밀번호는 6자 이상이어야 합니다.');
+    // SECURITY: Enforce strong password policy
+    // Reference: OWASP - Identification and Authentication Failures (A07:2021)
+    // Requirements: At least 8 characters, at least one letter, at least one number
+    if (password.length < 8) {
+      Alert.alert('비밀번호 오류', '비밀번호는 8자 이상이어야 합니다.');
+      return;
+    }
+
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+
+    if (!hasLetter || !hasNumber) {
+      Alert.alert('비밀번호 오류', '비밀번호는 영문자와 숫자를 모두 포함해야 합니다.');
       return;
     }
 
@@ -187,7 +198,7 @@ const SignUpScreen = ({ navigation }: Props) => {
             {/* Password input */}
             <View className="mb-4">
               <Text className="text-sm font-semibold text-gray-900 mb-2">
-                비밀번호 * (6자 이상)
+                비밀번호 * (8자 이상, 영문+숫자 포함)
               </Text>
               <TextInput
                 className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"

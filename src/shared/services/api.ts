@@ -594,9 +594,13 @@ export const createMedicationWithNotifications = async (
     const notificationIds = await scheduleMedicationNotifications(savedMedication);
     notificationSchedules.set(savedMedication.id, notificationIds);
 
-    console.log(
-      `약 생성 및 알림 예약 완료: ${savedMedication.name} (${notificationIds.length}개 알림)`
-    );
+    // SECURITY: Only log in development mode to prevent data leakage
+    // Reference: OWASP - Security Logging and Monitoring Failures (A09:2021)
+    if (__DEV__) {
+      console.log(
+        `약 생성 및 알림 예약 완료: ${savedMedication.name} (${notificationIds.length}개 알림)`
+      );
+    }
 
     return { medication: savedMedication, notificationIds };
   } catch (error) {
@@ -625,9 +629,11 @@ export const updateMedicationWithNotifications = async (
     );
     notificationSchedules.set(medicationId, newNotificationIds);
 
-    console.log(
-      `약 업데이트 및 알림 재예약 완료: ${updatedMedication.name} (${newNotificationIds.length}개 알림)`
-    );
+    if (__DEV__) {
+      console.log(
+        `약 업데이트 및 알림 재예약 완료: ${updatedMedication.name} (${newNotificationIds.length}개 알림)`
+      );
+    }
 
     return { medication: updatedMedication, notificationIds: newNotificationIds };
   } catch (error) {
@@ -646,7 +652,9 @@ export const deleteMedicationWithNotifications = async (medicationId: string): P
     if (notificationIds.length > 0) {
       await cancelMedicationNotifications(notificationIds);
       notificationSchedules.delete(medicationId);
-      console.log(`약 삭제 및 알림 취소 완료: ${medicationId}`);
+      if (__DEV__) {
+        console.log(`약 삭제 및 알림 취소 완료: ${medicationId}`);
+      }
     }
   } catch (error) {
     console.error('알림 취소 실패:', error);
@@ -766,7 +774,9 @@ export const scheduleAllMedicationNotifications = async (): Promise<void> => {
       }
     }
 
-    console.log(`총 ${medications.length}개 약의 알림이 예약되었습니다.`);
+    if (__DEV__) {
+      console.log(`총 ${medications.length}개 약의 알림이 예약되었습니다.`);
+    }
   } catch (error) {
     console.error('일괄 알림 예약 실패:', error);
     throw error;
@@ -1023,7 +1033,9 @@ export const savePushToken = async (token: string): Promise<void> => {
     .eq('id', user.id);
 
   if (error) throw error;
-  console.log('푸시 토큰 저장 완료');
+  if (__DEV__) {
+    console.log('푸시 토큰 저장 완료');
+  }
 };
 
 /**
@@ -1286,7 +1298,9 @@ export const subscribeMissedMedicationEvents = (
         filter: `parent_id=eq.${parentId}`,
       },
       (payload) => {
-        console.log('새 미복용 이벤트 수신:', payload);
+        if (__DEV__) {
+          console.log('새 미복용 이벤트 수신:', payload);
+        }
         callback(payload.new as MissedMedicationEvent);
       }
     )

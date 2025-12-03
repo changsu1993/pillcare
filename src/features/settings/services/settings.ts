@@ -85,7 +85,11 @@ export const saveSettings = async (settings: Partial<AppSettings>): Promise<AppS
     // Save to storage
     await AsyncStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
 
-    console.log('[SettingsService] Settings saved:', updated);
+    // SECURITY: Only log in development mode to prevent data leakage
+    // Reference: OWASP - Security Logging and Monitoring Failures (A09:2021)
+    if (__DEV__) {
+      console.log('[SettingsService] Settings saved:', updated);
+    }
     return updated;
   } catch (error) {
     console.error('[SettingsService] Error saving settings:', error);

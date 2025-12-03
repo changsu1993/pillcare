@@ -162,24 +162,27 @@ const ParentHomeScreen = ({ navigation }: Props) => {
             </View>
           )}
 
-          {/* 개발/테스트용 버튼 */}
-          <View className="bg-gray-100 rounded-xl p-4 mb-4 border border-gray-300">
-            <Text className="text-sm font-semibold text-gray-600 mb-3">개발자 도구</Text>
-            <View className="flex-row gap-2">
-              <TouchableOpacity
-                className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
-                onPress={handleTestNotification}
-              >
-                <Text className="text-xs font-semibold text-white">테스트 알림</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
-                onPress={handleCheckScheduledNotifications}
-              >
-                <Text className="text-xs font-semibold text-white">예약된 알림 확인</Text>
-              </TouchableOpacity>
+          {/* 개발/테스트용 버튼 - SECURITY: Only show in development mode */}
+          {/* Reference: OWASP - Security Misconfiguration (A05:2021) */}
+          {__DEV__ && (
+            <View className="bg-gray-100 rounded-xl p-4 mb-4 border border-gray-300">
+              <Text className="text-sm font-semibold text-gray-600 mb-3">개발자 도구</Text>
+              <View className="flex-row gap-2">
+                <TouchableOpacity
+                  className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
+                  onPress={handleTestNotification}
+                >
+                  <Text className="text-xs font-semibold text-white">테스트 알림</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
+                  onPress={handleCheckScheduledNotifications}
+                >
+                  <Text className="text-xs font-semibold text-white">예약된 알림 확인</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          )}
 
           <View className="justify-center items-center py-16">
             <Text className="text-8xl mb-6">✓</Text>
@@ -237,24 +240,27 @@ const ParentHomeScreen = ({ navigation }: Props) => {
           </View>
         )}
 
-        {/* 개발/테스트용 버튼 */}
-        <View className="bg-gray-100 rounded-xl p-4 mb-4 border border-gray-300">
-          <Text className="text-sm font-semibold text-gray-600 mb-3">개발자 도구</Text>
-          <View className="flex-row gap-2">
-            <TouchableOpacity
-              className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
-              onPress={handleTestNotification}
-            >
-              <Text className="text-xs font-semibold text-white">테스트 알림</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
-              onPress={handleCheckScheduledNotifications}
-            >
-              <Text className="text-xs font-semibold text-white">예약된 알림 확인</Text>
-            </TouchableOpacity>
+        {/* 개발/테스트용 버튼 - SECURITY: Only show in development mode */}
+        {/* Reference: OWASP - Security Misconfiguration (A05:2021) */}
+        {__DEV__ && (
+          <View className="bg-gray-100 rounded-xl p-4 mb-4 border border-gray-300">
+            <Text className="text-sm font-semibold text-gray-600 mb-3">개발자 도구</Text>
+            <View className="flex-row gap-2">
+              <TouchableOpacity
+                className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
+                onPress={handleTestNotification}
+              >
+                <Text className="text-xs font-semibold text-white">테스트 알림</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
+                onPress={handleCheckScheduledNotifications}
+              >
+                <Text className="text-xs font-semibold text-white">예약된 알림 확인</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Medication list */}
         {medications.map((med) => (

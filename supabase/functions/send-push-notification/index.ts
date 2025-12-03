@@ -29,9 +29,12 @@ interface RequestBody {
 }
 
 serve(async (req) => {
-  // CORS headers
+  // CORS headers - Restrict to Supabase project origin only
+  // SECURITY: Wildcard CORS (*) allows any website to make requests to this function
+  // Reference: OWASP - Security Misconfiguration (A05:2021)
   const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': 'https://pdvqnafeogbyrqdorxie.supabase.co',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   };
 

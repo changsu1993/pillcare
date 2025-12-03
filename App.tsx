@@ -62,13 +62,19 @@ export default function App() {
     checkUser();
 
     // Listen to auth changes
+    // SECURITY: Only log auth events in development mode
+    // Reference: OWASP - Security Logging and Monitoring Failures (A09:2021)
     const authListener = onAuthStateChange(async (event, session) => {
-      console.log('Auth event:', event);
-      console.log('isPasswordRecoveryRef.current:', isPasswordRecoveryRef.current);
+      if (__DEV__) {
+        console.log('Auth event:', event);
+        console.log('isPasswordRecoveryRef.current:', isPasswordRecoveryRef.current);
+      }
 
       // Handle password recovery event
       if (event === 'PASSWORD_RECOVERY') {
-        console.log('Password recovery mode activated via PASSWORD_RECOVERY event');
+        if (__DEV__) {
+          console.log('Password recovery mode activated via PASSWORD_RECOVERY event');
+        }
         isPasswordRecoveryRef.current = true;
         setIsPasswordRecovery(true);
         setUser(session?.user || null);
@@ -78,14 +84,16 @@ export default function App() {
       // If in password recovery mode, don't load user role
       // This prevents the app from showing the home screen during password reset
       if (isPasswordRecoveryRef.current && session?.user) {
-        console.log('In password recovery mode - skipping role load');
+        if (__DEV__) {
+          console.log('In password recovery mode - skipping role load');
+        }
         setUser(session.user);
         return;
       }
 
       if (session?.user) {
         setUser(session.user);
-        await loadUserRole(session.user.id);
+        await loadUserRole();
       } else {
         setUser(null);
         setUserRole(null);
@@ -98,7 +106,9 @@ export default function App() {
     const handleDeepLink = async (url: string | null) => {
       if (!url) return;
 
-      console.log('[Deep Link] Received URL:', url);
+      if (__DEV__) {
+        console.log('[Deep Link] Received URL:', url);
+      }
 
       // Extract tokens from URL if present
       if (url.includes('access_token') || url.includes('refresh_token')) {
@@ -109,36 +119,48 @@ export default function App() {
           const refreshToken = params.get('refresh_token');
           const type = params.get('type');
 
-          console.log('[Deep Link] Parsed params:', {
-            hasAccessToken: !!accessToken,
-            hasRefreshToken: !!refreshToken,
-            type,
-          });
+          if (__DEV__) {
+            console.log('[Deep Link] Parsed params:', {
+              hasAccessToken: !!accessToken,
+              hasRefreshToken: !!refreshToken,
+              type,
+            });
+          }
 
           if (accessToken && refreshToken && type === 'recovery') {
             // Set password recovery mode BEFORE setting session
             // This ensures the auth listener doesn't try to load user role
-            console.log('[Deep Link] Password recovery type detected - setting recovery mode');
+            if (__DEV__) {
+              console.log('[Deep Link] Password recovery type detected - setting recovery mode');
+            }
             isPasswordRecoveryRef.current = true;
             setIsPasswordRecovery(true);
 
             // Set session with tokens
-            console.log('[Deep Link] Calling setSession with tokens');
+            if (__DEV__) {
+              console.log('[Deep Link] Calling setSession with tokens');
+            }
             const { error } = await supabase.auth.setSession({
               access_token: accessToken,
               refresh_token: refreshToken,
             });
 
             if (error) {
-              console.error('[Deep Link] Error setting session:', error);
+              if (__DEV__) {
+                console.error('[Deep Link] Error setting session:', error);
+              }
               isPasswordRecoveryRef.current = false;
               setIsPasswordRecovery(false);
             } else {
-              console.log('[Deep Link] Session set successfully - should show ResetPasswordScreen');
+              if (__DEV__) {
+                console.log('[Deep Link] Session set successfully - should show ResetPasswordScreen');
+              }
             }
           }
         } catch (error) {
-          console.error('[Deep Link] Error parsing deep link:', error);
+          if (__DEV__) {
+            console.error('[Deep Link] Error parsing deep link:', error);
+          }
         }
       }
     };
@@ -162,7 +184,9 @@ export default function App() {
     // 알림 응답 리스너 (사용자가 알림을 탭했을 때)
     const notificationResponseSubscription = registerNotificationResponseListener(
       (response) => {
-        console.log('알림 응답:', response);
+        if (__DEV__) {
+          console.log('알림 응답:', response);
+        }
         handleNotificationResponse(response);
       }
     );
@@ -170,7 +194,9 @@ export default function App() {
     // Foreground 알림 리스너 (앱이 열려있을 때 알림 수신)
     const foregroundSubscription = registerForegroundNotificationListener(
       (notification) => {
-        console.log('Foreground 알림 수신:', notification);
+        if (__DEV__) {
+          console.log('Foreground 알림 수신:', notification);
+        }
         // 앱이 열려있을 때는 자동으로 화면 전환
         handleForegroundNotification(notification);
       }
@@ -216,7 +242,9 @@ export default function App() {
     ) {
       // 자녀 앱: 홈 화면으로 이동 (부모님 복약 현황 확인)
       // Note: 자녀 Navigator의 Home 탭으로 이동
-      console.log('Missed medication notification tapped - navigating to home');
+      if (__DEV__) {
+        console.log('Missed medication notification tapped - navigating to home');
+      }
       navigationRef.current?.navigate('HomeTab');
     }
   };
@@ -256,7 +284,7 @@ export default function App() {
 
       if (currentUser) {
         setUser(currentUser);
-        await loadUserRole(currentUser.id);
+        await loadUserRole();
       }
     } catch (error) {
       console.error('Error checking user:', error);
@@ -265,11 +293,13 @@ export default function App() {
     }
   };
 
-  const loadUserRole = async (userId: string) => {
+  const loadUserRole = async () => {
     try {
       const profile = await getUserProfile();
       setUserRole(profile?.role || null);
-      console.log('User role:', profile?.role);
+      if (__DEV__) {
+        console.log('User role:', profile?.role);
+      }
 
       // Initialize push token after user is loaded
       initializePushToken();
@@ -287,10 +317,14 @@ export default function App() {
       const token = await getExpoPushToken();
       if (token) {
         await savePushToken(token);
-        console.log('Push token saved successfully');
+        if (__DEV__) {
+          console.log('Push token saved successfully');
+        }
       }
     } catch (error) {
-      console.error('Error initializing push token:', error);
+      if (__DEV__) {
+        console.error('Error initializing push token:', error);
+      }
       // Non-critical error - app can continue without push token
     }
   };
@@ -313,11 +347,13 @@ export default function App() {
   };
 
   // Role-based navigation
-  console.log('[Render] State:', {
-    isPasswordRecovery,
-    hasUser: !!user,
-    userRole,
-  });
+  if (__DEV__) {
+    console.log('[Render] State:', {
+      isPasswordRecovery,
+      hasUser: !!user,
+      userRole,
+    });
+  }
 
   return (
     <SettingsProvider>

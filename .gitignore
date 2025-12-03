@@ -32,6 +32,14 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env.production.local
+
+# EAS Build secrets (NEVER commit these)
+google-services.json
+GoogleService-Info.plist
+google-service-account.json
+*.keystore
+*.jks
 
 # typescript
 *.tsbuildinfo

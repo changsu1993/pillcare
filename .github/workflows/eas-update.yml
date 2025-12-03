@@ -1,0 +1,99 @@
+# EAS Update Workflow
+# Pushes OTA updates to specific channels
+# Use for JS/asset-only changes that don't require a new binary build
+
+name: EAS Update (OTA)
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Update branch/channel'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - preview
+          - production
+      message:
+        description: 'Update message'
+        required: true
+        default: 'Bug fixes and improvements'
+
+# Ensure only one update runs at a time per branch
+concurrency:
+  group: eas-update-${{ github.event.inputs.branch }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npm run typecheck
+
+      - name: Lint check
+        run: npm run lint
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+  update:
+    name: Push Update
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Push OTA update
+        run: |
+          eas update \
+            --branch ${{ github.event.inputs.branch }} \
+            --message "${{ github.event.inputs.message }}" \
+            --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Get update info
+        run: |
+          echo "## OTA Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.event.inputs.branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Message:** ${{ github.event.inputs.message }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Pushed by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Recent Updates" >> $GITHUB_STEP_SUMMARY
+          eas update:list --branch ${{ github.event.inputs.branch }} --limit 5 --json | jq -r '.[] | "- \(.message) (\(.createdAt))"' >> $GITHUB_STEP_SUMMARY || true

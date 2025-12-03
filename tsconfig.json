@@ -16,7 +16,7 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["react-native", "react", "node", "jest"]
+    "types": ["react-native", "react", "node"]
   },
   "include": [
     "src/**/*",
@@ -29,6 +29,9 @@
     "node_modules",
     "babel.config.js",
     "metro.config.js",
-    "jest.config.js"
+    "jest.config.js",
+    "supabase/functions",
+    "**/__tests__/**",
+    "src/test/**"
   ]
 }

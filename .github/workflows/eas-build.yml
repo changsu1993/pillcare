@@ -1,0 +1,230 @@
+# EAS Build and Deploy Workflow
+# Triggers on push to main branch or manual dispatch
+# Builds and optionally submits to app stores
+
+name: EAS Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - ios
+          - android
+      profile:
+        description: 'Build profile'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - development
+          - preview
+          - production
+      submit:
+        description: 'Submit to stores after build'
+        required: false
+        default: false
+        type: boolean
+
+# Ensure only one build runs at a time per branch
+concurrency:
+  group: eas-build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+jobs:
+  # Validation job - runs tests and checks
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npm run typecheck
+
+      - name: Lint check
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+  # Build job - builds the app using EAS
+  build:
+    name: Build (${{ matrix.platform }})
+    needs: validate
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.platform == 'all' && fromJSON('["ios", "android"]') || fromJSON(format('["{0}"]', github.event.inputs.platform))) || fromJSON('["ios", "android"]') }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Determine build profile
+        id: profile
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "profile=${{ github.event.inputs.profile }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "profile=preview" >> $GITHUB_OUTPUT
+          else
+            echo "profile=development" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build app
+        run: |
+          eas build \
+            --platform ${{ matrix.platform }} \
+            --profile ${{ steps.profile.outputs.profile }} \
+            --non-interactive \
+            --no-wait
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Get build URL
+        id: build-url
+        run: |
+          BUILD_URL=$(eas build:list --platform ${{ matrix.platform }} --limit 1 --json | jq -r '.[0].buildDetailsPageUrl')
+          echo "url=$BUILD_URL" >> $GITHUB_OUTPUT
+          echo "Build URL: $BUILD_URL"
+
+    outputs:
+      build-url: ${{ steps.build-url.outputs.url }}
+
+  # Submit job - submits to app stores (only for production builds)
+  submit:
+    name: Submit (${{ matrix.platform }})
+    needs: build
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.submit == 'true' &&
+      github.event.inputs.profile == 'production'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ github.event.inputs.platform == 'all' && fromJSON('["ios", "android"]') || fromJSON(format('["{0}"]', github.event.inputs.platform)) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Wait for build to complete
+        run: |
+          echo "Waiting for build to complete..."
+          # Get the latest build ID
+          BUILD_ID=$(eas build:list --platform ${{ matrix.platform }} --limit 1 --json | jq -r '.[0].id')
+
+          # Wait for build to finish (max 30 minutes)
+          MAX_ATTEMPTS=60
+          ATTEMPT=0
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            STATUS=$(eas build:view $BUILD_ID --json | jq -r '.status')
+            echo "Build status: $STATUS (attempt $((ATTEMPT + 1))/$MAX_ATTEMPTS)"
+
+            if [ "$STATUS" = "FINISHED" ]; then
+              echo "Build completed successfully!"
+              break
+            elif [ "$STATUS" = "ERRORED" ] || [ "$STATUS" = "CANCELED" ]; then
+              echo "Build failed with status: $STATUS"
+              exit 1
+            fi
+
+            ATTEMPT=$((ATTEMPT + 1))
+            sleep 30
+          done
+
+          if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+            echo "Timeout waiting for build to complete"
+            exit 1
+          fi
+
+      - name: Submit to store
+        run: |
+          eas submit \
+            --platform ${{ matrix.platform }} \
+            --profile production \
+            --non-interactive \
+            --latest
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+  # Notify job - sends notification on completion
+  notify:
+    name: Notify
+    needs: [validate, build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build Summary
+        run: |
+          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Validate | ${{ needs.validate.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ${{ needs.build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY

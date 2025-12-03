@@ -11,7 +11,7 @@
  * - Toggle medication active/inactive
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import {
   View,
   Text,
@@ -24,7 +24,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   getConnectedParent,
@@ -66,33 +66,46 @@ const MedicationManageScreen = () => {
     }
   }, []);
 
+  // Load data on initial mount
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  const onRefresh = async (): Promise<void> => {
+  // Refresh data when screen comes into focus (e.g., returning from add/edit screen)
+  useFocusEffect(
+    useCallback(() => {
+      if (!isLoading) {
+        loadData();
+      }
+    }, [isLoading, loadData])
+  );
+
+  const onRefresh = useCallback(async (): Promise<void> => {
     setRefreshing(true);
     await loadData();
     setRefreshing(false);
-  };
+  }, [loadData]);
 
   /**
-   * Handle add medication
+   * Handle add medication - memoized callback
    */
-  const handleAddMedication = (): void => {
+  const handleAddMedication = useCallback((): void => {
     if (!parentInfo) {
       Alert.alert('오류', '부모님 연결이 필요합니다.');
       return;
     }
     navigation.navigate('AddMedication', { parentId: parentInfo.id });
-  };
+  }, [parentInfo, navigation]);
 
   /**
-   * Handle edit medication
+   * Handle edit medication - memoized callback
    */
-  const handleEditMedication = (medicationId: string): void => {
-    navigation.navigate('EditMedication', { medicationId });
-  };
+  const handleEditMedication = useCallback(
+    (medicationId: string): void => {
+      navigation.navigate('EditMedication', { medicationId });
+    },
+    [navigation]
+  );
 
   /**
    * Handle delete medication
@@ -135,25 +148,35 @@ const MedicationManageScreen = () => {
   };
 
   /**
-   * Format frequency text
+   * Memoized frequency map for formatting
    */
-  const formatFrequency = (frequency: string): string => {
-    const frequencyMap: Record<string, string> = {
+  const frequencyMap = useMemo<Record<string, string>>(
+    () => ({
       once_daily: '하루 1회',
       twice_daily: '하루 2회',
       three_times_daily: '하루 3회',
       as_needed: '필요시',
       weekly: '주 1회',
-    };
-    return frequencyMap[frequency] || frequency;
-  };
+    }),
+    []
+  );
 
   /**
-   * Format reminder times
+   * Format frequency text - memoized callback
    */
-  const formatReminderTimes = (times: string[]): string => {
+  const formatFrequency = useCallback(
+    (frequency: string): string => {
+      return frequencyMap[frequency] || frequency;
+    },
+    [frequencyMap]
+  );
+
+  /**
+   * Format reminder times - stable reference
+   */
+  const formatReminderTimes = useCallback((times: string[]): string => {
     return times.join(', ');
-  };
+  }, []);
 
   // Loading state
   if (isLoading) {

@@ -16,7 +16,7 @@
  * />
  */
 
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -44,6 +44,7 @@ interface TimePeriod {
   color: string;
 }
 
+// Moved outside component - static data never changes
 const TIME_PERIODS: TimePeriod[] = [
   { key: 'morning', label: '아침', icon: 'sunny', color: '#F59E0B' },
   { key: 'afternoon', label: '점심', icon: 'partly-sunny', color: '#EAB308' },
@@ -51,24 +52,59 @@ const TIME_PERIODS: TimePeriod[] = [
   { key: 'night', label: '밤', icon: 'moon-outline', color: '#6366F1' },
 ];
 
-const TimePatternChart: React.FC<TimePatternChartProps> = ({ data, isLoading = false }) => {
-  /**
-   * Calculate missed rate for a time period
-   */
-  const calculateMissedRate = (periodData: TimePeriodData): number => {
-    if (periodData.total === 0) return 0;
-    return Math.round((periodData.missed / periodData.total) * 100);
-  };
+/**
+ * Calculate missed rate for a time period
+ * Pure function for memoization
+ */
+const calculateMissedRateValue = (periodData: TimePeriodData): number => {
+  if (periodData.total === 0) return 0;
+  return Math.round((periodData.missed / periodData.total) * 100);
+};
 
-  /**
-   * Find the time period with highest missed rate
-   */
-  const getMostMissedPeriod = (): keyof TimePatternData | null => {
+/**
+ * Get bar color class based on missed rate
+ * Pure function for memoization
+ */
+const getBarColorClassValue = (rate: number): string => {
+  if (rate >= 30) return 'bg-error';
+  if (rate >= 15) return 'bg-warning';
+  return 'bg-success';
+};
+
+/**
+ * Get text color based on missed rate
+ * Pure function for memoization
+ */
+const getTextColorValue = (rate: number): string => {
+  if (rate >= 30) return '#EF4444';
+  if (rate >= 15) return '#F59E0B';
+  return '#22C55E';
+};
+
+const TimePatternChart: React.FC<TimePatternChartProps> = memo(({ data, isLoading = false }) => {
+  // Memoize computed period data with rates and styles
+  const periodDataWithStyles = useMemo(() => {
+    return TIME_PERIODS.map((period) => {
+      const periodData = data[period.key];
+      const missedRate = calculateMissedRateValue(periodData);
+      return {
+        ...period,
+        periodData,
+        missedRate,
+        barWidth: `${Math.max(missedRate, 2)}%`,
+        barColorClass: getBarColorClassValue(missedRate),
+        textColor: getTextColorValue(missedRate),
+      };
+    });
+  }, [data]);
+
+  // Memoize most missed period calculation
+  const mostMissedPeriod = useMemo(() => {
     let maxRate = 0;
     let maxPeriod: keyof TimePatternData | null = null;
 
     TIME_PERIODS.forEach(({ key }) => {
-      const rate = calculateMissedRate(data[key]);
+      const rate = calculateMissedRateValue(data[key]);
       if (rate > maxRate) {
         maxRate = rate;
         maxPeriod = key;
@@ -76,35 +112,12 @@ const TimePatternChart: React.FC<TimePatternChartProps> = ({ data, isLoading = f
     });
 
     return maxPeriod;
-  };
+  }, [data]);
 
-  const mostMissedPeriod = getMostMissedPeriod();
-
-  /**
-   * Get bar width based on missed rate (max width for highest rate)
-   */
-  const getBarWidth = (periodData: TimePeriodData): string => {
-    const rate = calculateMissedRate(periodData);
-    return `${Math.max(rate, 2)}%`; // Minimum 2% for visibility
-  };
-
-  /**
-   * Get bar color class based on missed rate
-   */
-  const getBarColorClass = (rate: number): string => {
-    if (rate >= 30) return 'bg-error';
-    if (rate >= 15) return 'bg-warning';
-    return 'bg-success';
-  };
-
-  /**
-   * Get text color based on missed rate
-   */
-  const getTextColor = (rate: number): string => {
-    if (rate >= 30) return '#EF4444'; // error
-    if (rate >= 15) return '#F59E0B'; // warning
-    return '#22C55E'; // success
-  };
+  // Memoize most missed period label for display
+  const mostMissedPeriodLabel = useMemo(() => {
+    return TIME_PERIODS.find((p) => p.key === mostMissedPeriod)?.label;
+  }, [mostMissedPeriod]);
 
   if (isLoading) {
     return (
@@ -125,29 +138,24 @@ const TimePatternChart: React.FC<TimePatternChartProps> = ({ data, isLoading = f
     >
       <View className="flex-row justify-between items-center mb-4">
         <Text className="text-base font-bold text-gray-900">시간대별 미복약 패턴</Text>
-        {mostMissedPeriod && (
+        {mostMissedPeriod && mostMissedPeriodLabel && (
           <View className="px-2 py-1 rounded-md" style={{ backgroundColor: '#EF444420' }}>
             <Text className="text-[11px] font-semibold text-error">
-              {TIME_PERIODS.find((p) => p.key === mostMissedPeriod)?.label} 주의
+              {mostMissedPeriodLabel} 주의
             </Text>
           </View>
         )}
       </View>
 
       <View className="gap-3">
-        {TIME_PERIODS.map((period) => {
-          const periodData = data[period.key];
-          const missedRate = calculateMissedRate(periodData);
-          const barWidth = getBarWidth(periodData);
-          const barColorClass = getBarColorClass(missedRate);
-          const textColor = getTextColor(missedRate);
+        {periodDataWithStyles.map((period) => {
           const isHighlighted = period.key === mostMissedPeriod;
 
           return (
             <View
               key={period.key}
               className={`flex-row items-center py-2 px-2 rounded-lg ${isHighlighted ? 'bg-gray-100' : ''}`}
-              accessibilityLabel={`${period.label} 시간대, 미복약률 ${missedRate}%, ${periodData.total}회 중 ${periodData.missed}회 미복용`}
+              accessibilityLabel={`${period.label} 시간대, 미복약률 ${period.missedRate}%, ${period.periodData.total}회 중 ${period.periodData.missed}회 미복용`}
             >
               {/* Icon & Label */}
               <View className="flex-row items-center gap-1.5" style={{ width: 70 }}>
@@ -159,21 +167,21 @@ const TimePatternChart: React.FC<TimePatternChartProps> = ({ data, isLoading = f
               <View className="flex-1 flex-row items-center mx-2">
                 <View className="flex-1 h-5 bg-gray-200 rounded-full overflow-hidden mr-2">
                   <View
-                    className={`h-full rounded-full ${barColorClass}`}
-                    style={{ width: barWidth as any, minWidth: 2 }}
+                    className={`h-full rounded-full ${period.barColorClass}`}
+                    style={{ width: period.barWidth as any, minWidth: 2 }}
                   />
                 </View>
                 <Text
                   className="text-sm font-bold"
-                  style={{ color: textColor, minWidth: 40, textAlign: 'right' }}
+                  style={{ color: period.textColor, minWidth: 40, textAlign: 'right' }}
                 >
-                  {missedRate}%
+                  {period.missedRate}%
                 </Text>
               </View>
 
               {/* Count */}
               <Text className="text-xs text-gray-500" style={{ minWidth: 40, textAlign: 'right' }}>
-                {periodData.missed}/{periodData.total}
+                {period.periodData.missed}/{period.periodData.total}
               </Text>
             </View>
           );
@@ -187,6 +195,9 @@ const TimePatternChart: React.FC<TimePatternChartProps> = ({ data, isLoading = f
       </View>
     </View>
   );
-};
+});
+
+// Display name for React DevTools
+TimePatternChart.displayName = 'TimePatternChart';
 
 export default TimePatternChart;

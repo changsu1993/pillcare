@@ -11,7 +11,7 @@
  * - Real-time adherence rate display
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import {
   View,
   Text,
@@ -23,6 +23,7 @@ import {
   Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   getConnectedParent,
@@ -39,6 +40,85 @@ interface TodayMedicationItem {
   status: 'taken' | 'pending' | 'missed';
   log?: MedicationLog;
 }
+
+/**
+ * Get status icon and color - moved outside component for better performance
+ */
+const getStatusDisplayConfig = (
+  status: 'taken' | 'pending' | 'missed'
+): { icon: string; colorClass: string; bgColorClass: string; text: string } => {
+  switch (status) {
+    case 'taken':
+      return {
+        icon: 'checkmark-circle',
+        colorClass: 'text-success',
+        bgColorClass: 'bg-success',
+        text: '복용 완료',
+      };
+    case 'pending':
+      return {
+        icon: 'time',
+        colorClass: 'text-warning',
+        bgColorClass: 'bg-warning',
+        text: '대기 중',
+      };
+    case 'missed':
+      return {
+        icon: 'close-circle',
+        colorClass: 'text-error',
+        bgColorClass: 'bg-error',
+        text: '미복용',
+      };
+  }
+};
+
+/**
+ * Memoized medication timeline item component
+ */
+interface TimelineItemProps {
+  item: TodayMedicationItem;
+  isLast: boolean;
+}
+
+const TimelineItem = memo(({ item, isLast }: TimelineItemProps) => {
+  const statusDisplay = useMemo(() => getStatusDisplayConfig(item.status), [item.status]);
+
+  return (
+    <View className="flex-row mb-4">
+      {/* Timeline line */}
+      <View className="w-7 items-center mr-3">
+        <View
+          className={`w-6 h-6 rounded-full justify-center items-center ${statusDisplay.bgColorClass}`}
+        >
+          <Ionicons name={statusDisplay.icon as any} size={12} color="#FFFFFF" />
+        </View>
+        {!isLast && <View className="flex-1 w-0.5 bg-gray-200 mt-1 -mb-2" />}
+      </View>
+
+      {/* Content */}
+      <View className="flex-1">
+        <Text className="text-xs text-gray-500 mb-1.5">{item.scheduledTime}</Text>
+        <View
+          className={`bg-white rounded-xl p-4 border-l-4 shadow-sm ${statusDisplay.bgColorClass.replace('bg-', 'border-l-')}`}
+        >
+          <View className="flex-row justify-between items-center mb-1">
+            <Text className="text-base font-semibold text-gray-900 flex-1">
+              {item.medicationName}
+            </Text>
+            <View className={`px-2 py-1 rounded ${statusDisplay.bgColorClass}/20`}>
+              <Text className={`text-xs font-semibold ${statusDisplay.colorClass}`}>
+                {statusDisplay.text}
+              </Text>
+            </View>
+          </View>
+          <Text className="text-sm text-gray-500">{item.dosage}</Text>
+        </View>
+      </View>
+    </View>
+  );
+});
+
+TimelineItem.displayName = 'TimelineItem';
 
 const ChildHomeScreen = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -123,60 +203,58 @@ const ChildHomeScreen = () => {
     return items;
   };
 
+  // Load data on initial mount
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  const onRefresh = async (): Promise<void> => {
+  // Refresh data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      if (!isLoading) {
+        loadData();
+      }
+    }, [isLoading, loadData])
+  );
+
+  const onRefresh = useCallback(async (): Promise<void> => {
     setRefreshing(true);
     await loadData();
     setRefreshing(false);
-  };
+  }, [loadData]);
 
-  /**
-   * Calculate today's adherence rate
-   */
-  const calculateTodayAdherence = (): number => {
-    if (todayItems.length === 0) return 0;
-    const takenCount = todayItems.filter((item) => item.status === 'taken').length;
-    return Math.round((takenCount / todayItems.length) * 100);
-  };
-
-  /**
-   * Get status icon and color
-   */
-  const getStatusDisplay = (
-    status: 'taken' | 'pending' | 'missed'
-  ): { icon: string; colorClass: string; bgColorClass: string; text: string } => {
-    switch (status) {
-      case 'taken':
-        return {
-          icon: 'checkmark-circle',
-          colorClass: 'text-success',
-          bgColorClass: 'bg-success',
-          text: '복용 완료',
-        };
-      case 'pending':
-        return {
-          icon: 'time',
-          colorClass: 'text-warning',
-          bgColorClass: 'bg-warning',
-          text: '대기 중',
-        };
-      case 'missed':
-        return {
-          icon: 'close-circle',
-          colorClass: 'text-error',
-          bgColorClass: 'bg-error',
-          text: '미복용',
-        };
+  // Memoized adherence calculations
+  const { adherenceRate, takenCount, pendingCount, missedCount } = useMemo(() => {
+    if (todayItems.length === 0) {
+      return { adherenceRate: 0, takenCount: 0, pendingCount: 0, missedCount: 0 };
     }
-  };
+    const taken = todayItems.filter((item) => item.status === 'taken').length;
+    const pending = todayItems.filter((item) => item.status === 'pending').length;
+    const missed = todayItems.filter((item) => item.status === 'missed').length;
+    const rate = Math.round((taken / todayItems.length) * 100);
+    return { adherenceRate: rate, takenCount: taken, pendingCount: pending, missedCount: missed };
+  }, [todayItems]);
+
+  // Memoized adherence rate color class
+  const adherenceRateColorClass = useMemo(() => {
+    if (adherenceRate >= 80) return 'text-success';
+    if (adherenceRate >= 50) return 'text-warning';
+    return 'text-error';
+  }, [adherenceRate]);
+
+  // Memoized formatted date
+  const formattedDate = useMemo(() => {
+    return new Date().toLocaleDateString('ko-KR', {
+      month: 'long',
+      day: 'numeric',
+      weekday: 'short',
+    });
+  }, []);
 
   /**
-   * Handle call parent
+   * Handle call parent - memoized callback
    */
-  const handleCallParent = (): void => {
+  const handleCallParent = useCallback((): void => {
     if (!parentInfo?.phone_number) {
       Alert.alert('전화번호 없음', '부모님의 전화번호가 등록되어 있지 않습니다.');
       return;
@@ -195,7 +273,7 @@ const ChildHomeScreen = () => {
         console.error('Error opening phone:', err);
         Alert.alert('오류', '전화를 걸 수 없습니다.');
       });
-  };
+  }, [parentInfo?.phone_number]);
 
   // Loading state
   if (isLoading) {
@@ -239,8 +317,6 @@ const ChildHomeScreen = () => {
     );
   }
 
-  const adherenceRate = calculateTodayAdherence();
-
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
       <ScrollView
@@ -264,39 +340,25 @@ const ChildHomeScreen = () => {
 
           <View className="flex-row justify-between items-center bg-gray-100 rounded-xl p-4 mb-4">
             <Text className="text-sm text-gray-500">오늘 복약률</Text>
-            <Text
-              className={`text-3xl font-bold ${
-                adherenceRate >= 80
-                  ? 'text-success'
-                  : adherenceRate >= 50
-                    ? 'text-warning'
-                    : 'text-error'
-              }`}
-            >
+            <Text className={`text-3xl font-bold ${adherenceRateColorClass}`}>
               {adherenceRate}%
             </Text>
           </View>
 
-          {/* Stats Row */}
+          {/* Stats Row - using memoized values */}
           <View className="flex-row justify-around items-center">
             <View className="items-center flex-1">
-              <Text className="text-xl font-bold text-gray-900">
-                {todayItems.filter((i) => i.status === 'taken').length}
-              </Text>
+              <Text className="text-xl font-bold text-gray-900">{takenCount}</Text>
               <Text className="text-xs text-gray-500 mt-1">복용</Text>
             </View>
             <View className="w-px h-8 bg-gray-200" />
             <View className="items-center flex-1">
-              <Text className="text-xl font-bold text-gray-900">
-                {todayItems.filter((i) => i.status === 'pending').length}
-              </Text>
+              <Text className="text-xl font-bold text-gray-900">{pendingCount}</Text>
               <Text className="text-xs text-gray-500 mt-1">대기</Text>
             </View>
             <View className="w-px h-8 bg-gray-200" />
             <View className="items-center flex-1">
-              <Text className="text-xl font-bold text-gray-900">
-                {todayItems.filter((i) => i.status === 'missed').length}
-              </Text>
+              <Text className="text-xl font-bold text-gray-900">{missedCount}</Text>
               <Text className="text-xs text-gray-500 mt-1">미복용</Text>
             </View>
           </View>
@@ -305,16 +367,10 @@ const ChildHomeScreen = () => {
         {/* Today's Medications Section */}
         <View className="flex-row justify-between items-center mb-4">
           <Text className="text-lg font-bold text-gray-900">오늘의 복약</Text>
-          <Text className="text-sm text-gray-500">
-            {new Date().toLocaleDateString('ko-KR', {
-              month: 'long',
-              day: 'numeric',
-              weekday: 'short',
-            })}
-          </Text>
+          <Text className="text-sm text-gray-500">{formattedDate}</Text>
         </View>
 
-        {/* Medication Timeline */}
+        {/* Medication Timeline - using memoized TimelineItem */}
         {todayItems.length === 0 ? (
           <View className="bg-white rounded-xl p-8 items-center">
             <Ionicons name="medical-outline" size={32} color="#9CA3AF" />
@@ -322,44 +378,13 @@ const ChildHomeScreen = () => {
           </View>
         ) : (
           <View className="pl-1">
-            {todayItems.map((item, index) => {
-              const statusDisplay = getStatusDisplay(item.status);
-              return (
-                <View key={`${item.medicationId}-${item.scheduledTime}`} className="flex-row mb-4">
-                  {/* Timeline line */}
-                  <View className="w-7 items-center mr-3">
-                    <View
-                      className={`w-6 h-6 rounded-full justify-center items-center ${statusDisplay.bgColorClass}`}
-                    >
-                      <Ionicons name={statusDisplay.icon as any} size={12} color="#FFFFFF" />
-                    </View>
-                    {index < todayItems.length - 1 && (
-                      <View className="flex-1 w-0.5 bg-gray-200 mt-1 -mb-2" />
-                    )}
-                  </View>
-
-                  {/* Content */}
-                  <View className="flex-1">
-                    <Text className="text-xs text-gray-500 mb-1.5">{item.scheduledTime}</Text>
-                    <View
-                      className={`bg-white rounded-xl p-4 border-l-4 shadow-sm ${statusDisplay.bgColorClass.replace('bg-', 'border-l-')}`}
-                    >
-                      <View className="flex-row justify-between items-center mb-1">
-                        <Text className="text-base font-semibold text-gray-900 flex-1">
-                          {item.medicationName}
-                        </Text>
-                        <View className={`px-2 py-1 rounded ${statusDisplay.bgColorClass}/20`}>
-                          <Text className={`text-xs font-semibold ${statusDisplay.colorClass}`}>
-                            {statusDisplay.text}
-                          </Text>
-                        </View>
-                      </View>
-                      <Text className="text-sm text-gray-500">{item.dosage}</Text>
-                    </View>
-                  </View>
-                </View>
-              );
-            })}
+            {todayItems.map((item, index) => (
+              <TimelineItem
+                key={`${item.medicationId}-${item.scheduledTime}`}
+                item={item}
+                isLast={index === todayItems.length - 1}
+              />
+            ))}
           </View>
         )}
       </ScrollView>

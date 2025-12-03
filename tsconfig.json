@@ -16,7 +16,7 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["react-native", "react", "node"]
+    "types": ["react-native", "react", "node", "jest"]
   },
   "include": [
     "src/**/*",

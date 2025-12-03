@@ -11,7 +11,7 @@
  * - Voice guidance support
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import {
   Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   getTodayScheduledMedications,
   scheduleAllMedicationNotifications,
@@ -36,15 +37,96 @@ import {
 
 type Props = ParentScreenProps<'Home'>;
 
+/**
+ * Memoized medication card component to prevent unnecessary re-renders
+ */
+interface MedicationCardProps {
+  medication: ScheduledMedication;
+  onPress: (medicationId: string) => void;
+}
+
+const MedicationCard = memo(({ medication, onPress }: MedicationCardProps) => {
+  const handlePress = useCallback(() => {
+    onPress(medication.medication_id);
+  }, [medication.medication_id, onPress]);
+
+  return (
+    <TouchableOpacity
+      className={`bg-white rounded-2xl p-6 border-[3px] shadow-sm ${
+        medication.taken ? 'border-success opacity-60' : 'border-yellow-400'
+      }`}
+      onPress={handlePress}
+      activeOpacity={0.7}
+      accessibilityLabel={`${medication.medication_name} 상세 보기`}
+      accessibilityHint="탭하여 약 상세 정보를 확인합니다"
+      accessibilityRole="button"
+    >
+      {/* Medication name */}
+      <Text className="text-3xl font-bold text-gray-900 mb-2">{medication.medication_name}</Text>
+
+      {/* Dosage */}
+      <Text className="text-2xl text-gray-600 mb-4">{medication.dosage}</Text>
+
+      {/* Status */}
+      <View className="mb-3">
+        {medication.taken ? (
+          <Text className="text-2xl font-semibold text-success">복용 완료</Text>
+        ) : (
+          <Text className="text-2xl font-semibold text-warning">복용 대기 중</Text>
+        )}
+      </View>
+
+      {/* Scheduled time */}
+      <Text className="text-xl text-gray-700">{medication.scheduled_time}</Text>
+    </TouchableOpacity>
+  );
+});
+
+MedicationCard.displayName = 'MedicationCard';
+
 const ParentHomeScreen = ({ navigation }: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [medications, setMedications] = useState<ScheduledMedication[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [hasNotificationPermission, setHasNotificationPermission] = useState<boolean>(false);
 
+  // Load medications on initial mount
   useEffect(() => {
     loadTodayMedications();
     checkNotificationPermissions();
+  }, []);
+
+  // Refresh data when screen comes into focus (e.g., returning from detail screen)
+  useFocusEffect(
+    useCallback(() => {
+      // Only reload if not in initial loading state
+      if (!isLoading) {
+        loadTodayMedications();
+      }
+    }, [isLoading])
+  );
+
+  // Memoized callback for navigating to medication detail
+  const handleMedicationPress = useCallback(
+    (medicationId: string) => {
+      navigation.navigate('MedicationDetail', { medicationId });
+    },
+    [navigation]
+  );
+
+  // Memoized callback for adding medication
+  const handleAddMedication = useCallback(() => {
+    navigation.navigate('AddMedication');
+  }, [navigation]);
+
+  // Memoized callback for viewing medication calendar
+  const handleViewCalendar = useCallback(() => {
+    navigation.navigate('MedicationCalendar');
+  }, [navigation]);
+
+  // Memoized callback for opening settings
+  const handleOpenSettings = useCallback(() => {
+    Linking.openSettings();
   }, []);
 
   const checkNotificationPermissions = async (): Promise<void> => {
@@ -155,7 +237,7 @@ const ParentHomeScreen = ({ navigation }: Props) => {
               </Text>
               <TouchableOpacity
                 className="bg-warning px-6 py-3 rounded-lg self-center"
-                onPress={() => Linking.openSettings()}
+                onPress={handleOpenSettings}
               >
                 <Text className="text-base font-semibold text-white">설정으로 이동</Text>
               </TouchableOpacity>
@@ -185,7 +267,7 @@ const ParentHomeScreen = ({ navigation }: Props) => {
           )}
 
           <View className="justify-center items-center py-16">
-            <Text className="text-8xl mb-6">✓</Text>
+            <Text className="text-8xl mb-6">&#10003;</Text>
             <Text className="text-3xl text-gray-600 text-center leading-10">
               오늘 드실 약이{'\n'}
               없습니다
@@ -195,7 +277,7 @@ const ParentHomeScreen = ({ navigation }: Props) => {
           {/* 약 추가하기 버튼 */}
           <TouchableOpacity
             className="bg-success rounded-2xl py-6 px-8 items-center justify-center min-h-[72px] mt-4 shadow-lg"
-            onPress={() => navigation.navigate('AddMedication')}
+            onPress={handleAddMedication}
             accessibilityLabel="약 추가하기"
             accessibilityHint="탭하여 새로운 약을 등록합니다"
             accessibilityRole="button"
@@ -206,7 +288,7 @@ const ParentHomeScreen = ({ navigation }: Props) => {
           {/* 복약 이력 보기 버튼 */}
           <TouchableOpacity
             className="bg-blue-500 rounded-2xl py-6 px-8 items-center justify-center min-h-[72px] mt-4 shadow-lg flex-row"
-            onPress={() => navigation.navigate('MedicationCalendar')}
+            onPress={handleViewCalendar}
             accessibilityLabel="복약 이력 보기"
             accessibilityHint="탭하여 복약 이력 캘린더를 확인합니다"
             accessibilityRole="button"
@@ -226,14 +308,14 @@ const ParentHomeScreen = ({ navigation }: Props) => {
         {!hasNotificationPermission && (
           <View className="bg-yellow-100 rounded-xl p-5 mb-4 border-2 border-warning">
             <Text className="text-xl font-bold text-yellow-900 mb-2 text-center">
-              ⚠️ 알림 권한이 필요합니다
+              &#9888;&#65039; 알림 권한이 필요합니다
             </Text>
             <Text className="text-base text-yellow-900 mb-4 text-center leading-5">
               약 복용 알림을 받으려면 설정에서 권한을 허용해주세요.
             </Text>
             <TouchableOpacity
               className="bg-warning px-6 py-3 rounded-lg self-center"
-              onPress={() => Linking.openSettings()}
+              onPress={handleOpenSettings}
             >
               <Text className="text-base font-semibold text-white">설정으로 이동</Text>
             </TouchableOpacity>
@@ -262,45 +344,15 @@ const ParentHomeScreen = ({ navigation }: Props) => {
           </View>
         )}
 
-        {/* Medication list */}
+        {/* Medication list - using memoized cards */}
         {medications.map((med) => (
-          <TouchableOpacity
-            key={med.id}
-            className={`bg-white rounded-2xl p-6 border-[3px] shadow-sm ${
-              med.taken ? 'border-success opacity-60' : 'border-yellow-400'
-            }`}
-            onPress={() =>
-              navigation.navigate('MedicationDetail', { medicationId: med.medication_id })
-            }
-            activeOpacity={0.7}
-            accessibilityLabel={`${med.medication_name} 상세 보기`}
-            accessibilityHint="탭하여 약 상세 정보를 확인합니다"
-            accessibilityRole="button"
-          >
-            {/* Medication name */}
-            <Text className="text-3xl font-bold text-gray-900 mb-2">{med.medication_name}</Text>
-
-            {/* Dosage */}
-            <Text className="text-2xl text-gray-600 mb-4">{med.dosage}</Text>
-
-            {/* Status */}
-            <View className="mb-3">
-              {med.taken ? (
-                <Text className="text-2xl font-semibold text-success">복용 완료 ✓</Text>
-              ) : (
-                <Text className="text-2xl font-semibold text-warning">복용 대기 중</Text>
-              )}
-            </View>
-
-            {/* Scheduled time */}
-            <Text className="text-xl text-gray-700">{med.scheduled_time}</Text>
-          </TouchableOpacity>
+          <MedicationCard key={med.id} medication={med} onPress={handleMedicationPress} />
         ))}
 
         {/* 약 추가하기 버튼 */}
         <TouchableOpacity
           className="bg-success rounded-2xl py-6 px-8 items-center justify-center min-h-[72px] mt-4 shadow-lg"
-          onPress={() => navigation.navigate('AddMedication')}
+          onPress={handleAddMedication}
           accessibilityLabel="약 추가하기"
           accessibilityHint="탭하여 새로운 약을 등록합니다"
           accessibilityRole="button"
@@ -311,7 +363,7 @@ const ParentHomeScreen = ({ navigation }: Props) => {
         {/* 복약 이력 보기 버튼 */}
         <TouchableOpacity
           className="bg-blue-500 rounded-2xl py-6 px-8 items-center justify-center min-h-[72px] mt-4 shadow-lg flex-row"
-          onPress={() => navigation.navigate('MedicationCalendar')}
+          onPress={handleViewCalendar}
           accessibilityLabel="복약 이력 보기"
           accessibilityHint="탭하여 복약 이력 캘린더를 확인합니다"
           accessibilityRole="button"

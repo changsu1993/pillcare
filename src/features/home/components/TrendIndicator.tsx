@@ -11,7 +11,7 @@
  * />
  */
 
-import React from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -22,74 +22,86 @@ interface TrendIndicatorProps {
 
 type TrendDirection = 'up' | 'down' | 'stable';
 
-const TrendIndicator: React.FC<TrendIndicatorProps> = ({ weeklyRates, isLoading = false }) => {
-  /**
-   * Calculate trend direction
-   */
-  const getTrendDirection = (): TrendDirection => {
-    if (weeklyRates.length < 2) return 'stable';
+/**
+ * Get trend style configuration based on direction
+ * Pure function moved outside component for better performance
+ */
+const getTrendStyleConfig = (
+  direction: TrendDirection
+): { icon: string; color: string; bgColor: string; label: string } => {
+  switch (direction) {
+    case 'up':
+      return { icon: 'trending-up', color: '#22C55E', bgColor: '#22C55E20', label: '개선 중' };
+    case 'down':
+      return { icon: 'trending-down', color: '#EF4444', bgColor: '#EF444420', label: '감소 중' };
+    case 'stable':
+      return { icon: 'remove', color: '#6B7280', bgColor: '#6B728020', label: '유지 중' };
+  }
+};
 
-    const latestRate = weeklyRates[weeklyRates.length - 1];
-    const previousRate = weeklyRates[weeklyRates.length - 2];
-    const diff = latestRate - previousRate;
+/**
+ * Get change icon color based on percentage change
+ * Pure function for memoization
+ */
+const getChangeIconColorValue = (change: number): string => {
+  if (change > 0) return '#22C55E';
+  if (change < 0) return '#EF4444';
+  return '#6B7280';
+};
 
-    if (diff > 3) return 'up';
-    if (diff < -3) return 'down';
-    return 'stable';
-  };
+/**
+ * Normalize rate to valid range
+ */
+const normalizeRateValue = (rate: number): number => {
+  return Math.min(Math.max(rate, 0), 100);
+};
 
-  /**
-   * Calculate percentage change from previous week
-   */
-  const getPercentageChange = (): number => {
-    if (weeklyRates.length < 2) return 0;
-
-    const latestRate = weeklyRates[weeklyRates.length - 1];
-    const previousRate = weeklyRates[weeklyRates.length - 2];
-
-    return latestRate - previousRate;
-  };
-
-  /**
-   * Get trend icon and color
-   */
-  const getTrendStyle = (
-    direction: TrendDirection
-  ): { icon: string; color: string; bgColor: string; label: string } => {
-    switch (direction) {
-      case 'up':
-        return { icon: 'trending-up', color: '#22C55E', bgColor: '#22C55E20', label: '개선 중' };
-      case 'down':
-        return { icon: 'trending-down', color: '#EF4444', bgColor: '#EF444420', label: '감소 중' };
-      case 'stable':
-        return { icon: 'remove', color: '#6B7280', bgColor: '#6B728020', label: '유지 중' };
+const TrendIndicator: React.FC<TrendIndicatorProps> = memo(({ weeklyRates, isLoading = false }) => {
+  // Memoize computed values to prevent recalculation on every render
+  const { trendDirection, percentageChange, latestRate } = useMemo(() => {
+    if (weeklyRates.length < 2) {
+      return {
+        trendDirection: 'stable' as TrendDirection,
+        percentageChange: 0,
+        latestRate: weeklyRates[weeklyRates.length - 1] || 0,
+      };
     }
-  };
 
-  /**
-   * Get change icon color
-   */
-  const getChangeIconColor = (change: number): string => {
-    if (change > 0) return '#22C55E'; // success
-    if (change < 0) return '#EF4444'; // error
-    return '#6B7280'; // gray-500
-  };
+    const latest = weeklyRates[weeklyRates.length - 1];
+    const previous = weeklyRates[weeklyRates.length - 2];
+    const diff = latest - previous;
 
-  /**
-   * Normalize rates to chart height (0-100 -> 0-100%)
-   */
-  const normalizeRate = (rate: number): number => {
-    return Math.min(Math.max(rate, 0), 100);
-  };
+    let direction: TrendDirection = 'stable';
+    if (diff > 3) direction = 'up';
+    else if (diff < -3) direction = 'down';
+
+    return {
+      trendDirection: direction,
+      percentageChange: diff,
+      latestRate: latest,
+    };
+  }, [weeklyRates]);
+
+  // Memoize trend style based on direction
+  const trendStyle = useMemo(() => getTrendStyleConfig(trendDirection), [trendDirection]);
+
+  // Memoize change icon color
+  const changeIconColor = useMemo(
+    () => getChangeIconColorValue(percentageChange),
+    [percentageChange]
+  );
+
+  // Memoize chart point spacing calculation
+  const pointSpacing = useMemo(() => {
+    return 100 / (weeklyRates.length - 1 || 1);
+  }, [weeklyRates.length]);
 
   /**
    * Generate line chart with data points
+   * Memoized to prevent re-renders when parent updates
    */
-  const renderLineChart = () => {
+  const renderLineChart = useCallback(() => {
     if (weeklyRates.length === 0) return null;
-
-    const chartWidth = 100; // percentage
-    const pointSpacing = chartWidth / (weeklyRates.length - 1 || 1);
 
     return (
       <View className="flex-1 relative">
@@ -102,9 +114,9 @@ const TrendIndicator: React.FC<TrendIndicatorProps> = ({ weeklyRates, isLoading 
 
         {/* Data points */}
         {weeklyRates.map((rate, index) => {
-          const normalizedRate = normalizeRate(rate);
+          const normalizedRate = normalizeRateValue(rate);
           const leftPosition = index * pointSpacing;
-          const topPosition = 100 - normalizedRate; // Invert for top-down coordinate system
+          const topPosition = 100 - normalizedRate;
           const isLatest = index === weeklyRates.length - 1;
 
           return (
@@ -121,7 +133,7 @@ const TrendIndicator: React.FC<TrendIndicatorProps> = ({ weeklyRates, isLoading 
                     transform: [
                       {
                         rotate: `${Math.atan2(
-                          normalizeRate(weeklyRates[index + 1]) - normalizedRate,
+                          normalizeRateValue(weeklyRates[index + 1]) - normalizedRate,
                           pointSpacing
                         )}rad`,
                       },
@@ -161,7 +173,7 @@ const TrendIndicator: React.FC<TrendIndicatorProps> = ({ weeklyRates, isLoading 
         })}
       </View>
     );
-  };
+  }, [weeklyRates, pointSpacing]);
 
   if (isLoading) {
     return (
@@ -184,12 +196,6 @@ const TrendIndicator: React.FC<TrendIndicatorProps> = ({ weeklyRates, isLoading 
       </View>
     );
   }
-
-  const trendDirection = getTrendDirection();
-  const percentageChange = getPercentageChange();
-  const trendStyle = getTrendStyle(trendDirection);
-  const latestRate = weeklyRates[weeklyRates.length - 1];
-  const changeIconColor = getChangeIconColor(percentageChange);
 
   return (
     <View
@@ -249,6 +255,9 @@ const TrendIndicator: React.FC<TrendIndicatorProps> = ({ weeklyRates, isLoading 
       </View>
     </View>
   );
-};
+});
+
+// Display name for React DevTools
+TrendIndicator.displayName = 'TrendIndicator';
 
 export default TrendIndicator;

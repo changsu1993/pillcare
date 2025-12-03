@@ -23,6 +23,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   ReactNode,
 } from 'react';
 import {
@@ -108,16 +109,38 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     [updateSettings]
   );
 
-  const value: SettingsContextValue = {
-    settings,
-    isLoading,
-    updateSettings,
-    reloadSettings,
-    isVoiceEnabled: settings.voiceGuidanceEnabled,
-    isVibrationEnabled: settings.vibrationEnabled,
-    voiceSpeed: settings.voiceSpeed,
-    updateVoiceSpeed,
-  };
+  // Memoize derived values to prevent unnecessary re-renders
+  const isVoiceEnabled = useMemo(
+    () => settings.voiceGuidanceEnabled,
+    [settings.voiceGuidanceEnabled]
+  );
+  const isVibrationEnabled = useMemo(() => settings.vibrationEnabled, [settings.vibrationEnabled]);
+  const voiceSpeed = useMemo(() => settings.voiceSpeed, [settings.voiceSpeed]);
+
+  // Memoize the context value to prevent unnecessary re-renders of consumers
+  // Only recreate when dependencies actually change
+  const value: SettingsContextValue = useMemo(
+    () => ({
+      settings,
+      isLoading,
+      updateSettings,
+      reloadSettings,
+      isVoiceEnabled,
+      isVibrationEnabled,
+      voiceSpeed,
+      updateVoiceSpeed,
+    }),
+    [
+      settings,
+      isLoading,
+      updateSettings,
+      reloadSettings,
+      isVoiceEnabled,
+      isVibrationEnabled,
+      voiceSpeed,
+      updateVoiceSpeed,
+    ]
+  );
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 };

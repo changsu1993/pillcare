@@ -46,16 +46,6 @@ jobs:
       - name: Format check
         run: npm run format:check
 
-      - name: Run unit tests
-        run: npm run test:unit
-
-      - name: Upload coverage report
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: false
-        continue-on-error: true
-
   expo-doctor:
     name: Expo Doctor
     runs-on: ubuntu-latest

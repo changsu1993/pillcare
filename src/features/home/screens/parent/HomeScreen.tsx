@@ -11,7 +11,7 @@
  * - Voice guidance support
  */
 
-import React, { useState, useEffect, useCallback, memo } from 'react';
+import React, { useState, useEffect, useCallback, memo, useRef } from 'react';
 import {
   View,
   Text,
@@ -95,20 +95,26 @@ const ParentHomeScreen = ({ navigation }: Props) => {
   const [error, setError] = useState<string | null>(null);
   const [hasNotificationPermission, setHasNotificationPermission] = useState<boolean>(false);
 
+  // Track if initial load is complete (using ref to avoid re-renders)
+  const isInitialLoadRef = useRef<boolean>(true);
+
   // Load medications on initial mount
   useEffect(() => {
-    loadTodayMedications();
+    loadTodayMedications().finally(() => {
+      isInitialLoadRef.current = false;
+    });
     checkNotificationPermissions();
   }, []);
 
   // Refresh data when screen comes into focus (e.g., returning from detail screen)
+  // Note: Empty dependency array to prevent infinite loops
   useFocusEffect(
     useCallback(() => {
-      // Only reload if not in initial loading state
-      if (!isLoading) {
+      // Only reload if initial load is complete (not on first mount)
+      if (!isInitialLoadRef.current) {
         loadTodayMedications();
       }
-    }, [isLoading])
+    }, [])
   );
 
   // Memoized callback for navigating to medication detail

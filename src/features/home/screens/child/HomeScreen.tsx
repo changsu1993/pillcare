@@ -11,7 +11,7 @@
  * - Real-time adherence rate display
  */
 
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
 import {
   View,
   Text,
@@ -132,6 +132,9 @@ const ChildHomeScreen = () => {
   const [parentMedications, setParentMedications] = useState<Medication[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  // Track if initial load is complete (using ref to avoid re-renders)
+  const isInitialLoadRef = useRef<boolean>(true);
+
   const loadData = useCallback(async (): Promise<void> => {
     try {
       setError(null);
@@ -214,16 +217,20 @@ const ChildHomeScreen = () => {
 
   // Load data on initial mount
   useEffect(() => {
-    loadData();
+    loadData().finally(() => {
+      isInitialLoadRef.current = false;
+    });
   }, [loadData]);
 
   // Refresh data when screen comes into focus
+  // Note: Empty dependency array to prevent infinite loops
   useFocusEffect(
     useCallback(() => {
-      if (!isLoading) {
+      // Only reload if initial load is complete (not on first mount)
+      if (!isInitialLoadRef.current) {
         loadData();
       }
-    }, [isLoading, loadData])
+    }, [loadData])
   );
 
   const onRefresh = useCallback(async (): Promise<void> => {

@@ -80,6 +80,7 @@ function AppContent() {
   const [onboardingChecked, setOnboardingChecked] = useState<boolean>(false);
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
   const isPasswordRecoveryRef = useRef<boolean>(false);
+  const isRoleLoadedRef = useRef<boolean>(false);
 
   useEffect(() => {
     // Check initial auth state
@@ -116,9 +117,11 @@ function AppContent() {
       }
 
       // Only handle significant auth events (not token refresh)
-      if (event === 'SIGNED_IN') {
-        setUser(session?.user || null);
-        await loadUserRole();
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+        if (session?.user) {
+          setUser(session.user);
+          await loadUserRole();
+        }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setUserRole(null);
@@ -126,6 +129,7 @@ function AppContent() {
         setOnboardingChecked(false);
         isPasswordRecoveryRef.current = false;
         setIsPasswordRecovery(false);
+        isRoleLoadedRef.current = false;
       }
       // Ignore TOKEN_REFRESHED and other events to prevent flickering
     });
@@ -321,7 +325,20 @@ function AppContent() {
     }
   };
 
-  const loadUserRole = async (forceCheck = false) => {
+  /**
+   * Load user role from profile - idempotent function
+   * Uses ref to prevent multiple calls causing flickering
+   */
+  const loadUserRole = async () => {
+    // Skip if already loaded to prevent flickering from multiple calls
+    if (isRoleLoadedRef.current) {
+      if (__DEV__) {
+        console.log('loadUserRole skipped - already loaded');
+      }
+      return;
+    }
+    isRoleLoadedRef.current = true;
+
     try {
       const profile = await getUserProfile();
       setUserRole(profile?.role || null);
@@ -329,8 +346,8 @@ function AppContent() {
         console.log('User role:', profile?.role);
       }
 
-      // Check onboarding status for the role (only if not already checked or forced)
-      if (profile?.role && (!onboardingChecked || forceCheck)) {
+      // Check onboarding status for the role
+      if (profile?.role) {
         const completed = await isOnboardingCompleted(profile.role);
         setShowOnboarding(!completed);
         setOnboardingChecked(true);
@@ -344,6 +361,8 @@ function AppContent() {
     } catch (error) {
       console.error('Error loading user role:', error);
       setUserRole(null);
+      // Reset ref on error so it can be retried
+      isRoleLoadedRef.current = false;
     }
   };
 

@@ -115,15 +115,19 @@ function AppContent() {
         return;
       }
 
-      if (session?.user) {
-        setUser(session.user);
+      // Only handle significant auth events (not token refresh)
+      if (event === 'SIGNED_IN') {
+        setUser(session?.user || null);
         await loadUserRole();
-      } else {
+      } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setUserRole(null);
+        setShowOnboarding(false);
+        setOnboardingChecked(false);
         isPasswordRecoveryRef.current = false;
         setIsPasswordRecovery(false);
       }
+      // Ignore TOKEN_REFRESHED and other events to prevent flickering
     });
 
     // Handle deep link URL for password recovery
@@ -317,7 +321,7 @@ function AppContent() {
     }
   };
 
-  const loadUserRole = async () => {
+  const loadUserRole = async (forceCheck = false) => {
     try {
       const profile = await getUserProfile();
       setUserRole(profile?.role || null);
@@ -325,8 +329,8 @@ function AppContent() {
         console.log('User role:', profile?.role);
       }
 
-      // Check onboarding status for the role
-      if (profile?.role) {
+      // Check onboarding status for the role (only if not already checked or forced)
+      if (profile?.role && (!onboardingChecked || forceCheck)) {
         const completed = await isOnboardingCompleted(profile.role);
         setShowOnboarding(!completed);
         setOnboardingChecked(true);

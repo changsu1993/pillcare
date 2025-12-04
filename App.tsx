@@ -39,6 +39,7 @@ import ResetPasswordScreen from './src/features/auth/screens/ResetPasswordScreen
 
 // Contexts
 import { SettingsProvider } from './src/features/settings/contexts/SettingsContext';
+import { ThemeProvider, useTheme } from './src/shared/contexts';
 
 // Onboarding
 import {
@@ -58,7 +59,19 @@ const linking = {
   },
 };
 
-export default function App() {
+/**
+ * ThemedStatusBar - Status bar that adapts to dark mode
+ */
+const ThemedStatusBar = () => {
+  const { isDarkMode } = useTheme();
+  return <StatusBar style={isDarkMode ? 'light' : 'dark'} />;
+};
+
+/**
+ * AppContent - Main app content wrapped with theme context
+ */
+function AppContent() {
+  const { isDarkMode } = useTheme();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
@@ -192,23 +205,23 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    // 알림 응답 리스너 (사용자가 알림을 탭했을 때)
+    // Notification response listener (when user taps notification)
     const notificationResponseSubscription = registerNotificationResponseListener(
       (response) => {
         if (__DEV__) {
-          console.log('알림 응답:', response);
+          console.log('Notification response:', response);
         }
         handleNotificationResponse(response);
       }
     );
 
-    // Foreground 알림 리스너 (앱이 열려있을 때 알림 수신)
+    // Foreground notification listener (when app is open)
     const foregroundSubscription = registerForegroundNotificationListener(
       (notification) => {
         if (__DEV__) {
-          console.log('Foreground 알림 수신:', notification);
+          console.log('Foreground notification received:', notification);
         }
-        // 앱이 열려있을 때는 자동으로 화면 전환
+        // Auto-navigate when app is open
         handleForegroundNotification(notification);
       }
     );
@@ -221,7 +234,7 @@ export default function App() {
   }, [userRole]);
 
   /**
-   * 알림 응답 처리 (사용자가 알림을 탭했을 때)
+   * Handle notification response (when user taps notification)
    */
   const handleNotificationResponse = (
     response: Notifications.NotificationResponse
@@ -239,7 +252,7 @@ export default function App() {
       'scheduledTime' in data &&
       userRole === 'parent'
     ) {
-      // 부모 앱: FullScreenReminderScreen으로 이동
+      // Parent app: Navigate to FullScreenReminderScreen
       navigationRef.current?.navigate('FullScreenReminder', {
         medicationId: String(data.medicationId),
         scheduledTime: String(data.scheduledTime),
@@ -251,8 +264,8 @@ export default function App() {
       data.type === 'missed_medication' &&
       userRole === 'child'
     ) {
-      // 자녀 앱: 홈 화면으로 이동 (부모님 복약 현황 확인)
-      // Note: 자녀 Navigator의 Home 탭으로 이동
+      // Child app: Navigate to home screen to check parent's medication status
+      // Note: Navigate to Home tab in Child Navigator
       if (__DEV__) {
         console.log('Missed medication notification tapped - navigating to home');
       }
@@ -261,7 +274,7 @@ export default function App() {
   };
 
   /**
-   * Foreground 알림 처리 (앱이 열려있을 때)
+   * Foreground notification handling (when app is open)
    */
   const handleForegroundNotification = (
     notification: Notifications.Notification
@@ -278,7 +291,7 @@ export default function App() {
       'scheduledTime' in data &&
       userRole === 'parent'
     ) {
-      // 부모 앱: 자동으로 FullScreenReminderScreen으로 이동
+      // Parent app: Auto-navigate to FullScreenReminderScreen
       setTimeout(() => {
         navigationRef.current?.navigate('FullScreenReminder', {
           medicationId: String(data.medicationId),
@@ -392,9 +405,11 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
+      <View className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="mt-4 text-base text-gray-900">PillCare 로딩 중...</Text>
+        <Text className={`mt-4 text-base ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+          PillCare 로딩 중...
+        </Text>
       </View>
     );
   }
@@ -421,7 +436,7 @@ export default function App() {
   return (
     <SettingsProvider>
       <NavigationContainer ref={navigationRef} linking={linking}>
-        <StatusBar style="auto" />
+        <ThemedStatusBar />
         {isPasswordRecovery ? (
           // Password recovery mode - show reset password screen
           <ResetPasswordScreen
@@ -440,9 +455,11 @@ export default function App() {
           <AuthNavigator />
         ) : !userRole || !onboardingChecked ? (
           // Logged in but no role assigned yet or checking onboarding
-          <View className="flex-1 justify-center items-center bg-white">
+          <View className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
             <ActivityIndicator size="large" color="#3B82F6" />
-            <Text className="mt-4 text-base text-gray-900">프로필 설정 중...</Text>
+            <Text className={`mt-4 text-base ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+              프로필 설정 중...
+            </Text>
           </View>
         ) : showOnboarding ? (
           // Show onboarding for new users
@@ -459,8 +476,8 @@ export default function App() {
           <ChildNavigator />
         ) : (
           // Unknown role
-          <View className="flex-1 bg-white items-center justify-center p-6">
-            <Text className="text-lg text-error text-center leading-relaxed">
+          <View className={`flex-1 items-center justify-center p-6 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
+            <Text className={`text-lg text-error text-center leading-relaxed`}>
               알 수 없는 사용자 역할입니다.{'\n'}
               설정을 확인해주세요.
             </Text>
@@ -468,5 +485,13 @@ export default function App() {
         )}
       </NavigationContainer>
     </SettingsProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }

@@ -36,10 +36,12 @@ import { User, FamilyConnection } from '../../../../shared/types/database.types'
 import { getSettings, saveSettings, VoiceSpeed } from '../../services/settings';
 import { testVoice, stopSpeaking } from '../../../notifications/services/voice';
 import { resetOnboardingStatus } from '../../../onboarding';
+import { useTheme, ThemeMode } from '../../../../shared/contexts';
 
 type Props = ParentScreenProps<'Settings'>;
 
 const ParentSettingsScreen = ({ navigation }: Props) => {
+  const { isDarkMode, themeMode, setTheme } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [connectedChildren, setConnectedChildren] = useState<User[]>([]);
@@ -239,6 +241,44 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
     }
   };
 
+  const handleThemeChange = async (mode: ThemeMode) => {
+    try {
+      setIsSettingsSaving(true);
+      await setTheme(mode);
+    } catch (error) {
+      console.error('Error saving theme setting:', error);
+      Alert.alert('오류', '테마 설정을 저장할 수 없습니다.');
+    } finally {
+      setIsSettingsSaving(false);
+    }
+  };
+
+  const getThemeLabel = (mode: ThemeMode): string => {
+    switch (mode) {
+      case 'light':
+        return '라이트';
+      case 'dark':
+        return '다크';
+      case 'system':
+        return '시스템 설정';
+      default:
+        return '시스템 설정';
+    }
+  };
+
+  const getThemeIcon = (mode: ThemeMode): string => {
+    switch (mode) {
+      case 'light':
+        return '\u2600\uFE0F'; // Sun
+      case 'dark':
+        return '\u{1F319}'; // Crescent Moon
+      case 'system':
+        return '\u{1F4F1}'; // Mobile Phone
+      default:
+        return '\u{1F4F1}';
+    }
+  };
+
   if (isLoading) {
     return (
       <View className="flex-1 bg-gray-50 justify-center items-center">
@@ -398,14 +438,20 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
 
           {/* Vibration toggle */}
           <View
-            className="bg-white h-[72px] flex-row items-center justify-between px-6 rounded-2xl border-2 border-gray-200 shadow-sm"
+            className={`h-[72px] flex-row items-center justify-between px-6 rounded-2xl border-2 shadow-sm ${
+              isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+            }`}
             accessibilityLabel="진동 설정"
             accessibilityRole="adjustable"
             accessibilityState={{ checked: vibrationEnabled }}
           >
             <View className="flex-row items-center flex-1">
               <Text className="text-4xl mr-4">📳</Text>
-              <Text className="text-2xl font-semibold text-gray-900">진동</Text>
+              <Text
+                className={`text-2xl font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}
+              >
+                진동
+              </Text>
             </View>
             <View className="justify-center items-center w-[60px] h-9">
               <Switch
@@ -417,6 +463,113 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
                 accessibilityLabel={vibrationEnabled ? '진동 켜짐' : '진동 꺼짐'}
                 disabled={isSettingsSaving}
               />
+            </View>
+          </View>
+
+          {/* Theme selection */}
+          <View
+            className={`p-6 rounded-2xl border-2 shadow-sm ${
+              isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+            }`}
+          >
+            <Text
+              className={`text-2xl font-semibold mb-4 ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}
+            >
+              화면 테마
+            </Text>
+            <View className="flex-row gap-3">
+              {/* Light mode button */}
+              <TouchableOpacity
+                className={`flex-1 h-[72px] items-center justify-center rounded-xl border-2 ${
+                  themeMode === 'light'
+                    ? 'bg-primary border-primary'
+                    : isDarkMode
+                      ? 'bg-gray-700 border-gray-600'
+                      : 'bg-gray-50 border-gray-200'
+                }`}
+                onPress={() => handleThemeChange('light')}
+                activeOpacity={0.7}
+                disabled={isSettingsSaving}
+                accessibilityLabel="라이트 모드"
+                accessibilityHint="화면을 밝게 설정합니다"
+                accessibilityRole="button"
+                accessibilityState={{ selected: themeMode === 'light' }}
+              >
+                <Text className="text-4xl mb-1">{getThemeIcon('light')}</Text>
+                <Text
+                  className={`text-xl font-semibold ${
+                    themeMode === 'light'
+                      ? 'text-white'
+                      : isDarkMode
+                        ? 'text-gray-100'
+                        : 'text-gray-900'
+                  }`}
+                >
+                  {getThemeLabel('light')}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Dark mode button */}
+              <TouchableOpacity
+                className={`flex-1 h-[72px] items-center justify-center rounded-xl border-2 ${
+                  themeMode === 'dark'
+                    ? 'bg-primary border-primary'
+                    : isDarkMode
+                      ? 'bg-gray-700 border-gray-600'
+                      : 'bg-gray-50 border-gray-200'
+                }`}
+                onPress={() => handleThemeChange('dark')}
+                activeOpacity={0.7}
+                disabled={isSettingsSaving}
+                accessibilityLabel="다크 모드"
+                accessibilityHint="화면을 어둡게 설정합니다"
+                accessibilityRole="button"
+                accessibilityState={{ selected: themeMode === 'dark' }}
+              >
+                <Text className="text-4xl mb-1">{getThemeIcon('dark')}</Text>
+                <Text
+                  className={`text-xl font-semibold ${
+                    themeMode === 'dark'
+                      ? 'text-white'
+                      : isDarkMode
+                        ? 'text-gray-100'
+                        : 'text-gray-900'
+                  }`}
+                >
+                  {getThemeLabel('dark')}
+                </Text>
+              </TouchableOpacity>
+
+              {/* System mode button */}
+              <TouchableOpacity
+                className={`flex-1 h-[72px] items-center justify-center rounded-xl border-2 ${
+                  themeMode === 'system'
+                    ? 'bg-primary border-primary'
+                    : isDarkMode
+                      ? 'bg-gray-700 border-gray-600'
+                      : 'bg-gray-50 border-gray-200'
+                }`}
+                onPress={() => handleThemeChange('system')}
+                activeOpacity={0.7}
+                disabled={isSettingsSaving}
+                accessibilityLabel="시스템 설정"
+                accessibilityHint="시스템 설정에 따라 화면 테마를 자동으로 변경합니다"
+                accessibilityRole="button"
+                accessibilityState={{ selected: themeMode === 'system' }}
+              >
+                <Text className="text-4xl mb-1">{getThemeIcon('system')}</Text>
+                <Text
+                  className={`text-xl font-semibold ${
+                    themeMode === 'system'
+                      ? 'text-white'
+                      : isDarkMode
+                        ? 'text-gray-100'
+                        : 'text-gray-900'
+                  }`}
+                >
+                  {getThemeLabel('system')}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 

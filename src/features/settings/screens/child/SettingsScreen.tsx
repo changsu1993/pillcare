@@ -34,6 +34,7 @@ import { User, FamilyConnection } from '../../../../shared/types/database.types'
 import { ChildStackParamList } from '../../../../shared/types/navigation.types';
 import { requestNotificationPermissions } from '../../../notifications/services/notifications';
 import { resetOnboardingStatus } from '../../../onboarding';
+import { useTheme, ThemeMode } from '../../../../shared/contexts';
 
 interface UserProfile {
   id: string;
@@ -47,6 +48,7 @@ type NavigationProp = NativeStackNavigationProp<ChildStackParamList, 'Settings'>
 
 const ChildSettingsScreen = () => {
   const navigation = useNavigation<NavigationProp>();
+  const { isDarkMode, themeMode, setTheme } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingPrefs, setIsSavingPrefs] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -224,6 +226,31 @@ const ChildSettingsScreen = () => {
     }
   };
 
+  const handleThemeChange = async (mode: ThemeMode) => {
+    try {
+      setIsSavingPrefs(true);
+      await setTheme(mode);
+    } catch (error) {
+      console.error('Error saving theme setting:', error);
+      Alert.alert('오류', '테마 설정을 저장할 수 없습니다.');
+    } finally {
+      setIsSavingPrefs(false);
+    }
+  };
+
+  const getThemeLabel = (mode: ThemeMode): string => {
+    switch (mode) {
+      case 'light':
+        return '라이트';
+      case 'dark':
+        return '다크';
+      case 'system':
+        return '시스템 설정';
+      default:
+        return '시스템 설정';
+    }
+  };
+
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-gray-50">
@@ -265,13 +292,33 @@ const ChildSettingsScreen = () => {
         </View>
 
         {/* 알림 설정 섹션 */}
-        <View className="bg-white mt-4 px-4 py-3 border-t border-b border-gray-200">
-          <Text className="text-xs font-semibold text-gray-500 mb-3 uppercase">알림 설정</Text>
+        <View
+          className={`mt-4 px-4 py-3 border-t border-b ${
+            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+          }`}
+        >
+          <Text
+            className={`text-xs font-semibold mb-3 uppercase ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-500'
+            }`}
+          >
+            알림 설정
+          </Text>
 
-          <View className="flex-row items-center justify-between py-3 border-b border-gray-100">
+          <View
+            className={`flex-row items-center justify-between py-3 border-b ${
+              isDarkMode ? 'border-gray-700' : 'border-gray-100'
+            }`}
+          >
             <View className="flex-row items-center flex-1 gap-3">
-              <Ionicons name="notifications-outline" size={24} color="#6B7280" />
-              <Text className="text-base text-gray-900">푸시 알림</Text>
+              <Ionicons
+                name="notifications-outline"
+                size={24}
+                color={isDarkMode ? '#9CA3AF' : '#6B7280'}
+              />
+              <Text className={`text-base ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+                푸시 알림
+              </Text>
             </View>
             <Switch
               value={notificationsEnabled}
@@ -282,12 +329,24 @@ const ChildSettingsScreen = () => {
             />
           </View>
 
-          <View className="flex-row items-center justify-between py-3 border-b border-gray-100">
+          <View
+            className={`flex-row items-center justify-between py-3 border-b ${
+              isDarkMode ? 'border-gray-700' : 'border-gray-100'
+            }`}
+          >
             <View className="flex-row items-center flex-1 gap-3">
-              <Ionicons name="alert-circle-outline" size={24} color="#6B7280" />
+              <Ionicons
+                name="alert-circle-outline"
+                size={24}
+                color={isDarkMode ? '#9CA3AF' : '#6B7280'}
+              />
               <View>
-                <Text className="text-base text-gray-900">미복용 알림</Text>
-                <Text className="text-xs text-gray-400 mt-0.5">
+                <Text className={`text-base ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+                  미복용 알림
+                </Text>
+                <Text
+                  className={`text-xs mt-0.5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}
+                >
                   부모님이 약을 놓치면 알림을 받습니다
                 </Text>
               </View>
@@ -300,6 +359,113 @@ const ChildSettingsScreen = () => {
               thumbColor={missedAlertEnabled ? '#3B82F6' : '#9CA3AF'}
             />
           </View>
+        </View>
+
+        {/* 테마 설정 섹션 */}
+        <View
+          className={`mt-4 px-4 py-3 border-t border-b ${
+            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+          }`}
+        >
+          <Text
+            className={`text-xs font-semibold mb-3 uppercase ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-500'
+            }`}
+          >
+            화면 테마
+          </Text>
+
+          {/* Light mode option */}
+          <TouchableOpacity
+            className={`flex-row items-center justify-between py-3 border-b ${
+              isDarkMode ? 'border-gray-700' : 'border-gray-100'
+            }`}
+            onPress={() => handleThemeChange('light')}
+            disabled={isSavingPrefs}
+          >
+            <View className="flex-row items-center gap-3">
+              <Ionicons name="sunny-outline" size={24} color={isDarkMode ? '#9CA3AF' : '#6B7280'} />
+              <Text className={`text-base ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+                {getThemeLabel('light')}
+              </Text>
+            </View>
+            <View
+              className={`w-5 h-5 rounded-full border-2 justify-center items-center ${
+                themeMode === 'light'
+                  ? 'border-primary bg-primary'
+                  : isDarkMode
+                    ? 'border-gray-600'
+                    : 'border-gray-300'
+              }`}
+            >
+              {themeMode === 'light' && <Ionicons name="checkmark" size={12} color="#FFFFFF" />}
+            </View>
+          </TouchableOpacity>
+
+          {/* Dark mode option */}
+          <TouchableOpacity
+            className={`flex-row items-center justify-between py-3 border-b ${
+              isDarkMode ? 'border-gray-700' : 'border-gray-100'
+            }`}
+            onPress={() => handleThemeChange('dark')}
+            disabled={isSavingPrefs}
+          >
+            <View className="flex-row items-center gap-3">
+              <Ionicons name="moon-outline" size={24} color={isDarkMode ? '#9CA3AF' : '#6B7280'} />
+              <Text className={`text-base ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+                {getThemeLabel('dark')}
+              </Text>
+            </View>
+            <View
+              className={`w-5 h-5 rounded-full border-2 justify-center items-center ${
+                themeMode === 'dark'
+                  ? 'border-primary bg-primary'
+                  : isDarkMode
+                    ? 'border-gray-600'
+                    : 'border-gray-300'
+              }`}
+            >
+              {themeMode === 'dark' && <Ionicons name="checkmark" size={12} color="#FFFFFF" />}
+            </View>
+          </TouchableOpacity>
+
+          {/* System mode option */}
+          <TouchableOpacity
+            className={`flex-row items-center justify-between py-3 border-b ${
+              isDarkMode ? 'border-gray-700' : 'border-gray-100'
+            }`}
+            onPress={() => handleThemeChange('system')}
+            disabled={isSavingPrefs}
+          >
+            <View className="flex-row items-center gap-3">
+              <Ionicons
+                name="phone-portrait-outline"
+                size={24}
+                color={isDarkMode ? '#9CA3AF' : '#6B7280'}
+              />
+              <View>
+                <Text className={`text-base ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+                  {getThemeLabel('system')}
+                </Text>
+                <Text
+                  className={`text-xs mt-0.5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}
+                >
+                  기기 설정에 따라 자동 변경
+                </Text>
+              </View>
+            </View>
+            <View
+              className={`w-5 h-5 rounded-full border-2 justify-center items-center ${
+                themeMode === 'system'
+                  ? 'border-primary bg-primary'
+                  : isDarkMode
+                    ? 'border-gray-600'
+                    : 'border-gray-300'
+              }`}
+            >
+              {themeMode === 'system' && <Ionicons name="checkmark" size={12} color="#FFFFFF" />}
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* 가족 연결 섹션 */}

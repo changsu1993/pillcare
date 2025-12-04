@@ -36,6 +36,7 @@ import {
   getAllScheduledNotifications,
 } from '../../../notifications/services/notifications';
 import RefillAlertBanner from '../../../medication/components/RefillAlertBanner';
+import { useTheme } from '../../../../shared/contexts';
 
 type Props = ParentScreenProps<'Home'>;
 
@@ -87,6 +88,7 @@ const MedicationCard = memo(({ medication, onPress }: MedicationCardProps) => {
 MedicationCard.displayName = 'MedicationCard';
 
 const ParentHomeScreen = ({ navigation }: Props) => {
+  const { isDarkMode } = useTheme();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [scheduledMedications, setScheduledMedications] = useState<ScheduledMedication[]>([]);
   const [allMedications, setAllMedications] = useState<Medication[]>([]);
@@ -207,16 +209,22 @@ const ParentHomeScreen = ({ navigation }: Props) => {
 
   if (isLoading) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+      <View
+        className={`flex-1 justify-center items-center p-6 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
+      >
         <ActivityIndicator size="large" color="#22C55E" />
-        <Text className="text-xl text-gray-900 mt-4">불러오는 중...</Text>
+        <Text className={`text-xl mt-4 ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+          불러오는 중...
+        </Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+      <View
+        className={`flex-1 justify-center items-center p-6 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
+      >
         <Text className="text-xl text-error text-center mb-6">{error}</Text>
         <TouchableOpacity
           className="bg-blue-500 px-8 py-4 rounded-xl"
@@ -231,15 +239,21 @@ const ParentHomeScreen = ({ navigation }: Props) => {
   // Empty state (no medications scheduled)
   if (scheduledMedications.length === 0) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50">
+      <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, gap: 16 }}>
           {/* 알림 권한 경고 (권한이 없을 때만 표시) */}
           {!hasNotificationPermission && (
-            <View className="bg-yellow-100 rounded-xl p-5 mb-4 border-2 border-warning">
-              <Text className="text-xl font-bold text-yellow-900 mb-2 text-center">
+            <View
+              className={`rounded-xl p-5 mb-4 border-2 border-warning ${isDarkMode ? 'bg-yellow-900/30' : 'bg-yellow-100'}`}
+            >
+              <Text
+                className={`text-xl font-bold mb-2 text-center ${isDarkMode ? 'text-yellow-200' : 'text-yellow-900'}`}
+              >
                 ⚠️ 알림 권한이 필요합니다
               </Text>
-              <Text className="text-base text-yellow-900 mb-4 text-center leading-5">
+              <Text
+                className={`text-base mb-4 text-center leading-5 ${isDarkMode ? 'text-yellow-300' : 'text-yellow-900'}`}
+              >
                 약 복용 알림을 받으려면 설정에서 권한을 허용해주세요.
               </Text>
               <TouchableOpacity
@@ -254,8 +268,14 @@ const ParentHomeScreen = ({ navigation }: Props) => {
           {/* 개발/테스트용 버튼 - SECURITY: Only show in development mode */}
           {/* Reference: OWASP - Security Misconfiguration (A05:2021) */}
           {__DEV__ && (
-            <View className="bg-gray-100 rounded-xl p-4 mb-4 border border-gray-300">
-              <Text className="text-sm font-semibold text-gray-600 mb-3">개발자 도구</Text>
+            <View
+              className={`rounded-xl p-4 mb-4 border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'}`}
+            >
+              <Text
+                className={`text-sm font-semibold mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
+              >
+                개발자 도구
+              </Text>
               <View className="flex-row gap-2">
                 <TouchableOpacity
                   className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
@@ -275,7 +295,9 @@ const ParentHomeScreen = ({ navigation }: Props) => {
 
           <View className="justify-center items-center py-16">
             <Text className="text-8xl mb-6">&#10003;</Text>
-            <Text className="text-3xl text-gray-600 text-center leading-10">
+            <Text
+              className={`text-3xl text-center leading-10 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
+            >
               오늘 드실 약이{'\n'}
               없습니다
             </Text>
@@ -309,15 +331,21 @@ const ParentHomeScreen = ({ navigation }: Props) => {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, gap: 16 }}>
         {/* 알림 권한 경고 (권한이 없을 때만 표시) */}
         {!hasNotificationPermission && (
-          <View className="bg-yellow-100 rounded-xl p-5 mb-4 border-2 border-warning">
-            <Text className="text-xl font-bold text-yellow-900 mb-2 text-center">
+          <View
+            className={`rounded-xl p-5 mb-4 border-2 border-warning ${isDarkMode ? 'bg-yellow-900/30' : 'bg-yellow-100'}`}
+          >
+            <Text
+              className={`text-xl font-bold mb-2 text-center ${isDarkMode ? 'text-yellow-200' : 'text-yellow-900'}`}
+            >
               &#9888;&#65039; 알림 권한이 필요합니다
             </Text>
-            <Text className="text-base text-yellow-900 mb-4 text-center leading-5">
+            <Text
+              className={`text-base mb-4 text-center leading-5 ${isDarkMode ? 'text-yellow-300' : 'text-yellow-900'}`}
+            >
               약 복용 알림을 받으려면 설정에서 권한을 허용해주세요.
             </Text>
             <TouchableOpacity
@@ -332,8 +360,14 @@ const ParentHomeScreen = ({ navigation }: Props) => {
         {/* 개발/테스트용 버튼 - SECURITY: Only show in development mode */}
         {/* Reference: OWASP - Security Misconfiguration (A05:2021) */}
         {__DEV__ && (
-          <View className="bg-gray-100 rounded-xl p-4 mb-4 border border-gray-300">
-            <Text className="text-sm font-semibold text-gray-600 mb-3">개발자 도구</Text>
+          <View
+            className={`rounded-xl p-4 mb-4 border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'}`}
+          >
+            <Text
+              className={`text-sm font-semibold mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
+            >
+              개발자 도구
+            </Text>
             <View className="flex-row gap-2">
               <TouchableOpacity
                 className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"

@@ -1,5 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // Enable dark mode with class strategy for NativeWind
+  darkMode: 'class',
   // NOTE: Update this to include the paths to all of your component files.
   content: [
     './App.{js,jsx,ts,tsx}',

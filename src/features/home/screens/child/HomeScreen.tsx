@@ -31,6 +31,7 @@ import {
   getParentMedications,
 } from '../../../../shared/services/api';
 import { User, MedicationLog, Medication } from '../../../../shared/types/database.types';
+import { useTheme } from '../../../../shared/contexts/ThemeContext';
 
 interface TodayMedicationItem {
   medicationId: string;
@@ -78,9 +79,10 @@ const getStatusDisplayConfig = (
 interface TimelineItemProps {
   item: TodayMedicationItem;
   isLast: boolean;
+  isDarkMode: boolean;
 }
 
-const TimelineItem = memo(({ item, isLast }: TimelineItemProps) => {
+const TimelineItem = memo(({ item, isLast, isDarkMode }: TimelineItemProps) => {
   const statusDisplay = useMemo(() => getStatusDisplayConfig(item.status), [item.status]);
 
   return (
@@ -92,17 +94,25 @@ const TimelineItem = memo(({ item, isLast }: TimelineItemProps) => {
         >
           <Ionicons name={statusDisplay.icon as any} size={12} color="#FFFFFF" />
         </View>
-        {!isLast && <View className="flex-1 w-0.5 bg-gray-200 mt-1 -mb-2" />}
+        {!isLast && (
+          <View
+            className={`flex-1 w-0.5 mt-1 -mb-2 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}
+          />
+        )}
       </View>
 
       {/* Content */}
       <View className="flex-1">
-        <Text className="text-xs text-gray-500 mb-1.5">{item.scheduledTime}</Text>
+        <Text className={`text-xs mb-1.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          {item.scheduledTime}
+        </Text>
         <View
-          className={`bg-white rounded-xl p-4 border-l-4 shadow-sm ${statusDisplay.bgColorClass.replace('bg-', 'border-l-')}`}
+          className={`rounded-xl p-4 border-l-4 shadow-sm ${isDarkMode ? 'bg-gray-800' : 'bg-white'} ${statusDisplay.bgColorClass.replace('bg-', 'border-l-')}`}
         >
           <View className="flex-row justify-between items-center mb-1">
-            <Text className="text-base font-semibold text-gray-900 flex-1">
+            <Text
+              className={`text-base font-semibold flex-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+            >
               {item.medicationName}
             </Text>
             <View className={`px-2 py-1 rounded ${statusDisplay.bgColorClass}/20`}>
@@ -111,7 +121,9 @@ const TimelineItem = memo(({ item, isLast }: TimelineItemProps) => {
               </Text>
             </View>
           </View>
-          <Text className="text-sm text-gray-500">{item.dosage}</Text>
+          <Text className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            {item.dosage}
+          </Text>
         </View>
       </View>
     </View>
@@ -126,6 +138,9 @@ const ChildHomeScreen = () => {
   const [parentInfo, setParentInfo] = useState<User | null>(null);
   const [todayItems, setTodayItems] = useState<TodayMedicationItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  // Theme context
+  const { isDarkMode } = useTheme();
 
   const loadData = useCallback(async (): Promise<void> => {
     try {
@@ -278,9 +293,13 @@ const ChildHomeScreen = () => {
   // Loading state
   if (isLoading) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+      <View
+        className={`flex-1 justify-center items-center p-6 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
+      >
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="text-base text-gray-500 mt-3">불러오는 중...</Text>
+        <Text className={`text-base mt-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          불러오는 중...
+        </Text>
       </View>
     );
   }
@@ -288,7 +307,9 @@ const ChildHomeScreen = () => {
   // Error state
   if (error) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+      <View
+        className={`flex-1 justify-center items-center p-6 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
+      >
         <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
         <Text className="text-base text-error text-center mt-3 mb-4">{error}</Text>
         <TouchableOpacity className="bg-primary px-6 py-3 rounded-lg" onPress={loadData}>
@@ -301,11 +322,20 @@ const ChildHomeScreen = () => {
   // No parent connected
   if (!parentInfo) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
+      <SafeAreaView
+        className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
+        edges={['bottom']}
+      >
         <View className="flex-1 justify-center items-center p-6">
-          <Ionicons name="people-outline" size={64} color="#9CA3AF" />
-          <Text className="text-xl font-bold text-gray-900 mt-4 mb-2">부모님을 연결해주세요</Text>
-          <Text className="text-sm text-gray-500 text-center leading-5 mb-6">
+          <Ionicons name="people-outline" size={64} color={isDarkMode ? '#6B7280' : '#9CA3AF'} />
+          <Text
+            className={`text-xl font-bold mt-4 mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+          >
+            부모님을 연결해주세요
+          </Text>
+          <Text
+            className={`text-sm text-center leading-5 mb-6 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}
+          >
             부모님의 복약 현황을 확인하려면{'\n'}먼저 가족 연결을 해주세요
           </Text>
           <TouchableOpacity className="flex-row items-center bg-primary px-5 py-3 rounded-lg gap-2">
@@ -318,7 +348,10 @@ const ChildHomeScreen = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
+    <SafeAreaView
+      className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
+      edges={['bottom']}
+    >
       <ScrollView
         className="flex-1"
         contentContainerClassName="p-4 pb-20"
@@ -327,19 +360,31 @@ const ChildHomeScreen = () => {
         }
       >
         {/* Parent Info Card */}
-        <View className="bg-white rounded-2xl p-5 mb-5 shadow-sm">
+        <View
+          className={`rounded-2xl p-5 mb-5 shadow-sm ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}
+        >
           <View className="flex-row items-center mb-5">
-            <View className="w-12 h-12 rounded-full bg-primary/20 justify-center items-center mr-3">
+            <View
+              className={`w-12 h-12 rounded-full justify-center items-center mr-3 ${isDarkMode ? 'bg-primary/30' : 'bg-primary/20'}`}
+            >
               <Ionicons name="person" size={24} color="#3B82F6" />
             </View>
             <View className="flex-1">
-              <Text className="text-lg font-bold text-gray-900">{parentInfo.name}님</Text>
-              <Text className="text-sm text-gray-500 mt-0.5">부모님 복약 현황</Text>
+              <Text className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                {parentInfo.name}님
+              </Text>
+              <Text className={`text-sm mt-0.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                부모님 복약 현황
+              </Text>
             </View>
           </View>
 
-          <View className="flex-row justify-between items-center bg-gray-100 rounded-xl p-4 mb-4">
-            <Text className="text-sm text-gray-500">오늘 복약률</Text>
+          <View
+            className={`flex-row justify-between items-center rounded-xl p-4 mb-4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}
+          >
+            <Text className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              오늘 복약률
+            </Text>
             <Text className={`text-3xl font-bold ${adherenceRateColorClass}`}>
               {adherenceRate}%
             </Text>
@@ -348,33 +393,53 @@ const ChildHomeScreen = () => {
           {/* Stats Row - using memoized values */}
           <View className="flex-row justify-around items-center">
             <View className="items-center flex-1">
-              <Text className="text-xl font-bold text-gray-900">{takenCount}</Text>
-              <Text className="text-xs text-gray-500 mt-1">복용</Text>
+              <Text className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                {takenCount}
+              </Text>
+              <Text className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                복용
+              </Text>
             </View>
-            <View className="w-px h-8 bg-gray-200" />
+            <View className={`w-px h-8 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`} />
             <View className="items-center flex-1">
-              <Text className="text-xl font-bold text-gray-900">{pendingCount}</Text>
-              <Text className="text-xs text-gray-500 mt-1">대기</Text>
+              <Text className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                {pendingCount}
+              </Text>
+              <Text className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                대기
+              </Text>
             </View>
-            <View className="w-px h-8 bg-gray-200" />
+            <View className={`w-px h-8 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`} />
             <View className="items-center flex-1">
-              <Text className="text-xl font-bold text-gray-900">{missedCount}</Text>
-              <Text className="text-xs text-gray-500 mt-1">미복용</Text>
+              <Text className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                {missedCount}
+              </Text>
+              <Text className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                미복용
+              </Text>
             </View>
           </View>
         </View>
 
         {/* Today's Medications Section */}
         <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-lg font-bold text-gray-900">오늘의 복약</Text>
-          <Text className="text-sm text-gray-500">{formattedDate}</Text>
+          <Text className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            오늘의 복약
+          </Text>
+          <Text className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            {formattedDate}
+          </Text>
         </View>
 
         {/* Medication Timeline - using memoized TimelineItem */}
         {todayItems.length === 0 ? (
-          <View className="bg-white rounded-xl p-8 items-center">
-            <Ionicons name="medical-outline" size={32} color="#9CA3AF" />
-            <Text className="text-sm text-gray-500 mt-3">오늘 예정된 복약이 없습니다</Text>
+          <View
+            className={`rounded-xl p-8 items-center ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}
+          >
+            <Ionicons name="medical-outline" size={32} color={isDarkMode ? '#6B7280' : '#9CA3AF'} />
+            <Text className={`text-sm mt-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              오늘 예정된 복약이 없습니다
+            </Text>
           </View>
         ) : (
           <View className="pl-1">
@@ -383,6 +448,7 @@ const ChildHomeScreen = () => {
                 key={`${item.medicationId}-${item.scheduledTime}`}
                 item={item}
                 isLast={index === todayItems.length - 1}
+                isDarkMode={isDarkMode}
               />
             ))}
           </View>

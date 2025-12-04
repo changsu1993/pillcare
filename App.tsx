@@ -38,6 +38,7 @@ import ResetPasswordScreen from './src/features/auth/screens/ResetPasswordScreen
 
 // Contexts
 import { SettingsProvider } from './src/features/settings/contexts/SettingsContext';
+import { ThemeProvider, useTheme } from './src/shared/contexts/ThemeContext';
 
 // Deep linking configuration
 const linking = {
@@ -49,13 +50,26 @@ const linking = {
   },
 };
 
-export default function App() {
+/**
+ * Theme-aware StatusBar component
+ * Adjusts status bar style based on current theme
+ */
+const ThemedStatusBar = () => {
+  const { isDarkMode } = useTheme();
+  return <StatusBar style={isDarkMode ? 'light' : 'dark'} />;
+};
+
+/**
+ * Main App Content component (needs to be inside ThemeProvider)
+ */
+const AppContent = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [isPasswordRecovery, setIsPasswordRecovery] = useState<boolean>(false);
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
   const isPasswordRecoveryRef = useRef<boolean>(false);
+  const { isDarkMode } = useTheme();
 
   useEffect(() => {
     // Check initial auth state
@@ -331,9 +345,9 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
+      <View className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="mt-4 text-base text-gray-900">PillCare 로딩 중...</Text>
+        <Text className={`mt-4 text-base ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>PillCare 로딩 중...</Text>
       </View>
     );
   }
@@ -356,47 +370,58 @@ export default function App() {
   }
 
   return (
-    <SettingsProvider>
-      <NavigationContainer ref={navigationRef} linking={linking}>
-        <StatusBar style="auto" />
-        {isPasswordRecovery ? (
-          // Password recovery mode - show reset password screen
-          <ResetPasswordScreen
-            navigation={{
-              navigate: (screen: string) => {
-                if (screen === 'SignIn') {
-                  handlePasswordResetSuccess();
-                }
-              },
-              goBack: handlePasswordResetSuccess,
-            } as any}
-            route={{ params: { email: user?.email } } as any}
-          />
-        ) : !user ? (
-          // Not logged in - show auth screens
-          <AuthNavigator />
-        ) : !userRole ? (
-          // Logged in but no role assigned yet
-          <View className="flex-1 justify-center items-center bg-white">
-            <ActivityIndicator size="large" color="#3B82F6" />
-            <Text className="mt-4 text-base text-gray-900">프로필 설정 중...</Text>
-          </View>
-        ) : userRole === 'parent' ? (
-          // Parent app (elderly-optimized UI)
-          <ParentNavigator />
-        ) : userRole === 'child' ? (
-          // Child app (monitoring UI)
-          <ChildNavigator />
-        ) : (
-          // Unknown role
-          <View className="flex-1 bg-white items-center justify-center p-6">
-            <Text className="text-lg text-error text-center leading-relaxed">
-              알 수 없는 사용자 역할입니다.{'\n'}
-              설정을 확인해주세요.
-            </Text>
-          </View>
-        )}
-      </NavigationContainer>
-    </SettingsProvider>
+    <NavigationContainer ref={navigationRef} linking={linking}>
+      <ThemedStatusBar />
+      {isPasswordRecovery ? (
+        // Password recovery mode - show reset password screen
+        <ResetPasswordScreen
+          navigation={{
+            navigate: (screen: string) => {
+              if (screen === 'SignIn') {
+                handlePasswordResetSuccess();
+              }
+            },
+            goBack: handlePasswordResetSuccess,
+          } as any}
+          route={{ params: { email: user?.email } } as any}
+        />
+      ) : !user ? (
+        // Not logged in - show auth screens
+        <AuthNavigator />
+      ) : !userRole ? (
+        // Logged in but no role assigned yet
+        <View className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
+          <ActivityIndicator size="large" color="#3B82F6" />
+          <Text className={`mt-4 text-base ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>프로필 설정 중...</Text>
+        </View>
+      ) : userRole === 'parent' ? (
+        // Parent app (elderly-optimized UI)
+        <ParentNavigator />
+      ) : userRole === 'child' ? (
+        // Child app (monitoring UI)
+        <ChildNavigator />
+      ) : (
+        // Unknown role
+        <View className={`flex-1 items-center justify-center p-6 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
+          <Text className={`text-lg text-error text-center leading-relaxed`}>
+            알 수 없는 사용자 역할입니다.{'\n'}
+            설정을 확인해주세요.
+          </Text>
+        </View>
+      )}
+    </NavigationContainer>
+  );
+};
+
+/**
+ * Main App component - wraps everything with providers
+ */
+export default function App() {
+  return (
+    <ThemeProvider>
+      <SettingsProvider>
+        <AppContent />
+      </SettingsProvider>
+    </ThemeProvider>
   );
 }

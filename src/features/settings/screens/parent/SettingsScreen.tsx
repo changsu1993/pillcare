@@ -35,6 +35,7 @@ import { supabase } from '../../../../shared/services/supabase';
 import { User, FamilyConnection } from '../../../../shared/types/database.types';
 import { getSettings, saveSettings, VoiceSpeed } from '../../services/settings';
 import { testVoice, stopSpeaking } from '../../../notifications/services/voice';
+import { useTheme, ThemeMode, getThemeModeLabel } from '../../../../shared/contexts/ThemeContext';
 
 type Props = ParentScreenProps<'Settings'>;
 
@@ -47,6 +48,9 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
   const [vibrationEnabled, setVibrationEnabled] = useState(true);
   const [voiceSpeed, setVoiceSpeed] = useState<VoiceSpeed>(0.85);
   const [isSettingsSaving, setIsSettingsSaving] = useState(false);
+
+  // Theme context
+  const { themeMode, isDarkMode, setTheme } = useTheme();
 
   // Reload data when screen comes into focus
   useFocusEffect(
@@ -173,6 +177,37 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
     }
   };
 
+  /**
+   * Handle theme mode change
+   */
+  const handleThemeChange = async (mode: ThemeMode) => {
+    try {
+      setIsSettingsSaving(true);
+      await setTheme(mode);
+    } catch (error) {
+      console.error('Error saving theme setting:', error);
+      Alert.alert('오류', '설정을 저장할 수 없습니다.');
+    } finally {
+      setIsSettingsSaving(false);
+    }
+  };
+
+  /**
+   * Get theme mode emoji
+   */
+  const getThemeModeEmoji = (mode: ThemeMode): string => {
+    switch (mode) {
+      case 'light':
+        return '\u{2600}\u{FE0F}'; // Sun
+      case 'dark':
+        return '\u{1F319}'; // Crescent moon
+      case 'system':
+        return '\u{1F4F1}'; // Mobile phone
+      default:
+        return '\u{1F4F1}';
+    }
+  };
+
   const handleGenerateCode = () => {
     navigation.navigate('InvitationCode');
   };
@@ -228,63 +263,182 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-gray-50 justify-center items-center">
+      <View
+        className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
+      >
         <ActivityIndicator size="large" color="#22C55E" />
-        <Text className="text-xl text-gray-900 mt-4">불러오는 중...</Text>
+        <Text className={`text-xl mt-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          불러오는 중...
+        </Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 24 }}>
         {/* Profile card */}
-        <View className="bg-white p-8 rounded-2xl items-center mb-6 border-2 border-gray-200 shadow-sm">
+        <View
+          className={`p-8 rounded-2xl items-center mb-6 border-2 shadow-sm ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+        >
           <Text className="text-6xl mb-4">👤</Text>
           <Text
-            className="text-3xl font-bold text-gray-900 mb-2"
+            className={`text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
             accessibilityLabel={`이름: ${user?.name || '사용자'}`}
           >
             {user?.name || '사용자'}
           </Text>
           <Text
-            className="text-xl text-gray-700 mb-4"
+            className={`text-xl mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}
             accessibilityLabel={`이메일: ${user?.email || ''}`}
           >
             {user?.email || ''}
           </Text>
           <TouchableOpacity
-            className="flex-row items-center gap-2 bg-gray-100 px-6 py-3 rounded-xl"
+            className={`flex-row items-center gap-2 px-6 py-3 rounded-xl ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}
             onPress={() => navigation.navigate('ProfileEdit')}
             activeOpacity={0.7}
             accessibilityLabel="프로필 수정"
             accessibilityRole="button"
           >
-            <Ionicons name="create-outline" size={24} color="#374151" />
-            <Text className="text-xl font-semibold text-gray-700">프로필 수정</Text>
+            <Ionicons name="create-outline" size={24} color={isDarkMode ? '#D1D5DB' : '#374151'} />
+            <Text
+              className={`text-xl font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}
+            >
+              프로필 수정
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Settings options */}
         <View className="gap-4">
+          {/* Theme mode selection */}
+          <View
+            className={`p-6 rounded-2xl border-2 shadow-sm ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+          >
+            <Text
+              className={`text-2xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+            >
+              화면 모드
+            </Text>
+            <View className="flex-row gap-3">
+              {/* Light mode button */}
+              <TouchableOpacity
+                className={`flex-1 h-[72px] items-center justify-center rounded-xl border-2 ${
+                  themeMode === 'light'
+                    ? 'bg-primary border-primary'
+                    : isDarkMode
+                      ? 'bg-gray-700 border-gray-600'
+                      : 'bg-gray-50 border-gray-200'
+                }`}
+                onPress={() => handleThemeChange('light')}
+                activeOpacity={0.7}
+                disabled={isSettingsSaving}
+                accessibilityLabel="라이트 모드"
+                accessibilityHint="화면을 밝은 모드로 설정합니다"
+                accessibilityRole="button"
+                accessibilityState={{ selected: themeMode === 'light' }}
+              >
+                <Text className="text-4xl mb-1">{getThemeModeEmoji('light')}</Text>
+                <Text
+                  className={`text-xl font-semibold ${
+                    themeMode === 'light'
+                      ? 'text-white'
+                      : isDarkMode
+                        ? 'text-white'
+                        : 'text-gray-900'
+                  }`}
+                >
+                  {getThemeModeLabel('light')}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Dark mode button */}
+              <TouchableOpacity
+                className={`flex-1 h-[72px] items-center justify-center rounded-xl border-2 ${
+                  themeMode === 'dark'
+                    ? 'bg-primary border-primary'
+                    : isDarkMode
+                      ? 'bg-gray-700 border-gray-600'
+                      : 'bg-gray-50 border-gray-200'
+                }`}
+                onPress={() => handleThemeChange('dark')}
+                activeOpacity={0.7}
+                disabled={isSettingsSaving}
+                accessibilityLabel="다크 모드"
+                accessibilityHint="화면을 어두운 모드로 설정합니다"
+                accessibilityRole="button"
+                accessibilityState={{ selected: themeMode === 'dark' }}
+              >
+                <Text className="text-4xl mb-1">{getThemeModeEmoji('dark')}</Text>
+                <Text
+                  className={`text-xl font-semibold ${
+                    themeMode === 'dark'
+                      ? 'text-white'
+                      : isDarkMode
+                        ? 'text-white'
+                        : 'text-gray-900'
+                  }`}
+                >
+                  {getThemeModeLabel('dark')}
+                </Text>
+              </TouchableOpacity>
+
+              {/* System mode button */}
+              <TouchableOpacity
+                className={`flex-1 h-[72px] items-center justify-center rounded-xl border-2 ${
+                  themeMode === 'system'
+                    ? 'bg-primary border-primary'
+                    : isDarkMode
+                      ? 'bg-gray-700 border-gray-600'
+                      : 'bg-gray-50 border-gray-200'
+                }`}
+                onPress={() => handleThemeChange('system')}
+                activeOpacity={0.7}
+                disabled={isSettingsSaving}
+                accessibilityLabel="시스템 설정"
+                accessibilityHint="시스템 설정에 따라 화면 모드를 설정합니다"
+                accessibilityRole="button"
+                accessibilityState={{ selected: themeMode === 'system' }}
+              >
+                <Text className="text-4xl mb-1">{getThemeModeEmoji('system')}</Text>
+                <Text
+                  className={`text-xl font-semibold ${
+                    themeMode === 'system'
+                      ? 'text-white'
+                      : isDarkMode
+                        ? 'text-white'
+                        : 'text-gray-900'
+                  }`}
+                >
+                  {getThemeModeLabel('system')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
           {/* Voice guidance toggle */}
           <View
-            className="bg-white h-[72px] flex-row items-center justify-between px-6 rounded-2xl border-2 border-gray-200 shadow-sm"
+            className={`h-[72px] flex-row items-center justify-between px-6 rounded-2xl border-2 shadow-sm ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
             accessibilityLabel="음성 안내 설정"
             accessibilityRole="adjustable"
             accessibilityState={{ checked: voiceEnabled }}
           >
             <View className="flex-row items-center flex-1">
               <Text className="text-4xl mr-4">🔊</Text>
-              <Text className="text-2xl font-semibold text-gray-900">음성 안내</Text>
+              <Text
+                className={`text-2xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+              >
+                음성 안내
+              </Text>
             </View>
             <View className="justify-center items-center w-[60px] h-9">
               <Switch
                 value={voiceEnabled}
                 onValueChange={handleVoiceToggle}
-                trackColor={{ false: '#D1D5DB', true: '#86EFAC' }}
-                thumbColor={voiceEnabled ? '#22C55E' : '#F3F4F6'}
-                ios_backgroundColor="#D1D5DB"
+                trackColor={{ false: isDarkMode ? '#4B5563' : '#D1D5DB', true: '#86EFAC' }}
+                thumbColor={voiceEnabled ? '#22C55E' : isDarkMode ? '#9CA3AF' : '#F3F4F6'}
+                ios_backgroundColor={isDarkMode ? '#4B5563' : '#D1D5DB'}
                 accessibilityLabel={voiceEnabled ? '음성 안내 켜짐' : '음성 안내 꺼짐'}
                 disabled={isSettingsSaving}
               />
@@ -308,13 +462,23 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
 
           {/* Voice speed control - only show when voice is enabled */}
           {voiceEnabled && (
-            <View className="bg-white p-6 rounded-2xl border-2 border-gray-200 shadow-sm">
-              <Text className="text-2xl font-semibold text-gray-900 mb-4">음성 속도</Text>
+            <View
+              className={`p-6 rounded-2xl border-2 shadow-sm ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+            >
+              <Text
+                className={`text-2xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+              >
+                음성 속도
+              </Text>
               <View className="flex-row gap-3">
                 {/* Slow speed button */}
                 <TouchableOpacity
                   className={`flex-1 h-[72px] items-center justify-center rounded-xl border-2 ${
-                    voiceSpeed === 0.7 ? 'bg-primary border-primary' : 'bg-gray-50 border-gray-200'
+                    voiceSpeed === 0.7
+                      ? 'bg-primary border-primary'
+                      : isDarkMode
+                        ? 'bg-gray-700 border-gray-600'
+                        : 'bg-gray-50 border-gray-200'
                   }`}
                   onPress={() => handleVoiceSpeedChange(0.7)}
                   activeOpacity={0.7}
@@ -327,7 +491,11 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
                   <Text className="text-4xl mb-1">{getSpeedEmoji(0.7)}</Text>
                   <Text
                     className={`text-xl font-semibold ${
-                      voiceSpeed === 0.7 ? 'text-white' : 'text-gray-900'
+                      voiceSpeed === 0.7
+                        ? 'text-white'
+                        : isDarkMode
+                          ? 'text-white'
+                          : 'text-gray-900'
                     }`}
                   >
                     {getSpeedLabel(0.7)}
@@ -337,7 +505,11 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
                 {/* Normal speed button */}
                 <TouchableOpacity
                   className={`flex-1 h-[72px] items-center justify-center rounded-xl border-2 ${
-                    voiceSpeed === 0.85 ? 'bg-primary border-primary' : 'bg-gray-50 border-gray-200'
+                    voiceSpeed === 0.85
+                      ? 'bg-primary border-primary'
+                      : isDarkMode
+                        ? 'bg-gray-700 border-gray-600'
+                        : 'bg-gray-50 border-gray-200'
                   }`}
                   onPress={() => handleVoiceSpeedChange(0.85)}
                   activeOpacity={0.7}
@@ -350,7 +522,11 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
                   <Text className="text-4xl mb-1">{getSpeedEmoji(0.85)}</Text>
                   <Text
                     className={`text-xl font-semibold ${
-                      voiceSpeed === 0.85 ? 'text-white' : 'text-gray-900'
+                      voiceSpeed === 0.85
+                        ? 'text-white'
+                        : isDarkMode
+                          ? 'text-white'
+                          : 'text-gray-900'
                     }`}
                   >
                     {getSpeedLabel(0.85)}
@@ -360,7 +536,11 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
                 {/* Fast speed button */}
                 <TouchableOpacity
                   className={`flex-1 h-[72px] items-center justify-center rounded-xl border-2 ${
-                    voiceSpeed === 1.0 ? 'bg-primary border-primary' : 'bg-gray-50 border-gray-200'
+                    voiceSpeed === 1.0
+                      ? 'bg-primary border-primary'
+                      : isDarkMode
+                        ? 'bg-gray-700 border-gray-600'
+                        : 'bg-gray-50 border-gray-200'
                   }`}
                   onPress={() => handleVoiceSpeedChange(1.0)}
                   activeOpacity={0.7}
@@ -373,7 +553,11 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
                   <Text className="text-4xl mb-1">{getSpeedEmoji(1.0)}</Text>
                   <Text
                     className={`text-xl font-semibold ${
-                      voiceSpeed === 1.0 ? 'text-white' : 'text-gray-900'
+                      voiceSpeed === 1.0
+                        ? 'text-white'
+                        : isDarkMode
+                          ? 'text-white'
+                          : 'text-gray-900'
                     }`}
                   >
                     {getSpeedLabel(1.0)}
@@ -385,22 +569,26 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
 
           {/* Vibration toggle */}
           <View
-            className="bg-white h-[72px] flex-row items-center justify-between px-6 rounded-2xl border-2 border-gray-200 shadow-sm"
+            className={`h-[72px] flex-row items-center justify-between px-6 rounded-2xl border-2 shadow-sm ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
             accessibilityLabel="진동 설정"
             accessibilityRole="adjustable"
             accessibilityState={{ checked: vibrationEnabled }}
           >
             <View className="flex-row items-center flex-1">
               <Text className="text-4xl mr-4">📳</Text>
-              <Text className="text-2xl font-semibold text-gray-900">진동</Text>
+              <Text
+                className={`text-2xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+              >
+                진동
+              </Text>
             </View>
             <View className="justify-center items-center w-[60px] h-9">
               <Switch
                 value={vibrationEnabled}
                 onValueChange={handleVibrationToggle}
-                trackColor={{ false: '#D1D5DB', true: '#86EFAC' }}
-                thumbColor={vibrationEnabled ? '#22C55E' : '#F3F4F6'}
-                ios_backgroundColor="#D1D5DB"
+                trackColor={{ false: isDarkMode ? '#4B5563' : '#D1D5DB', true: '#86EFAC' }}
+                thumbColor={vibrationEnabled ? '#22C55E' : isDarkMode ? '#9CA3AF' : '#F3F4F6'}
+                ios_backgroundColor={isDarkMode ? '#4B5563' : '#D1D5DB'}
                 accessibilityLabel={vibrationEnabled ? '진동 켜짐' : '진동 꺼짐'}
                 disabled={isSettingsSaving}
               />
@@ -408,10 +596,16 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
           </View>
 
           {/* Family connections section */}
-          <View className="bg-white p-5 rounded-2xl border-2 border-gray-200 shadow-sm">
+          <View
+            className={`p-5 rounded-2xl border-2 shadow-sm ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+          >
             <View className="flex-row items-center mb-4">
               <Text className="text-4xl mr-4">👨‍👩‍👧</Text>
-              <Text className="text-2xl font-semibold text-gray-900">가족 연결</Text>
+              <Text
+                className={`text-2xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+              >
+                가족 연결
+              </Text>
             </View>
 
             {/* Connected children list */}
@@ -423,17 +617,27 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
                   return (
                     <View
                       key={connection.id}
-                      className="flex-row items-center justify-between py-3 border-b border-gray-100"
+                      className={`flex-row items-center justify-between py-3 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-100'}`}
                     >
                       <View className="flex-row items-center flex-1">
-                        <View className="w-11 h-11 rounded-full bg-primary-100 justify-center items-center mr-3">
+                        <View
+                          className={`w-11 h-11 rounded-full justify-center items-center mr-3 ${isDarkMode ? 'bg-primary-900' : 'bg-primary-100'}`}
+                        >
                           <Text className="text-lg font-bold text-primary">
                             {child.name?.charAt(0) || '?'}
                           </Text>
                         </View>
                         <View>
-                          <Text className="text-lg font-semibold text-gray-900">{child.name}</Text>
-                          <Text className="text-sm text-gray-700 mt-0.5">자녀</Text>
+                          <Text
+                            className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+                          >
+                            {child.name}
+                          </Text>
+                          <Text
+                            className={`text-sm mt-0.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-700'}`}
+                          >
+                            자녀
+                          </Text>
                         </View>
                       </View>
                       <TouchableOpacity
@@ -448,12 +652,16 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
                 })}
               </View>
             ) : (
-              <Text className="text-lg text-gray-700 text-center py-4">연결된 자녀가 없습니다</Text>
+              <Text
+                className={`text-lg text-center py-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-700'}`}
+              >
+                연결된 자녀가 없습니다
+              </Text>
             )}
 
             {/* Generate invitation code button */}
             <TouchableOpacity
-              className="flex-row items-center justify-center bg-success-50 py-4 rounded-xl gap-2 border-2 border-success"
+              className={`flex-row items-center justify-center py-4 rounded-xl gap-2 border-2 border-success ${isDarkMode ? 'bg-success-900' : 'bg-success-50'}`}
               onPress={handleGenerateCode}
               activeOpacity={0.7}
               accessibilityLabel="초대 코드 생성"
@@ -467,7 +675,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
 
           {/* Logout button */}
           <TouchableOpacity
-            className="bg-error-50 h-[72px] flex-row items-center px-6 rounded-2xl border-2 border-error-100 shadow-sm mt-4"
+            className={`h-[72px] flex-row items-center px-6 rounded-2xl border-2 shadow-sm mt-4 ${isDarkMode ? 'bg-error-900 border-error-800' : 'bg-error-50 border-error-100'}`}
             onPress={handleLogout}
             activeOpacity={0.7}
             accessibilityLabel="로그아웃"
@@ -482,7 +690,11 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
         </View>
 
         {/* App version */}
-        <Text className="text-lg text-gray-700 text-center mt-8">PillCare v0.1.0</Text>
+        <Text
+          className={`text-lg text-center mt-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-700'}`}
+        >
+          PillCare v0.1.0
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );

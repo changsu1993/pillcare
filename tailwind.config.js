@@ -8,6 +8,8 @@ module.exports = {
     './src/navigation/**/*.{js,jsx,ts,tsx}',
   ],
   presets: [require('nativewind/preset')],
+  // Enable dark mode with class strategy for NativeWind
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {

@@ -23,12 +23,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   Modal,
+  Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { ParentScreenProps } from '../../../../shared/types/navigation.types';
 import { createMedicationFromForm, MedicationFormData } from '../../../../shared/services/api';
 import TimePickerButton from '../../components/TimePickerButton';
+import QuantityInput from '../../components/QuantityInput';
 
 type Props = ParentScreenProps<'AddMedication'>;
 
@@ -99,6 +101,11 @@ const AddMedicationScreen = ({ navigation }: Props) => {
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [notes, setNotes] = useState<string>('');
+
+  // 재고 관리 상태
+  const [trackQuantity, setTrackQuantity] = useState<boolean>(false);
+  const [remainingQuantity, setRemainingQuantity] = useState<number | null>(null);
+  const [quantityPerDose, setQuantityPerDose] = useState<number>(1);
 
   // UI 상태
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -219,6 +226,11 @@ const AddMedicationScreen = ({ navigation }: Props) => {
         start_date: formatDateToString(startDate),
         end_date: hasEndDate && endDate ? formatDateToString(endDate) : undefined,
         notes: notes.trim() || undefined,
+        // Inventory tracking fields
+        remaining_quantity: trackQuantity ? remainingQuantity : null,
+        quantity_per_dose: trackQuantity ? quantityPerDose : 1,
+        refill_threshold: 7, // Default threshold
+        auto_decrement: true, // Auto-decrement by default
       };
 
       const { medication, notificationIds } = await createMedicationFromForm(formData);
@@ -433,6 +445,71 @@ const AddMedicationScreen = ({ navigation }: Props) => {
               accessibilityLabel="메모 입력"
               accessibilityHint="추가 복용 정보를 입력하세요"
             />
+          </View>
+
+          {/* 재고 관리 (선택) */}
+          <View className="mb-6">
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-2xl font-bold text-gray-900">재고 관리 (선택)</Text>
+              <Switch
+                value={trackQuantity}
+                onValueChange={(value) => {
+                  setTrackQuantity(value);
+                  if (value && remainingQuantity === null) {
+                    setRemainingQuantity(30); // Default starting quantity
+                  }
+                }}
+                trackColor={{ false: '#D1D5DB', true: '#86EFAC' }}
+                thumbColor={trackQuantity ? '#22C55E' : '#9CA3AF'}
+                accessibilityLabel="재고 관리 사용"
+                accessibilityRole="switch"
+              />
+            </View>
+
+            {trackQuantity && (
+              <View className="bg-white border-2 border-gray-300 rounded-xl p-5 gap-5">
+                {/* 남은 약 수량 */}
+                <QuantityInput
+                  value={remainingQuantity}
+                  onValueChange={setRemainingQuantity}
+                  variant="parent"
+                  label="남은 약 수량"
+                  min={0}
+                  max={9999}
+                  step={10}
+                  allowNull={false}
+                />
+
+                {/* 1회 복용량 */}
+                <View className="mt-4">
+                  <Text className="text-xl font-semibold text-gray-700 mb-2">1회 복용 수량</Text>
+                  <View className="flex-row items-center gap-3">
+                    {[1, 2, 3].map((qty) => (
+                      <TouchableOpacity
+                        key={qty}
+                        className={`flex-1 py-4 rounded-xl items-center justify-center min-h-[64px] ${
+                          quantityPerDose === qty
+                            ? 'bg-success border-2 border-success'
+                            : 'bg-gray-100 border-2 border-gray-300'
+                        }`}
+                        onPress={() => setQuantityPerDose(qty)}
+                        accessibilityLabel={`${qty}개`}
+                        accessibilityRole="radio"
+                        accessibilityState={{ selected: quantityPerDose === qty }}
+                      >
+                        <Text
+                          className={`text-2xl font-bold ${
+                            quantityPerDose === qty ? 'text-white' : 'text-gray-700'
+                          }`}
+                        >
+                          {qty}개
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            )}
           </View>
         </ScrollView>
 

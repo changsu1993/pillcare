@@ -17,6 +17,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Modal,
+  Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,6 +29,7 @@ import {
   MedicationFormData,
 } from '../../../../shared/services/api';
 import TimePickerButton from '../../components/TimePickerButton';
+import QuantityInput, { ThresholdInput } from '../../components/QuantityInput';
 
 type Props = ChildStackScreenProps<'EditMedication'>;
 
@@ -92,6 +94,12 @@ const EditMedicationScreen = ({ navigation, route }: Props) => {
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [notes, setNotes] = useState<string>('');
 
+  // Inventory tracking state
+  const [trackQuantity, setTrackQuantity] = useState<boolean>(false);
+  const [remainingQuantity, setRemainingQuantity] = useState<number | null>(null);
+  const [quantityPerDose, setQuantityPerDose] = useState<number>(1);
+  const [refillThreshold, setRefillThreshold] = useState<number>(7);
+
   // UI state
   const [showFrequencyPicker, setShowFrequencyPicker] = useState<boolean>(false);
   const [showStartDatePicker, setShowStartDatePicker] = useState<boolean>(false);
@@ -119,6 +127,14 @@ const EditMedicationScreen = ({ navigation, route }: Props) => {
         }
         setNotes(medication.notes || '');
 
+        // Load inventory tracking data
+        const hasInventory =
+          medication.remaining_quantity !== null && medication.remaining_quantity !== undefined;
+        setTrackQuantity(hasInventory);
+        setRemainingQuantity(medication.remaining_quantity ?? null);
+        setQuantityPerDose(medication.quantity_per_dose ?? 1);
+        setRefillThreshold(medication.refill_threshold ?? 7);
+
         setOriginalData({
           name: medication.name,
           dosage: medication.dosage,
@@ -127,6 +143,10 @@ const EditMedicationScreen = ({ navigation, route }: Props) => {
           start_date: medication.start_date,
           end_date: medication.end_date,
           notes: medication.notes,
+          remaining_quantity: medication.remaining_quantity,
+          quantity_per_dose: medication.quantity_per_dose,
+          refill_threshold: medication.refill_threshold,
+          auto_decrement: medication.auto_decrement,
         });
       } catch (error) {
         console.error('약 정보 불러오기 실패:', error);
@@ -238,6 +258,11 @@ const EditMedicationScreen = ({ navigation, route }: Props) => {
         start_date: formatDateToString(startDate),
         end_date: hasEndDate && endDate ? formatDateToString(endDate) : undefined,
         notes: notes.trim() || undefined,
+        // Inventory tracking fields
+        remaining_quantity: trackQuantity ? remainingQuantity : null,
+        quantity_per_dose: trackQuantity ? quantityPerDose : 1,
+        refill_threshold: trackQuantity ? refillThreshold : 7,
+        auto_decrement: originalData?.auto_decrement ?? true,
       };
 
       const { notificationIds } = await updateMedicationWithNotifications(medicationId, formData);
@@ -428,6 +453,79 @@ const EditMedicationScreen = ({ navigation, route }: Props) => {
               multiline
               textAlignVertical="top"
             />
+          </View>
+
+          {/* 재고 관리 (선택) */}
+          <View className="mb-5">
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-sm font-semibold text-gray-700">
+                재고 관리 <Text className="text-gray-400">(선택)</Text>
+              </Text>
+              <Switch
+                value={trackQuantity}
+                onValueChange={(value) => {
+                  setTrackQuantity(value);
+                  if (value && remainingQuantity === null) {
+                    setRemainingQuantity(30);
+                  }
+                }}
+                trackColor={{ false: '#D1D5DB', true: '#93C5FD' }}
+                thumbColor={trackQuantity ? '#3B82F6' : '#9CA3AF'}
+              />
+            </View>
+
+            {trackQuantity && (
+              <View className="bg-white border border-gray-300 rounded-xl p-4 gap-4">
+                {/* 남은 약 수량 */}
+                <QuantityInput
+                  value={remainingQuantity}
+                  onValueChange={setRemainingQuantity}
+                  variant="child"
+                  label="남은 약 수량"
+                  min={0}
+                  max={9999}
+                  step={10}
+                  allowNull={false}
+                />
+
+                {/* 1회 복용 수량 */}
+                <View>
+                  <Text className="text-sm font-semibold text-gray-700 mb-2">1회 복용 수량</Text>
+                  <View className="flex-row items-center gap-2">
+                    {[1, 2, 3].map((qty) => (
+                      <TouchableOpacity
+                        key={qty}
+                        className={`flex-1 py-3 rounded-lg items-center justify-center ${
+                          quantityPerDose === qty
+                            ? 'bg-primary border border-primary'
+                            : 'bg-gray-100 border border-gray-300'
+                        }`}
+                        onPress={() => setQuantityPerDose(qty)}
+                      >
+                        <Text
+                          className={`text-base font-semibold ${
+                            quantityPerDose === qty ? 'text-white' : 'text-gray-700'
+                          }`}
+                        >
+                          {qty}개
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+
+                {/* 재고 알림 임계값 */}
+                <ThresholdInput
+                  value={refillThreshold}
+                  onValueChange={setRefillThreshold}
+                  label="재고 알림 기준"
+                  min={1}
+                  max={30}
+                  unit="일"
+                  variant="child"
+                />
+              </View>
+            )}
           </View>
         </ScrollView>
 

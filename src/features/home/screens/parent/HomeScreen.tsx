@@ -26,14 +26,16 @@ import { useFocusEffect } from '@react-navigation/native';
 import {
   getTodayScheduledMedications,
   scheduleAllMedicationNotifications,
+  getMedications,
 } from '../../../../shared/services/api';
 import { ParentScreenProps } from '../../../../shared/types/navigation.types';
-import { ScheduledMedication } from '../../../../shared/types/database.types';
+import { ScheduledMedication, Medication } from '../../../../shared/types/database.types';
 import {
   requestNotificationPermissions,
   sendTestNotification,
   getAllScheduledNotifications,
 } from '../../../notifications/services/notifications';
+import RefillAlertBanner from '../../../medication/components/RefillAlertBanner';
 
 type Props = ParentScreenProps<'Home'>;
 
@@ -86,7 +88,8 @@ MedicationCard.displayName = 'MedicationCard';
 
 const ParentHomeScreen = ({ navigation }: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [medications, setMedications] = useState<ScheduledMedication[]>([]);
+  const [scheduledMedications, setScheduledMedications] = useState<ScheduledMedication[]>([]);
+  const [allMedications, setAllMedications] = useState<Medication[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [hasNotificationPermission, setHasNotificationPermission] = useState<boolean>(false);
 
@@ -161,8 +164,12 @@ const ParentHomeScreen = ({ navigation }: Props) => {
     try {
       setIsLoading(true);
       setError(null);
-      const scheduled = await getTodayScheduledMedications();
-      setMedications(scheduled);
+      const [scheduled, medications] = await Promise.all([
+        getTodayScheduledMedications(),
+        getMedications(),
+      ]);
+      setScheduledMedications(scheduled);
+      setAllMedications(medications);
     } catch (err) {
       console.error('Error loading medications:', err);
       setError('복약 정보를 불러올 수 없습니다');
@@ -222,7 +229,7 @@ const ParentHomeScreen = ({ navigation }: Props) => {
   }
 
   // Empty state (no medications scheduled)
-  if (medications.length === 0) {
+  if (scheduledMedications.length === 0) {
     return (
       <SafeAreaView className="flex-1 bg-gray-50">
         <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, gap: 16 }}>
@@ -344,8 +351,17 @@ const ParentHomeScreen = ({ navigation }: Props) => {
           </View>
         )}
 
+        {/* Refill Alert Banner - show if any medications have low inventory */}
+        {allMedications.length > 0 && (
+          <RefillAlertBanner
+            medications={allMedications}
+            variant="parent"
+            onPress={handleAddMedication}
+          />
+        )}
+
         {/* Medication list - using memoized cards */}
-        {medications.map((med) => (
+        {scheduledMedications.map((med) => (
           <MedicationCard key={med.id} medication={med} onPress={handleMedicationPress} />
         ))}
 

@@ -23,7 +23,7 @@ import {
   Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   getConnectedParent,
@@ -31,6 +31,7 @@ import {
   getParentMedications,
 } from '../../../../shared/services/api';
 import { User, MedicationLog, Medication } from '../../../../shared/types/database.types';
+import RefillAlertBanner from '../../../medication/components/RefillAlertBanner';
 
 interface TodayMedicationItem {
   medicationId: string;
@@ -121,10 +122,12 @@ const TimelineItem = memo(({ item, isLast }: TimelineItemProps) => {
 TimelineItem.displayName = 'TimelineItem';
 
 const ChildHomeScreen = () => {
+  const navigation = useNavigation<any>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [parentInfo, setParentInfo] = useState<User | null>(null);
   const [todayItems, setTodayItems] = useState<TodayMedicationItem[]>([]);
+  const [parentMedications, setParentMedications] = useState<Medication[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const loadData = useCallback(async (): Promise<void> => {
@@ -137,6 +140,7 @@ const ChildHomeScreen = () => {
 
       if (!parent) {
         setTodayItems([]);
+        setParentMedications([]);
         return;
       }
 
@@ -145,6 +149,9 @@ const ChildHomeScreen = () => {
         getParentTodayLogs(parent.id),
         getParentMedications(parent.id),
       ]);
+
+      // Store all medications for inventory tracking
+      setParentMedications(medications);
 
       // Build today's medication items from medications and logs
       const items = buildTodayItems(medications, logs);
@@ -363,6 +370,17 @@ const ChildHomeScreen = () => {
             </View>
           </View>
         </View>
+
+        {/* Refill Alert Banner - show if any medications have low inventory */}
+        {parentMedications.length > 0 && (
+          <View className="mb-4">
+            <RefillAlertBanner
+              medications={parentMedications}
+              variant="child"
+              onPress={() => navigation.navigate('MedicationStack', { screen: 'MedicationList' })}
+            />
+          </View>
+        )}
 
         {/* Today's Medications Section */}
         <View className="flex-row justify-between items-center mb-4">

@@ -8,11 +8,13 @@
  * - 4-week adherence trend
  * - Monthly calendar view
  * - Weekly bar chart
+ * - Data export functionality (CSV/PDF)
  *
  * Features:
  * - Pull-to-refresh
  * - Color-coded adherence visualization
  * - Detailed statistics
+ * - Export to CSV/PDF
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -42,6 +44,7 @@ import {
   TimeSlotPattern,
   WeeklyTrend,
 } from '../../../../shared/types/database.types';
+import { ExportModal } from '../../../reports/components';
 
 interface WeeklyData {
   date: string;
@@ -72,6 +75,9 @@ const ReportsScreen = () => {
   const [medicationAdherences, setMedicationAdherences] = useState<MedicationAdherence[]>([]);
   const [timeSlotPattern, setTimeSlotPattern] = useState<TimeSlotPattern[]>([]);
   const [weeklyTrends, setWeeklyTrends] = useState<number[]>([]);
+
+  // Export modal state
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const loadData = useCallback(async (): Promise<void> => {
     try {
@@ -271,6 +277,15 @@ const ReportsScreen = () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3B82F6" />
         }
       >
+        {/* Export Button */}
+        <TouchableOpacity
+          className="flex-row items-center justify-center bg-white rounded-xl p-3 mb-4 shadow-sm border border-gray-200"
+          onPress={() => setShowExportModal(true)}
+        >
+          <Ionicons name="download-outline" size={20} color="#3B82F6" />
+          <Text className="text-primary font-semibold ml-2">데이터 내보내기</Text>
+        </TouchableOpacity>
+
         {/* Summary Cards */}
         <View className="flex-row gap-3 mb-4">
           <View className="flex-1 bg-white rounded-xl p-4 items-center shadow-sm">
@@ -437,6 +452,15 @@ const ReportsScreen = () => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Export Modal */}
+      {parentInfo && (
+        <ExportModal
+          visible={showExportModal}
+          onClose={() => setShowExportModal(false)}
+          parentInfo={parentInfo}
+        />
+      )}
     </SafeAreaView>
   );
 };

@@ -230,7 +230,7 @@ export const getTodayScheduledMedications = async (): Promise<ScheduledMedicatio
 };
 
 /**
- * Log a medication as taken
+ * Log a medication as taken and decrement inventory
  */
 export const logMedicationTaken = async (
   medicationId: string,
@@ -254,7 +254,46 @@ export const logMedicationTaken = async (
     .single();
 
   if (error) throw error;
+
+  // Auto-decrement inventory if enabled
+  try {
+    await decrementMedicationQuantity(medicationId);
+  } catch (decrementError) {
+    // Log error but don't fail the medication log
+    console.error('Failed to decrement medication quantity:', decrementError);
+  }
+
   return data;
+};
+
+/**
+ * Decrement medication quantity after taking a dose
+ * Only decrements if auto_decrement is true and remaining_quantity is not null
+ */
+export const decrementMedicationQuantity = async (medicationId: string): Promise<void> => {
+  // First get the medication to check auto_decrement and current quantity
+  const medication = await getMedication(medicationId);
+
+  // Skip if tracking is disabled or auto_decrement is off
+  if (
+    medication.remaining_quantity === null ||
+    medication.remaining_quantity === undefined ||
+    !medication.auto_decrement
+  ) {
+    return;
+  }
+
+  const quantityPerDose = medication.quantity_per_dose ?? 1;
+  const newQuantity = Math.max(0, medication.remaining_quantity - quantityPerDose);
+
+  // Update the quantity
+  await updateMedication(medicationId, { remaining_quantity: newQuantity });
+
+  if (__DEV__) {
+    console.log(
+      `Decremented ${medication.name} quantity: ${medication.remaining_quantity} -> ${newQuantity}`
+    );
+  }
 };
 
 /**
@@ -676,6 +715,11 @@ export interface MedicationFormData {
   start_date: string; // "YYYY-MM-DD"
   end_date?: string; // "YYYY-MM-DD"
   notes?: string;
+  // Inventory tracking fields (optional)
+  remaining_quantity?: number | null;
+  refill_threshold?: number;
+  quantity_per_dose?: number;
+  auto_decrement?: boolean;
 }
 
 /**
@@ -720,6 +764,11 @@ export const createMedicationFromForm = async (
     end_date: formData.end_date || undefined,
     notes: formData.notes?.trim() || undefined,
     active: true,
+    // Inventory tracking fields with defaults
+    remaining_quantity: formData.remaining_quantity ?? null,
+    refill_threshold: formData.refill_threshold ?? 7,
+    quantity_per_dose: formData.quantity_per_dose ?? 1,
+    auto_decrement: formData.auto_decrement ?? true,
   };
 
   // 약 생성 및 알림 예약
@@ -753,6 +802,11 @@ export const createMedicationForParent = async (
     end_date: formData.end_date || undefined,
     notes: formData.notes?.trim() || undefined,
     active: true,
+    // Inventory tracking fields with defaults
+    remaining_quantity: formData.remaining_quantity ?? null,
+    refill_threshold: formData.refill_threshold ?? 7,
+    quantity_per_dose: formData.quantity_per_dose ?? 1,
+    auto_decrement: formData.auto_decrement ?? true,
   };
 
   // 약 생성 및 알림 예약

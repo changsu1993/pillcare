@@ -29,6 +29,22 @@ export interface Medication {
   notes?: string;
   active: boolean;
   created_at: string;
+  // Inventory tracking fields
+  remaining_quantity: number | null; // null means tracking is disabled
+  refill_threshold: number; // default 7 (days)
+  quantity_per_dose: number; // default 1
+  auto_decrement: boolean; // default true
+}
+
+/**
+ * Inventory status for a medication
+ */
+export interface InventoryStatus {
+  isLow: boolean; // daysRemaining <= refill_threshold
+  isCritical: boolean; // daysRemaining <= 3
+  daysRemaining: number | null;
+  remainingQuantity: number | null;
+  dailyUsage: number;
 }
 
 export interface MedicationLog {

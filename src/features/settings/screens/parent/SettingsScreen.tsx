@@ -35,6 +35,7 @@ import { supabase } from '../../../../shared/services/supabase';
 import { User, FamilyConnection } from '../../../../shared/types/database.types';
 import { getSettings, saveSettings, VoiceSpeed } from '../../services/settings';
 import { testVoice, stopSpeaking } from '../../../notifications/services/voice';
+import { resetOnboardingStatus } from '../../../onboarding';
 
 type Props = ParentScreenProps<'Settings'>;
 
@@ -224,6 +225,18 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
       ],
       { cancelable: true }
     );
+  };
+
+  const handleViewTutorial = async () => {
+    try {
+      await resetOnboardingStatus('parent');
+      // Force app to re-check onboarding status by signing out and back in
+      // For now, just show an alert that the tutorial will show on next login
+      Alert.alert('사용법 보기', '다음 로그인 시 튜토리얼이 다시 표시됩니다.', [{ text: '확인' }]);
+    } catch (error) {
+      console.error('Error resetting onboarding:', error);
+      Alert.alert('오류', '설정을 변경할 수 없습니다.');
+    }
   };
 
   if (isLoading) {
@@ -464,6 +477,22 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
               <Text className="text-xl font-semibold text-success">초대 코드 생성</Text>
             </TouchableOpacity>
           </View>
+
+          {/* View Tutorial button */}
+          <TouchableOpacity
+            className="bg-primary-50 h-[72px] flex-row items-center px-6 rounded-2xl border-2 border-primary-100 shadow-sm"
+            onPress={handleViewTutorial}
+            activeOpacity={0.7}
+            accessibilityLabel="사용법 보기"
+            accessibilityHint="앱 사용법 튜토리얼을 다시 봅니다"
+            accessibilityRole="button"
+          >
+            <View className="flex-row items-center flex-1">
+              <Text className="text-4xl mr-4">📖</Text>
+              <Text className="text-2xl font-semibold text-primary">사용법 보기</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={28} color="#3B82F6" />
+          </TouchableOpacity>
 
           {/* Logout button */}
           <TouchableOpacity

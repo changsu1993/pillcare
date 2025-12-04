@@ -5,6 +5,7 @@
  * - Navigation setup (Stack + Bottom Tabs)
  * - Authentication state management
  * - Role-based routing (Parent vs Child app)
+ * - Onboarding flow for new users
  */
 
 import './global.css';
@@ -39,6 +40,14 @@ import ResetPasswordScreen from './src/features/auth/screens/ResetPasswordScreen
 // Contexts
 import { SettingsProvider } from './src/features/settings/contexts/SettingsContext';
 
+// Onboarding
+import {
+  OnboardingNavigator,
+  isOnboardingCompleted,
+  setOnboardingCompleted,
+  setDontShowAgain,
+} from './src/features/onboarding';
+
 // Deep linking configuration
 const linking = {
   prefixes: [Linking.createURL('/'), 'pillcare://'],
@@ -54,6 +63,8 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [isPasswordRecovery, setIsPasswordRecovery] = useState<boolean>(false);
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
+  const [onboardingChecked, setOnboardingChecked] = useState<boolean>(false);
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
   const isPasswordRecoveryRef = useRef<boolean>(false);
 
@@ -301,11 +312,61 @@ export default function App() {
         console.log('User role:', profile?.role);
       }
 
+      // Check onboarding status for the role
+      if (profile?.role) {
+        const completed = await isOnboardingCompleted(profile.role);
+        setShowOnboarding(!completed);
+        setOnboardingChecked(true);
+        if (__DEV__) {
+          console.log('Onboarding completed:', completed, 'Show onboarding:', !completed);
+        }
+      }
+
       // Initialize push token after user is loaded
       initializePushToken();
     } catch (error) {
       console.error('Error loading user role:', error);
       setUserRole(null);
+    }
+  };
+
+  /**
+   * Handle onboarding completion
+   */
+  const handleOnboardingComplete = async () => {
+    if (userRole) {
+      try {
+        await setOnboardingCompleted(userRole);
+        setShowOnboarding(false);
+        if (__DEV__) {
+          console.log('Onboarding completed for role:', userRole);
+        }
+      } catch (error) {
+        console.error('Error completing onboarding:', error);
+        // Still hide onboarding even if storage fails
+        setShowOnboarding(false);
+      }
+    }
+  };
+
+  /**
+   * Handle navigation to family connection (child only)
+   */
+  const handleConnectParent = async () => {
+    if (userRole === 'child') {
+      try {
+        await setOnboardingCompleted(userRole);
+        setShowOnboarding(false);
+        // Navigate to settings tab to enter code
+        setTimeout(() => {
+          navigationRef.current?.navigate('SettingsTab', {
+            screen: 'EnterCode',
+          });
+        }, 100);
+      } catch (error) {
+        console.error('Error completing onboarding:', error);
+        setShowOnboarding(false);
+      }
     }
   };
 
@@ -352,6 +413,8 @@ export default function App() {
       isPasswordRecovery,
       hasUser: !!user,
       userRole,
+      showOnboarding,
+      onboardingChecked,
     });
   }
 
@@ -375,12 +438,19 @@ export default function App() {
         ) : !user ? (
           // Not logged in - show auth screens
           <AuthNavigator />
-        ) : !userRole ? (
-          // Logged in but no role assigned yet
+        ) : !userRole || !onboardingChecked ? (
+          // Logged in but no role assigned yet or checking onboarding
           <View className="flex-1 justify-center items-center bg-white">
             <ActivityIndicator size="large" color="#3B82F6" />
             <Text className="mt-4 text-base text-gray-900">프로필 설정 중...</Text>
           </View>
+        ) : showOnboarding ? (
+          // Show onboarding for new users
+          <OnboardingNavigator
+            role={userRole}
+            onComplete={handleOnboardingComplete}
+            onConnectParent={userRole === 'child' ? handleConnectParent : undefined}
+          />
         ) : userRole === 'parent' ? (
           // Parent app (elderly-optimized UI)
           <ParentNavigator />

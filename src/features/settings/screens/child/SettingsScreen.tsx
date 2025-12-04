@@ -33,6 +33,7 @@ import {
 import { User, FamilyConnection } from '../../../../shared/types/database.types';
 import { ChildStackParamList } from '../../../../shared/types/navigation.types';
 import { requestNotificationPermissions } from '../../../notifications/services/notifications';
+import { resetOnboardingStatus } from '../../../onboarding';
 
 interface UserProfile {
   id: string;
@@ -211,6 +212,18 @@ const ChildSettingsScreen = () => {
     ]);
   };
 
+  const handleViewTutorial = async () => {
+    try {
+      await resetOnboardingStatus('child');
+      Alert.alert('튜토리얼 다시 보기', '다음 로그인 시 튜토리얼이 다시 표시됩니다.', [
+        { text: '확인' },
+      ]);
+    } catch (error) {
+      console.error('Error resetting onboarding:', error);
+      Alert.alert('오류', '설정을 변경할 수 없습니다.');
+    }
+  };
+
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-gray-50">
@@ -348,6 +361,17 @@ const ChildSettingsScreen = () => {
         {/* 기타 섹션 */}
         <View className="bg-white mt-4 px-4 py-3 border-t border-b border-gray-200">
           <Text className="text-xs font-semibold text-gray-500 mb-3 uppercase">기타</Text>
+
+          <TouchableOpacity
+            className="flex-row items-center justify-between py-3.5 border-b border-gray-100"
+            onPress={handleViewTutorial}
+          >
+            <View className="flex-row items-center gap-3">
+              <Ionicons name="book-outline" size={24} color="#6B7280" />
+              <Text className="text-base text-gray-900">튜토리얼 다시 보기</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+          </TouchableOpacity>
 
           <TouchableOpacity className="flex-row items-center justify-between py-3.5 border-b border-gray-100">
             <View className="flex-row items-center gap-3">

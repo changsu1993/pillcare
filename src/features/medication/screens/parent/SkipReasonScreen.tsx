@@ -24,6 +24,7 @@ import {
 } from '../../../../shared/services/api';
 import { speakSkipPrompt, stopSpeaking } from '../../../notifications/services/voice';
 import { isVoiceGuidanceEnabled } from '../../../settings/services/settings';
+import type { SkipReasonLabelKey } from '../../../../i18n/types';
 
 type Props = ParentScreenProps<'SkipReason'>;
 
@@ -31,7 +32,7 @@ type SkipReason = 'forgot' | 'no_medication' | 'felt_sick' | 'at_hospital' | 'ot
 
 interface ReasonOption {
   key: SkipReason;
-  labelKey: string;
+  labelKey: SkipReasonLabelKey;
   icon: string;
 }
 
@@ -140,16 +141,16 @@ const SkipReasonScreen = ({ route, navigation }: Props) => {
             onPress={() => handleReasonSelect(reason.key)}
             activeOpacity={0.7}
             accessibilityLabel={t('accessibility.selectReason', {
-              reason: t(reason.labelKey as any),
+              reason: t(reason.labelKey),
             })}
             accessibilityHint={t('accessibility.selectReasonHint', {
-              reason: t(reason.labelKey as any),
+              reason: t(reason.labelKey),
             })}
             accessibilityRole="button"
           >
             <Text className="text-3xl mr-4">{reason.icon}</Text>
             <Text className="text-2xl font-semibold text-gray-900 flex-1">
-              {t(reason.labelKey as any)}
+              {t(reason.labelKey)}
             </Text>
           </TouchableOpacity>
         ))}

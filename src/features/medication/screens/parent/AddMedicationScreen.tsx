@@ -32,6 +32,7 @@ import { ParentScreenProps } from '../../../../shared/types/navigation.types';
 import { createMedicationFromForm, MedicationFormData } from '../../../../shared/services/api';
 import TimePickerButton from '../../components/TimePickerButton';
 import QuantityInput from '../../components/QuantityInput';
+import type { FrequencyLabelKey, TimeLabelKey } from '../../../../i18n/types';
 
 type Props = ParentScreenProps<'AddMedication'>;
 
@@ -40,7 +41,7 @@ type Props = ParentScreenProps<'AddMedication'>;
  */
 interface FrequencyOption {
   value: string;
-  labelKey: string;
+  labelKey: FrequencyLabelKey;
   timesPerDay: number;
 }
 
@@ -67,7 +68,7 @@ const DEFAULT_TIMES: Record<string, string[]> = {
 /**
  * 시간 라벨 키 (복용 횟수별)
  */
-const TIME_LABEL_KEYS: Record<number, string[]> = {
+const TIME_LABEL_KEYS: Record<number, TimeLabelKey[]> = {
   1: ['timeLabel.single'],
   2: ['timeLabel.morning', 'timeLabel.evening'],
   3: ['timeLabel.morning', 'timeLabel.lunch', 'timeLabel.evening'],
@@ -297,7 +298,7 @@ const AddMedicationScreen = ({ navigation }: Props) => {
    */
   const selectedFrequencyOption = FREQUENCY_OPTIONS.find((opt) => opt.value === frequency);
   const selectedFrequencyLabel = selectedFrequencyOption
-    ? t(selectedFrequencyOption.labelKey as any)
+    ? t(selectedFrequencyOption.labelKey)
     : t('frequency.daily1');
 
   /**
@@ -311,7 +312,7 @@ const AddMedicationScreen = ({ navigation }: Props) => {
   const getTimeLabel = (index: number): string => {
     const labelKeys = TIME_LABEL_KEYS[timesPerDay];
     if (labelKeys && labelKeys[index]) {
-      return t(labelKeys[index] as any);
+      return t(labelKeys[index]);
     }
     return t('timeLabel.reminder', { index: index + 1 });
   };
@@ -620,7 +621,7 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                   frequency === option.value ? 'bg-green-100' : ''
                 }`}
                 onPress={() => handleFrequencyChange(option.value)}
-                accessibilityLabel={t(option.labelKey as any)}
+                accessibilityLabel={t(option.labelKey)}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: frequency === option.value }}
               >
@@ -629,7 +630,7 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                     frequency === option.value ? 'font-bold text-green-700' : 'text-gray-900'
                   }`}
                 >
-                  {t(option.labelKey as any)}
+                  {t(option.labelKey)}
                 </Text>
                 {frequency === option.value && (
                   <Text className="text-2xl font-bold text-success">OK</Text>

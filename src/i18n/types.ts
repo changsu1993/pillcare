@@ -39,3 +39,25 @@ export type SettingsKeys = NestedKeyOf<TranslationResources['settings']>;
 export type OnboardingKeys = NestedKeyOf<TranslationResources['onboarding']>;
 export type HomeKeys = NestedKeyOf<TranslationResources['home']>;
 export type ReportsKeys = NestedKeyOf<TranslationResources['reports']>;
+
+// Specific key types for dynamic usage
+export type FrequencyLabelKey =
+  | 'frequency.daily1'
+  | 'frequency.daily2'
+  | 'frequency.daily3'
+  | 'frequency.asNeeded';
+
+export type TimeLabelKey =
+  | 'timeLabel.single'
+  | 'timeLabel.morning'
+  | 'timeLabel.lunch'
+  | 'timeLabel.evening';
+
+export type SkipReasonLabelKey =
+  | 'skipReason.sideEffect'
+  | 'skipReason.forgot'
+  | 'skipReason.noMedicine'
+  | 'skipReason.feltSick'
+  | 'skipReason.atHospital'
+  | 'skipReason.doctorAdvice'
+  | 'skipReason.other';

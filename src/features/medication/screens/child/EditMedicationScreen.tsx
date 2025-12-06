@@ -31,12 +31,13 @@ import {
 } from '../../../../shared/services/api';
 import TimePickerButton from '../../components/TimePickerButton';
 import QuantityInput, { ThresholdInput } from '../../components/QuantityInput';
+import type { FrequencyLabelKey, TimeLabelKey } from '../../../../i18n/types';
 
 type Props = ChildStackScreenProps<'EditMedication'>;
 
 interface FrequencyOption {
   value: string;
-  labelKey: string;
+  labelKey: FrequencyLabelKey;
   timesPerDay: number;
 }
 
@@ -54,7 +55,7 @@ const DEFAULT_TIMES: Record<string, string[]> = {
   as_needed: [],
 };
 
-const TIME_LABEL_KEYS: Record<number, string[]> = {
+const TIME_LABEL_KEYS: Record<number, TimeLabelKey[]> = {
   1: ['timeLabel.single'],
   2: ['timeLabel.morning', 'timeLabel.evening'],
   3: ['timeLabel.morning', 'timeLabel.lunch', 'timeLabel.evening'],
@@ -304,14 +305,14 @@ const EditMedicationScreen = ({ navigation, route }: Props) => {
 
   const selectedFrequencyOption = FREQUENCY_OPTIONS.find((opt) => opt.value === frequency);
   const selectedFrequencyLabel = selectedFrequencyOption
-    ? t(selectedFrequencyOption.labelKey as any)
+    ? t(selectedFrequencyOption.labelKey)
     : t('frequency.daily1');
   const timesPerDay = selectedFrequencyOption?.timesPerDay || 0;
 
   const getTimeLabel = (index: number): string => {
     const labelKeys = TIME_LABEL_KEYS[timesPerDay];
     if (labelKeys && labelKeys[index]) {
-      return t(labelKeys[index] as any);
+      return t(labelKeys[index]);
     }
     return t('timeLabel.reminder', { index: index + 1 });
   };
@@ -614,7 +615,7 @@ const EditMedicationScreen = ({ navigation, route }: Props) => {
                     frequency === option.value ? 'font-semibold text-primary' : 'text-gray-900'
                   }`}
                 >
-                  {t(option.labelKey as any)}
+                  {t(option.labelKey)}
                 </Text>
                 {frequency === option.value && (
                   <Ionicons name="checkmark" size={20} color="#3B82F6" />

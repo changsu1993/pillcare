@@ -85,14 +85,11 @@ const MedicationAdherenceCard: React.FC<MedicationAdherenceCardProps> = memo(
         <View className="flex-row items-center mb-3">
           <View className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden mr-3">
             <View
-              className={`h-full rounded-full ${styles.barColorClass}`}
-              style={{ width: `${progressWidth}%`, minWidth: 2 }}
+              className={`h-full rounded-full min-w-[2px] ${styles.barColorClass}`}
+              style={{ width: `${progressWidth}%` }}
             />
           </View>
-          <Text
-            className={`text-xl font-bold ${styles.textColorClass}`}
-            style={{ minWidth: 50, textAlign: 'right' }}
-          >
+          <Text className={`text-xl font-bold min-w-[50px] text-right ${styles.textColorClass}`}>
             {adherenceRate}%
           </Text>
         </View>

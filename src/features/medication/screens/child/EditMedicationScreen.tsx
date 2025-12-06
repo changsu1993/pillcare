@@ -335,7 +335,7 @@ const EditMedicationScreen = ({ navigation, route }: Props) => {
       >
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+          contentContainerClassName="p-4 pb-8"
           keyboardShouldPersistTaps="handled"
         >
           {/* 약 이름 */}

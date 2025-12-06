@@ -76,11 +76,10 @@ const OnboardingIllustration: React.FC<OnboardingIllustrationProps> = ({
       case 'logo':
         return (
           <View
-            className="rounded-2xl justify-center items-center"
+            className={`rounded-2xl justify-center items-center ${isParent ? 'bg-green-50' : 'bg-blue-50'}`}
             style={{
               width: containerSize,
               height: containerSize,
-              backgroundColor: isParent ? '#F0FDF4' : '#EFF6FF',
             }}
           >
             <MaterialCommunityIcons
@@ -106,12 +105,10 @@ const OnboardingIllustration: React.FC<OnboardingIllustrationProps> = ({
             <Ionicons name="notifications" size={size} color={color} />
             {/* Red badge dot */}
             <View
-              className="absolute bg-error rounded-full"
+              className="absolute top-0 right-0 bg-error rounded-full"
               style={{
                 width: size * 0.25,
                 height: size * 0.25,
-                top: 0,
-                right: 0,
               }}
             />
           </View>

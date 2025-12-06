@@ -162,7 +162,7 @@ const ProfileEditScreen = () => {
       >
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+          contentContainerClassName="p-5 pb-10"
           keyboardShouldPersistTaps="handled"
         >
           {/* Name Input */}
@@ -175,8 +175,7 @@ const ProfileEditScreen = () => {
               이름 <Text className="text-error">*</Text>
             </Text>
             <TextInput
-              className="bg-white border-2 border-gray-300 rounded-2xl px-6 py-5 text-2xl text-gray-900"
-              style={{ minHeight: 72 }}
+              className="bg-white border-2 border-gray-300 rounded-2xl px-6 py-5 text-2xl text-gray-900 min-h-[72px]"
               value={name}
               onChangeText={setName}
               placeholder="이름을 입력하세요"
@@ -198,8 +197,7 @@ const ProfileEditScreen = () => {
               전화번호 <Text className="text-gray-400">(선택)</Text>
             </Text>
             <TextInput
-              className="bg-white border-2 border-gray-300 rounded-2xl px-6 py-5 text-2xl text-gray-900"
-              style={{ minHeight: 72 }}
+              className="bg-white border-2 border-gray-300 rounded-2xl px-6 py-5 text-2xl text-gray-900 min-h-[72px]"
               value={phoneNumber}
               onChangeText={setPhoneNumber}
               placeholder="010-0000-0000"
@@ -228,8 +226,7 @@ const ProfileEditScreen = () => {
         {/* Bottom Buttons */}
         <View className="flex-row p-5 gap-4 bg-white border-t border-gray-200">
           <TouchableOpacity
-            className="flex-1 bg-gray-200 rounded-2xl justify-center items-center"
-            style={{ minHeight: 72 }}
+            className="flex-1 bg-gray-200 rounded-2xl justify-center items-center min-h-[72px]"
             onPress={handleCancel}
             disabled={isSaving}
             accessibilityLabel="취소"
@@ -239,10 +236,9 @@ const ProfileEditScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            className={`flex-[2] rounded-2xl justify-center items-center ${
+            className={`flex-[2] rounded-2xl justify-center items-center min-h-[72px] ${
               isSaving ? 'bg-gray-400' : 'bg-success'
             }`}
-            style={{ minHeight: 72 }}
             onPress={handleSave}
             disabled={isSaving}
             accessibilityLabel="저장"

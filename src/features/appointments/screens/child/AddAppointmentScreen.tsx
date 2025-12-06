@@ -185,7 +185,7 @@ const AddAppointmentScreen = () => {
       >
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+          contentContainerClassName="p-5 pb-10"
           keyboardShouldPersistTaps="handled"
         >
           {/* Hospital Name */}
@@ -335,7 +335,7 @@ const AddAppointmentScreen = () => {
                 display="spinner"
                 onChange={handleDateChange}
                 minimumDate={new Date()}
-                style={{ height: 200 }}
+                className="h-[200px]"
               />
             </View>
           </View>
@@ -372,7 +372,7 @@ const AddAppointmentScreen = () => {
                 mode="time"
                 display="spinner"
                 onChange={handleTimeChange}
-                style={{ height: 200 }}
+                className="h-[200px]"
               />
             </View>
           </View>

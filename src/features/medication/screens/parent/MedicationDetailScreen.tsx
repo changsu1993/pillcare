@@ -112,7 +112,7 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <ScrollView className="flex-1" contentContainerStyle={{ padding: 24, paddingBottom: 100 }}>
+      <ScrollView className="flex-1" contentContainerClassName="p-6 pb-[100px]">
         {/* Medication icon */}
         <Text className="text-6xl text-center mb-4">💊</Text>
 

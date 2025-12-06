@@ -264,7 +264,7 @@ const EditAppointmentScreen = () => {
       >
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+          contentContainerClassName="p-5 pb-10"
           keyboardShouldPersistTaps="handled"
         >
           {/* Hospital Name */}

@@ -90,7 +90,7 @@ const ResetPasswordScreen = ({ navigation, route }: Props) => {
         className="flex-1"
       >
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingVertical: 16 }}
+          contentContainerClassName="flex-grow px-6 py-4"
           keyboardShouldPersistTaps="handled"
         >
           {/* Header */}

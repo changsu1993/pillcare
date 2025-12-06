@@ -139,7 +139,7 @@ const TimePatternChart: React.FC<TimePatternChartProps> = memo(({ data, isLoadin
       <View className="flex-row justify-between items-center mb-4">
         <Text className="text-base font-bold text-gray-900">시간대별 미복약 패턴</Text>
         {mostMissedPeriod && mostMissedPeriodLabel && (
-          <View className="px-2 py-1 rounded-md" style={{ backgroundColor: '#EF444420' }}>
+          <View className="px-2 py-1 rounded-md bg-red-500/20">
             <Text className="text-[11px] font-semibold text-error">
               {mostMissedPeriodLabel} 주의
             </Text>
@@ -158,7 +158,7 @@ const TimePatternChart: React.FC<TimePatternChartProps> = memo(({ data, isLoadin
               accessibilityLabel={`${period.label} 시간대, 미복약률 ${period.missedRate}%, ${period.periodData.total}회 중 ${period.periodData.missed}회 미복용`}
             >
               {/* Icon & Label */}
-              <View className="flex-row items-center gap-1.5" style={{ width: 70 }}>
+              <View className="flex-row items-center gap-1.5 w-[70px]">
                 <Ionicons name={period.icon as any} size={20} color={period.color} />
                 <Text className="text-sm font-semibold text-gray-700">{period.label}</Text>
               </View>
@@ -167,20 +167,20 @@ const TimePatternChart: React.FC<TimePatternChartProps> = memo(({ data, isLoadin
               <View className="flex-1 flex-row items-center mx-2">
                 <View className="flex-1 h-5 bg-gray-200 rounded-full overflow-hidden mr-2">
                   <View
-                    className={`h-full rounded-full ${period.barColorClass}`}
-                    style={{ width: period.barWidth as any, minWidth: 2 }}
+                    className={`h-full rounded-full min-w-[2px] ${period.barColorClass}`}
+                    style={{ width: period.barWidth as any }}
                   />
                 </View>
                 <Text
-                  className="text-sm font-bold"
-                  style={{ color: period.textColor, minWidth: 40, textAlign: 'right' }}
+                  className="text-sm font-bold min-w-[40px] text-right"
+                  style={{ color: period.textColor }}
                 >
                   {period.missedRate}%
                 </Text>
               </View>
 
               {/* Count */}
-              <Text className="text-xs text-gray-500" style={{ minWidth: 40, textAlign: 'right' }}>
+              <Text className="text-xs text-gray-500 min-w-[40px] text-right">
                 {period.periodData.missed}/{period.periodData.total}
               </Text>
             </View>

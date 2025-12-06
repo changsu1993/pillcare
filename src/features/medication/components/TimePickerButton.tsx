@@ -188,7 +188,7 @@ const TimePickerButton = ({
                 display="spinner"
                 onChange={handleTimeChange}
                 minuteInterval={5}
-                style={{ height: 200 }}
+                className="h-[200px]"
               />
             </View>
           </View>

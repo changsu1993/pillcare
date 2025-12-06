@@ -269,7 +269,7 @@ const ParentHomeScreen = ({ navigation }: Props) => {
   if (scheduledMedications.length === 0) {
     return (
       <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-        <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, gap: 16 }}>
+        <ScrollView className="flex-1" contentContainerClassName="p-4 gap-4">
           {/* Notification permission warning */}
           {!hasNotificationPermission && (
             <View
@@ -368,7 +368,7 @@ const ParentHomeScreen = ({ navigation }: Props) => {
 
   return (
     <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, gap: 16 }}>
+      <ScrollView className="flex-1" contentContainerClassName="p-4 gap-4">
         {/* Notification permission warning */}
         {!hasNotificationPermission && (
           <View

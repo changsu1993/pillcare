@@ -106,11 +106,11 @@ const TrendIndicator: React.FC<TrendIndicatorProps> = memo(({ weeklyRates, isLoa
     return (
       <View className="flex-1 relative">
         {/* Grid lines */}
-        <View className="absolute left-0 right-0 h-px bg-gray-200" style={{ top: '0%' }} />
-        <View className="absolute left-0 right-0 h-px bg-gray-200" style={{ top: '25%' }} />
-        <View className="absolute left-0 right-0 h-px bg-gray-200" style={{ top: '50%' }} />
-        <View className="absolute left-0 right-0 h-px bg-gray-200" style={{ top: '75%' }} />
-        <View className="absolute left-0 right-0 h-px bg-gray-200" style={{ top: '100%' }} />
+        <View className="absolute left-0 right-0 h-px bg-gray-200 top-[0%]" />
+        <View className="absolute left-0 right-0 h-px bg-gray-200 top-[25%]" />
+        <View className="absolute left-0 right-0 h-px bg-gray-200 top-[50%]" />
+        <View className="absolute left-0 right-0 h-px bg-gray-200 top-[75%]" />
+        <View className="absolute left-0 right-0 h-px bg-gray-200 top-[100%]" />
 
         {/* Data points */}
         {weeklyRates.map((rate, index) => {
@@ -144,26 +144,18 @@ const TrendIndicator: React.FC<TrendIndicatorProps> = memo(({ weeklyRates, isLoa
 
               {/* Data point */}
               <View
-                className={`absolute w-2.5 h-2.5 rounded-full border-2 border-white ${
+                className={`absolute w-2.5 h-2.5 rounded-full border-2 border-white -ml-[5px] -mt-[5px] ${
                   isLatest ? 'bg-primary' : 'bg-gray-400'
                 }`}
                 style={{
                   left: `${leftPosition}%`,
                   top: `${topPosition}%`,
-                  marginLeft: -5,
-                  marginTop: -5,
                 }}
                 accessibilityLabel={`${index + 1}주차, 복약률 ${rate}%`}
               >
                 {/* Rate label */}
                 <Text
-                  className={`absolute ${isLatest ? 'text-xs font-bold text-primary' : 'text-[10px] font-semibold text-gray-500'}`}
-                  style={{
-                    top: -22,
-                    minWidth: 30,
-                    textAlign: 'center',
-                    left: -10,
-                  }}
+                  className={`absolute -top-[22px] min-w-[30px] text-center -left-[10px] ${isLatest ? 'text-xs font-bold text-primary' : 'text-[10px] font-semibold text-gray-500'}`}
                 >
                   {rate}%
                 </Text>

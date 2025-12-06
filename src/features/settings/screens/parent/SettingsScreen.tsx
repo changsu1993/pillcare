@@ -298,7 +298,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <ScrollView className="flex-1" contentContainerStyle={{ padding: 24 }}>
+      <ScrollView className="flex-1" contentContainerClassName="p-6">
         {/* Profile card */}
         <View className="bg-white p-8 rounded-2xl items-center mb-6 border-2 border-gray-200 shadow-sm">
           <Text className="text-6xl mb-4">&#128100;</Text>

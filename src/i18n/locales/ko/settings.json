@@ -33,9 +33,10 @@
     "fast": "빠르게"
   },
   "theme": {
-    "light": "라이트 모드",
-    "dark": "다크 모드",
-    "system": "시스템 설정"
+    "light": "라이트",
+    "dark": "다크",
+    "system": "시스템 설정",
+    "systemDescription": "기기 설정에 따라 자동 변경"
   },
   "button": {
     "editProfile": "프로필 수정",
@@ -75,5 +76,60 @@
   "placeholder": {
     "name": "이름을 입력하세요",
     "phone": "전화번호를 입력하세요"
+  },
+  "error": {
+    "saveFailed": "설정을 저장할 수 없습니다.",
+    "voiceTestFailed": "음성 테스트에 실패했습니다.",
+    "themeSaveFailed": "테마 설정을 저장할 수 없습니다.",
+    "signOutFailed": "로그아웃할 수 없습니다."
+  },
+  "voice": {
+    "test": "음성 테스트"
+  },
+  "profile": {
+    "user": "사용자",
+    "noName": "이름 없음"
+  },
+  "family": {
+    "child": "자녀",
+    "parent": "부모님",
+    "noChildren": "연결된 자녀가 없습니다",
+    "noParent": "연결된 부모님이 없습니다",
+    "generateCode": "초대 코드 생성",
+    "enterCode": "초대 코드 입력",
+    "enterCodeHint": "부모님의 초대 코드를 입력하여 연결하세요",
+    "disconnectTitle": "연결 해제",
+    "disconnectMessage": "{{name}}님과의 연결을 해제하시겠습니까?",
+    "disconnectParentMessage": "{{name}}님과의 연결을 해제하시겠습니까?\n\n연결 해제 시 부모님의 복약 현황을 확인할 수 없습니다.",
+    "disconnect": "해제",
+    "disconnected": "연결이 해제되었습니다.",
+    "disconnectFailed": "연결 해제에 실패했습니다."
+  },
+  "tutorial": {
+    "title": "사용법 보기",
+    "viewTitle": "튜토리얼 다시 보기",
+    "message": "다음 로그인 시 튜토리얼이 다시 표시됩니다."
+  },
+  "notification": {
+    "permissionRequired": "알림 권한 필요",
+    "permissionMessage": "알림을 받으려면 설정에서 알림 권한을 허용해주세요.",
+    "missedPermissionMessage": "미복용 알림을 받으려면 알림 권한을 허용해주세요.",
+    "pushNotifications": "푸시 알림",
+    "missedAlert": "미복용 알림",
+    "missedAlertDescription": "부모님이 약을 놓치면 알림을 받습니다"
+  },
+  "support": {
+    "help": "도움말"
+  },
+  "accessibility": {
+    "voiceOn": "음성 안내 켜짐",
+    "voiceOff": "음성 안내 꺼짐",
+    "voiceTestHint": "음성 안내 테스트 메시지를 재생합니다",
+    "vibrationOn": "진동 켜짐",
+    "vibrationOff": "진동 꺼짐",
+    "disconnectChild": "{{name}} 연결 해제",
+    "generateCodeHint": "자녀와 연결할 초대 코드를 생성합니다",
+    "tutorialHint": "앱 사용법 튜토리얼을 다시 봅니다",
+    "signOutHint": "앱에서 로그아웃합니다"
   }
 }

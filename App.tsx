@@ -10,6 +10,7 @@
 
 import './global.css';
 import './src/i18n'; // Initialize i18n
+import i18n from './src/i18n';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
@@ -432,7 +433,7 @@ function AppContent() {
       <View className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
         <ActivityIndicator size="large" color="#3B82F6" />
         <Text className={`mt-4 text-base ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-          PillCare 로딩 중...
+          {i18n.t('common:appName')} {i18n.t('common:loading')}
         </Text>
       </View>
     );
@@ -482,7 +483,7 @@ function AppContent() {
           <View className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
             <ActivityIndicator size="large" color="#3B82F6" />
             <Text className={`mt-4 text-base ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-              프로필 설정 중...
+              {i18n.t('common:loadingProfile')}
             </Text>
           </View>
         ) : showOnboarding ? (
@@ -502,8 +503,7 @@ function AppContent() {
           // Unknown role
           <View className={`flex-1 items-center justify-center p-6 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
             <Text className={`text-lg text-error text-center leading-relaxed`}>
-              알 수 없는 사용자 역할입니다.{'\n'}
-              설정을 확인해주세요.
+              {i18n.t('common:error.unknownRole')}
             </Text>
           </View>
         )}

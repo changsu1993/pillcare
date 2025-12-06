@@ -24,6 +24,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import {
   getConnectedParent,
@@ -47,7 +48,8 @@ interface TodayMedicationItem {
  * Get status icon and color - moved outside component for better performance
  */
 const getStatusDisplayConfig = (
-  status: 'taken' | 'pending' | 'missed'
+  status: 'taken' | 'pending' | 'missed',
+  statusTexts: { taken: string; pending: string; missed: string }
 ): { icon: string; colorClass: string; bgColorClass: string; text: string } => {
   switch (status) {
     case 'taken':
@@ -55,21 +57,21 @@ const getStatusDisplayConfig = (
         icon: 'checkmark-circle',
         colorClass: 'text-success',
         bgColorClass: 'bg-success',
-        text: '복용 완료',
+        text: statusTexts.taken,
       };
     case 'pending':
       return {
         icon: 'time',
         colorClass: 'text-warning',
         bgColorClass: 'bg-warning',
-        text: '대기 중',
+        text: statusTexts.pending,
       };
     case 'missed':
       return {
         icon: 'close-circle',
         colorClass: 'text-error',
         bgColorClass: 'bg-error',
-        text: '미복용',
+        text: statusTexts.missed,
       };
   }
 };
@@ -80,10 +82,14 @@ const getStatusDisplayConfig = (
 interface TimelineItemProps {
   item: TodayMedicationItem;
   isLast: boolean;
+  statusTexts: { taken: string; pending: string; missed: string };
 }
 
-const TimelineItem = memo(({ item, isLast }: TimelineItemProps) => {
-  const statusDisplay = useMemo(() => getStatusDisplayConfig(item.status), [item.status]);
+const TimelineItem = memo(({ item, isLast, statusTexts }: TimelineItemProps) => {
+  const statusDisplay = useMemo(
+    () => getStatusDisplayConfig(item.status, statusTexts),
+    [item.status, statusTexts]
+  );
 
   return (
     <View className="flex-row mb-4">
@@ -123,6 +129,7 @@ const TimelineItem = memo(({ item, isLast }: TimelineItemProps) => {
 TimelineItem.displayName = 'TimelineItem';
 
 const ChildHomeScreen = () => {
+  const { t } = useTranslation(['home', 'common', 'medication', 'settings']);
   const navigation = useNavigation<any>();
   const { isDarkMode } = useTheme();
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -163,11 +170,11 @@ const ChildHomeScreen = () => {
       setTodayItems(items);
     } catch (err) {
       console.error('Error loading child home data:', err);
-      setError('데이터를 불러올 수 없습니다');
+      setError(t('home:error.loadData'));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   /**
    * Build today's medication items from medications and logs
@@ -272,7 +279,7 @@ const ChildHomeScreen = () => {
    */
   const handleCallParent = useCallback((): void => {
     if (!parentInfo?.phone_number) {
-      Alert.alert('전화번호 없음', '부모님의 전화번호가 등록되어 있지 않습니다.');
+      Alert.alert(t('home:alert.noPhoneNumber'), t('home:alert.noPhoneMessage'));
       return;
     }
 
@@ -282,14 +289,24 @@ const ChildHomeScreen = () => {
         if (supported) {
           Linking.openURL(phoneUrl);
         } else {
-          Alert.alert('오류', '전화를 걸 수 없습니다.');
+          Alert.alert(t('common:error.generic'), t('home:error.cannotCall'));
         }
       })
       .catch((err) => {
         console.error('Error opening phone:', err);
-        Alert.alert('오류', '전화를 걸 수 없습니다.');
+        Alert.alert(t('common:error.generic'), t('home:error.cannotCall'));
       });
-  }, [parentInfo?.phone_number]);
+  }, [parentInfo?.phone_number, t]);
+
+  // Memoized status texts for TimelineItem - must be before conditional returns
+  const statusTexts = useMemo(
+    () => ({
+      taken: t('home:stats.taken'),
+      pending: t('home:stats.pending'),
+      missed: t('home:stats.missed'),
+    }),
+    [t]
+  );
 
   // Loading state
   if (isLoading) {
@@ -299,7 +316,7 @@ const ChildHomeScreen = () => {
       >
         <ActivityIndicator size="large" color="#3B82F6" />
         <Text className={`text-base mt-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-          불러오는 중...
+          {t('common:loading')}
         </Text>
       </View>
     );
@@ -314,7 +331,7 @@ const ChildHomeScreen = () => {
         <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
         <Text className="text-base text-error text-center mt-3 mb-4">{error}</Text>
         <TouchableOpacity className="bg-primary px-6 py-3 rounded-lg" onPress={loadData}>
-          <Text className="text-base font-semibold text-white">다시 시도</Text>
+          <Text className="text-base font-semibold text-white">{t('common:button.retry')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -332,16 +349,18 @@ const ChildHomeScreen = () => {
           <Text
             className={`text-xl font-bold mt-4 mb-2 ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}
           >
-            부모님을 연결해주세요
+            {t('home:child.noParentTitle')}
           </Text>
           <Text
             className={`text-sm text-center leading-5 mb-6 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}
           >
-            부모님의 복약 현황을 확인하려면{'\n'}먼저 가족 연결을 해주세요
+            {t('home:child.noParentMessage')}
           </Text>
           <TouchableOpacity className="flex-row items-center bg-primary px-5 py-3 rounded-lg gap-2">
             <Ionicons name="add-circle-outline" size={20} color="#FFFFFF" />
-            <Text className="text-base font-semibold text-white">가족 연결하기</Text>
+            <Text className="text-base font-semibold text-white">
+              {t('settings:button.connectFamily')}
+            </Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -374,10 +393,10 @@ const ChildHomeScreen = () => {
               <Text
                 className={`text-lg font-bold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}
               >
-                {parentInfo.name}님
+                {t('home:child.greeting', { name: parentInfo.name })}
               </Text>
               <Text className={`text-sm mt-0.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                부모님 복약 현황
+                {t('home:child.title')}
               </Text>
             </View>
           </View>
@@ -386,7 +405,7 @@ const ChildHomeScreen = () => {
             className={`flex-row justify-between items-center rounded-xl p-4 mb-4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}
           >
             <Text className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-              오늘 복약률
+              {t('home:child.adherenceRate')}
             </Text>
             <Text className={`text-3xl font-bold ${adherenceRateColorClass}`}>
               {adherenceRate}%
@@ -402,7 +421,7 @@ const ChildHomeScreen = () => {
                 {takenCount}
               </Text>
               <Text className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                복용
+                {t('home:stats.taken')}
               </Text>
             </View>
             <View className={`w-px h-8 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`} />
@@ -413,7 +432,7 @@ const ChildHomeScreen = () => {
                 {pendingCount}
               </Text>
               <Text className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                대기
+                {t('home:stats.pending')}
               </Text>
             </View>
             <View className={`w-px h-8 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`} />
@@ -424,7 +443,7 @@ const ChildHomeScreen = () => {
                 {missedCount}
               </Text>
               <Text className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                미복용
+                {t('home:stats.missed')}
               </Text>
             </View>
           </View>
@@ -444,7 +463,7 @@ const ChildHomeScreen = () => {
         {/* Today's Medications Section */}
         <View className="flex-row justify-between items-center mb-4">
           <Text className={`text-lg font-bold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-            오늘의 복약
+            {t('home:child.todayMedications')}
           </Text>
           <Text className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
             {formattedDate}
@@ -458,7 +477,7 @@ const ChildHomeScreen = () => {
           >
             <Ionicons name="medical-outline" size={32} color={isDarkMode ? '#6B7280' : '#9CA3AF'} />
             <Text className={`text-sm mt-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-              오늘 예정된 복약이 없습니다
+              {t('home:timeline.noData')}
             </Text>
           </View>
         ) : (
@@ -468,6 +487,7 @@ const ChildHomeScreen = () => {
                 key={`${item.medicationId}-${item.scheduledTime}`}
                 item={item}
                 isLast={index === todayItems.length - 1}
+                statusTexts={statusTexts}
               />
             ))}
           </View>
@@ -481,7 +501,7 @@ const ChildHomeScreen = () => {
         activeOpacity={0.8}
       >
         <Ionicons name="call" size={20} color="#FFFFFF" />
-        <Text className="text-base font-bold text-white">부모님께 전화</Text>
+        <Text className="text-base font-bold text-white">{t('home:child.callParent')}</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

@@ -23,6 +23,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { ParentScreenProps } from '../../../../shared/types/navigation.types';
 import {
@@ -41,6 +42,7 @@ import { useTheme, ThemeMode } from '../../../../shared/contexts';
 type Props = ParentScreenProps<'Settings'>;
 
 const ParentSettingsScreen = ({ navigation }: Props) => {
+  const { t } = useTranslation(['settings', 'common']);
   const { isDarkMode, themeMode, setTheme } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
@@ -102,7 +104,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
       console.error('Error saving voice setting:', error);
       // Revert on error
       setVoiceEnabled(!value);
-      Alert.alert('오류', '설정을 저장할 수 없습니다.');
+      Alert.alert(t('common:error.generic'), t('settings:error.saveFailed'));
     } finally {
       setIsSettingsSaving(false);
     }
@@ -117,7 +119,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
       console.error('Error saving vibration setting:', error);
       // Revert on error
       setVibrationEnabled(!value);
-      Alert.alert('오류', '설정을 저장할 수 없습니다.');
+      Alert.alert(t('common:error.generic'), t('settings:error.saveFailed'));
     } finally {
       setIsSettingsSaving(false);
     }
@@ -128,7 +130,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
       await testVoice();
     } catch (error) {
       console.error('Error testing voice:', error);
-      Alert.alert('오류', '음성 테스트에 실패했습니다.');
+      Alert.alert(t('common:error.generic'), t('settings:error.voiceTestFailed'));
     }
   };
 
@@ -144,7 +146,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
       // Revert on error
       const settings = await getSettings();
       setVoiceSpeed(settings.voiceSpeed);
-      Alert.alert('오류', '설정을 저장할 수 없습니다.');
+      Alert.alert(t('common:error.generic'), t('settings:error.saveFailed'));
     } finally {
       setIsSettingsSaving(false);
     }
@@ -153,13 +155,13 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
   const getSpeedLabel = (speed: VoiceSpeed): string => {
     switch (speed) {
       case 0.7:
-        return '느리게';
+        return t('settings:voiceSpeed.slow');
       case 0.85:
-        return '보통';
+        return t('settings:voiceSpeed.normal');
       case 1.0:
-        return '빠르게';
+        return t('settings:voiceSpeed.fast');
       default:
-        return '보통';
+        return t('settings:voiceSpeed.normal');
     }
   };
 
@@ -181,38 +183,42 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
   };
 
   const handleRemoveConnection = (connection: FamilyConnection) => {
-    const childName = connection.child?.name || '자녀';
-    Alert.alert('연결 해제', `${childName}님과의 연결을 해제하시겠습니까?`, [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '해제',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await removeFamilyConnection(connection.id);
-            // Reload data after removal
-            await loadData();
-            Alert.alert('완료', '연결이 해제되었습니다.');
-          } catch (error) {
-            console.error('Error removing connection:', error);
-            Alert.alert('오류', '연결 해제에 실패했습니다.');
-          }
+    const childName = connection.child?.name || t('settings:family.child');
+    Alert.alert(
+      t('settings:family.disconnectTitle'),
+      t('settings:family.disconnectMessage', { name: childName }),
+      [
+        { text: t('common:button.cancel'), style: 'cancel' },
+        {
+          text: t('settings:family.disconnect'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await removeFamilyConnection(connection.id);
+              // Reload data after removal
+              await loadData();
+              Alert.alert(t('common:button.done'), t('settings:family.disconnected'));
+            } catch (error) {
+              console.error('Error removing connection:', error);
+              Alert.alert(t('common:error.generic'), t('settings:family.disconnectFailed'));
+            }
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
   const handleLogout = () => {
     Alert.alert(
-      '로그아웃',
-      '정말 로그아웃하시겠습니까?',
+      t('settings:button.signOut'),
+      t('settings:message.signOutConfirm'),
       [
         {
-          text: '취소',
+          text: t('common:button.cancel'),
           style: 'cancel',
         },
         {
-          text: '로그아웃',
+          text: t('settings:button.signOut'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -220,7 +226,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
               // Navigation will be handled by auth state change
             } catch (error) {
               console.error('Error signing out:', error);
-              Alert.alert('오류', '로그아웃할 수 없습니다');
+              Alert.alert(t('common:error.generic'), t('settings:error.signOutFailed'));
             }
           },
         },
@@ -234,10 +240,12 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
       await resetOnboardingStatus('parent');
       // Force app to re-check onboarding status by signing out and back in
       // For now, just show an alert that the tutorial will show on next login
-      Alert.alert('사용법 보기', '다음 로그인 시 튜토리얼이 다시 표시됩니다.', [{ text: '확인' }]);
+      Alert.alert(t('settings:tutorial.title'), t('settings:tutorial.message'), [
+        { text: t('common:button.confirm') },
+      ]);
     } catch (error) {
       console.error('Error resetting onboarding:', error);
-      Alert.alert('오류', '설정을 변경할 수 없습니다.');
+      Alert.alert(t('common:error.generic'), t('settings:error.saveFailed'));
     }
   };
 
@@ -247,7 +255,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
       await setTheme(mode);
     } catch (error) {
       console.error('Error saving theme setting:', error);
-      Alert.alert('오류', '테마 설정을 저장할 수 없습니다.');
+      Alert.alert(t('common:error.generic'), t('settings:error.themeSaveFailed'));
     } finally {
       setIsSettingsSaving(false);
     }
@@ -256,13 +264,13 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
   const getThemeLabel = (mode: ThemeMode): string => {
     switch (mode) {
       case 'light':
-        return '라이트';
+        return t('settings:theme.light');
       case 'dark':
-        return '다크';
+        return t('settings:theme.dark');
       case 'system':
-        return '시스템 설정';
+        return t('settings:theme.system');
       default:
-        return '시스템 설정';
+        return t('settings:theme.system');
     }
   };
 
@@ -283,7 +291,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
     return (
       <View className="flex-1 bg-gray-50 justify-center items-center">
         <ActivityIndicator size="large" color="#22C55E" />
-        <Text className="text-xl text-gray-900 mt-4">불러오는 중...</Text>
+        <Text className="text-xl text-gray-900 mt-4">{t('common:loading')}</Text>
       </View>
     );
   }
@@ -293,16 +301,16 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 24 }}>
         {/* Profile card */}
         <View className="bg-white p-8 rounded-2xl items-center mb-6 border-2 border-gray-200 shadow-sm">
-          <Text className="text-6xl mb-4">👤</Text>
+          <Text className="text-6xl mb-4">&#128100;</Text>
           <Text
             className="text-3xl font-bold text-gray-900 mb-2"
-            accessibilityLabel={`이름: ${user?.name || '사용자'}`}
+            accessibilityLabel={`${t('settings:label.name')}: ${user?.name || t('settings:profile.user')}`}
           >
-            {user?.name || '사용자'}
+            {user?.name || t('settings:profile.user')}
           </Text>
           <Text
             className="text-xl text-gray-700 mb-4"
-            accessibilityLabel={`이메일: ${user?.email || ''}`}
+            accessibilityLabel={`${t('settings:label.email')}: ${user?.email || ''}`}
           >
             {user?.email || ''}
           </Text>
@@ -310,11 +318,13 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
             className="flex-row items-center gap-2 bg-gray-100 px-6 py-3 rounded-xl"
             onPress={() => navigation.navigate('ProfileEdit')}
             activeOpacity={0.7}
-            accessibilityLabel="프로필 수정"
+            accessibilityLabel={t('settings:button.editProfile')}
             accessibilityRole="button"
           >
             <Ionicons name="create-outline" size={24} color="#374151" />
-            <Text className="text-xl font-semibold text-gray-700">프로필 수정</Text>
+            <Text className="text-xl font-semibold text-gray-700">
+              {t('settings:button.editProfile')}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -323,13 +333,15 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
           {/* Voice guidance toggle */}
           <View
             className="bg-white h-[72px] flex-row items-center justify-between px-6 rounded-2xl border-2 border-gray-200 shadow-sm"
-            accessibilityLabel="음성 안내 설정"
+            accessibilityLabel={t('settings:label.voiceGuidance')}
             accessibilityRole="adjustable"
             accessibilityState={{ checked: voiceEnabled }}
           >
             <View className="flex-row items-center flex-1">
-              <Text className="text-4xl mr-4">🔊</Text>
-              <Text className="text-2xl font-semibold text-gray-900">음성 안내</Text>
+              <Text className="text-4xl mr-4">&#128266;</Text>
+              <Text className="text-2xl font-semibold text-gray-900">
+                {t('settings:label.voiceGuidance')}
+              </Text>
             </View>
             <View className="justify-center items-center w-[60px] h-9">
               <Switch
@@ -338,7 +350,11 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
                 trackColor={{ false: '#D1D5DB', true: '#86EFAC' }}
                 thumbColor={voiceEnabled ? '#22C55E' : '#F3F4F6'}
                 ios_backgroundColor="#D1D5DB"
-                accessibilityLabel={voiceEnabled ? '음성 안내 켜짐' : '음성 안내 꺼짐'}
+                accessibilityLabel={
+                  voiceEnabled
+                    ? t('settings:accessibility.voiceOn')
+                    : t('settings:accessibility.voiceOff')
+                }
                 disabled={isSettingsSaving}
               />
             </View>
@@ -350,19 +366,21 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
               className="bg-primary h-14 flex-row items-center justify-center px-6 rounded-xl border-2 border-primary gap-2"
               onPress={handleTestVoice}
               activeOpacity={0.7}
-              accessibilityLabel="음성 테스트"
-              accessibilityHint="음성 안내 테스트 메시지를 재생합니다"
+              accessibilityLabel={t('settings:voice.test')}
+              accessibilityHint={t('settings:accessibility.voiceTestHint')}
               accessibilityRole="button"
             >
-              <Text className="text-2xl">🎧</Text>
-              <Text className="text-lg font-semibold text-white">음성 테스트</Text>
+              <Text className="text-2xl">&#127911;</Text>
+              <Text className="text-lg font-semibold text-white">{t('settings:voice.test')}</Text>
             </TouchableOpacity>
           )}
 
           {/* Voice speed control - only show when voice is enabled */}
           {voiceEnabled && (
             <View className="bg-white p-6 rounded-2xl border-2 border-gray-200 shadow-sm">
-              <Text className="text-2xl font-semibold text-gray-900 mb-4">음성 속도</Text>
+              <Text className="text-2xl font-semibold text-gray-900 mb-4">
+                {t('settings:label.voiceSpeed')}
+              </Text>
               <View className="flex-row gap-3">
                 {/* Slow speed button */}
                 <TouchableOpacity
@@ -441,16 +459,16 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
             className={`h-[72px] flex-row items-center justify-between px-6 rounded-2xl border-2 shadow-sm ${
               isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
             }`}
-            accessibilityLabel="진동 설정"
+            accessibilityLabel={t('settings:label.vibration')}
             accessibilityRole="adjustable"
             accessibilityState={{ checked: vibrationEnabled }}
           >
             <View className="flex-row items-center flex-1">
-              <Text className="text-4xl mr-4">📳</Text>
+              <Text className="text-4xl mr-4">&#128243;</Text>
               <Text
                 className={`text-2xl font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}
               >
-                진동
+                {t('settings:label.vibration')}
               </Text>
             </View>
             <View className="justify-center items-center w-[60px] h-9">
@@ -460,7 +478,11 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
                 trackColor={{ false: '#D1D5DB', true: '#86EFAC' }}
                 thumbColor={vibrationEnabled ? '#22C55E' : '#F3F4F6'}
                 ios_backgroundColor="#D1D5DB"
-                accessibilityLabel={vibrationEnabled ? '진동 켜짐' : '진동 꺼짐'}
+                accessibilityLabel={
+                  vibrationEnabled
+                    ? t('settings:accessibility.vibrationOn')
+                    : t('settings:accessibility.vibrationOff')
+                }
                 disabled={isSettingsSaving}
               />
             </View>
@@ -475,7 +497,7 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
             <Text
               className={`text-2xl font-semibold mb-4 ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}
             >
-              화면 테마
+              {t('settings:title.theme')}
             </Text>
             <View className="flex-row gap-3">
               {/* Light mode button */}
@@ -576,8 +598,10 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
           {/* Family connections section */}
           <View className="bg-white p-5 rounded-2xl border-2 border-gray-200 shadow-sm">
             <View className="flex-row items-center mb-4">
-              <Text className="text-4xl mr-4">👨‍👩‍👧</Text>
-              <Text className="text-2xl font-semibold text-gray-900">가족 연결</Text>
+              <Text className="text-4xl mr-4">&#128106;</Text>
+              <Text className="text-2xl font-semibold text-gray-900">
+                {t('settings:section.family')}
+              </Text>
             </View>
 
             {/* Connected children list */}
@@ -599,13 +623,17 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
                         </View>
                         <View>
                           <Text className="text-lg font-semibold text-gray-900">{child.name}</Text>
-                          <Text className="text-sm text-gray-700 mt-0.5">자녀</Text>
+                          <Text className="text-sm text-gray-700 mt-0.5">
+                            {t('settings:family.child')}
+                          </Text>
                         </View>
                       </View>
                       <TouchableOpacity
                         onPress={() => handleRemoveConnection(connection)}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                        accessibilityLabel={`${child.name} 연결 해제`}
+                        accessibilityLabel={t('settings:accessibility.disconnectChild', {
+                          name: child.name,
+                        })}
                       >
                         <Ionicons name="close-circle" size={28} color="#EF4444" />
                       </TouchableOpacity>
@@ -614,7 +642,9 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
                 })}
               </View>
             ) : (
-              <Text className="text-lg text-gray-700 text-center py-4">연결된 자녀가 없습니다</Text>
+              <Text className="text-lg text-gray-700 text-center py-4">
+                {t('settings:family.noChildren')}
+              </Text>
             )}
 
             {/* Generate invitation code button */}
@@ -622,12 +652,14 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
               className="flex-row items-center justify-center bg-success-50 py-4 rounded-xl gap-2 border-2 border-success"
               onPress={handleGenerateCode}
               activeOpacity={0.7}
-              accessibilityLabel="초대 코드 생성"
-              accessibilityHint="자녀와 연결할 초대 코드를 생성합니다"
+              accessibilityLabel={t('settings:family.generateCode')}
+              accessibilityHint={t('settings:accessibility.generateCodeHint')}
               accessibilityRole="button"
             >
               <Ionicons name="add-circle" size={28} color="#22C55E" />
-              <Text className="text-xl font-semibold text-success">초대 코드 생성</Text>
+              <Text className="text-xl font-semibold text-success">
+                {t('settings:family.generateCode')}
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -636,13 +668,15 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
             className="bg-primary-50 h-[72px] flex-row items-center px-6 rounded-2xl border-2 border-primary-100 shadow-sm"
             onPress={handleViewTutorial}
             activeOpacity={0.7}
-            accessibilityLabel="사용법 보기"
-            accessibilityHint="앱 사용법 튜토리얼을 다시 봅니다"
+            accessibilityLabel={t('settings:tutorial.viewTitle')}
+            accessibilityHint={t('settings:accessibility.tutorialHint')}
             accessibilityRole="button"
           >
             <View className="flex-row items-center flex-1">
-              <Text className="text-4xl mr-4">📖</Text>
-              <Text className="text-2xl font-semibold text-primary">사용법 보기</Text>
+              <Text className="text-4xl mr-4">&#128214;</Text>
+              <Text className="text-2xl font-semibold text-primary">
+                {t('settings:tutorial.viewTitle')}
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={28} color="#3B82F6" />
           </TouchableOpacity>
@@ -652,19 +686,21 @@ const ParentSettingsScreen = ({ navigation }: Props) => {
             className="bg-error-50 h-[72px] flex-row items-center px-6 rounded-2xl border-2 border-error-100 shadow-sm mt-4"
             onPress={handleLogout}
             activeOpacity={0.7}
-            accessibilityLabel="로그아웃"
-            accessibilityHint="앱에서 로그아웃합니다"
+            accessibilityLabel={t('settings:button.signOut')}
+            accessibilityHint={t('settings:accessibility.signOutHint')}
             accessibilityRole="button"
           >
             <View className="flex-row items-center flex-1">
-              <Text className="text-4xl mr-4">🚪</Text>
-              <Text className="text-2xl font-semibold text-error">로그아웃</Text>
+              <Text className="text-4xl mr-4">&#128682;</Text>
+              <Text className="text-2xl font-semibold text-error">
+                {t('settings:button.signOut')}
+              </Text>
             </View>
           </TouchableOpacity>
         </View>
 
         {/* App version */}
-        <Text className="text-lg text-gray-700 text-center mt-8">PillCare v0.1.0</Text>
+        <Text className="text-lg text-gray-700 text-center mt-8">{t('common:appName')} v0.1.0</Text>
       </ScrollView>
     </SafeAreaView>
   );

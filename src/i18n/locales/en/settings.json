@@ -33,9 +33,10 @@
     "fast": "Fast"
   },
   "theme": {
-    "light": "Light Mode",
-    "dark": "Dark Mode",
-    "system": "System Default"
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "systemDescription": "Automatically changes based on device settings"
   },
   "button": {
     "editProfile": "Edit Profile",
@@ -75,5 +76,60 @@
   "placeholder": {
     "name": "Enter your name",
     "phone": "Enter your phone number"
+  },
+  "error": {
+    "saveFailed": "Unable to save settings.",
+    "voiceTestFailed": "Voice test failed.",
+    "themeSaveFailed": "Unable to save theme settings.",
+    "signOutFailed": "Unable to sign out."
+  },
+  "voice": {
+    "test": "Voice Test"
+  },
+  "profile": {
+    "user": "User",
+    "noName": "No Name"
+  },
+  "family": {
+    "child": "Child",
+    "parent": "Parent",
+    "noChildren": "No children connected",
+    "noParent": "No parent connected",
+    "generateCode": "Generate Invitation Code",
+    "enterCode": "Enter Invitation Code",
+    "enterCodeHint": "Enter your parent's invitation code to connect",
+    "disconnectTitle": "Disconnect",
+    "disconnectMessage": "Are you sure you want to disconnect from {{name}}?",
+    "disconnectParentMessage": "Are you sure you want to disconnect from {{name}}?\n\nYou will no longer be able to view their medication status.",
+    "disconnect": "Disconnect",
+    "disconnected": "Disconnected successfully.",
+    "disconnectFailed": "Failed to disconnect."
+  },
+  "tutorial": {
+    "title": "View Tutorial",
+    "viewTitle": "View Tutorial Again",
+    "message": "The tutorial will be shown again on your next login."
+  },
+  "notification": {
+    "permissionRequired": "Notification Permission Required",
+    "permissionMessage": "Please allow notification permissions in settings to receive alerts.",
+    "missedPermissionMessage": "Please allow notification permissions to receive missed medication alerts.",
+    "pushNotifications": "Push Notifications",
+    "missedAlert": "Missed Medication Alert",
+    "missedAlertDescription": "Get notified when your parent misses a medication"
+  },
+  "support": {
+    "help": "Help"
+  },
+  "accessibility": {
+    "voiceOn": "Voice guidance on",
+    "voiceOff": "Voice guidance off",
+    "voiceTestHint": "Play voice guidance test message",
+    "vibrationOn": "Vibration on",
+    "vibrationOff": "Vibration off",
+    "disconnectChild": "Disconnect {{name}}",
+    "generateCodeHint": "Generate invitation code to connect with children",
+    "tutorialHint": "View the app tutorial again",
+    "signOutHint": "Sign out of the app"
   }
 }

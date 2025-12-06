@@ -38,9 +38,17 @@ A healthcare service that automatically manages medication schedules and hospita
 PillCare/
 ├── src/
 │   ├── features/                    # Feature-based modules
+│   │   ├── appointments/            # Hospital appointments
+│   │   │   ├── screens/child/       # Appointment management
+│   │   │   └── components/          # Appointment cards
 │   │   ├── auth/                    # Authentication feature
 │   │   │   ├── navigation/          # Auth navigator
-│   │   │   └── screens/             # Login, signup, password reset
+│   │   │   ├── screens/             # Login, signup, password reset
+│   │   │   └── components/          # Social login buttons
+│   │   ├── family/                  # Family connections
+│   │   │   └── screens/
+│   │   │       ├── parent/          # Family code display
+│   │   │       └── child/           # Connect to parent
 │   │   ├── home/                    # Home/dashboard feature
 │   │   │   ├── screens/
 │   │   │   │   ├── parent/          # Parent home screen
@@ -53,33 +61,44 @@ PillCare/
 │   │   │   ├── components/          # Medication cards, forms
 │   │   │   ├── hooks/               # useMedications, etc.
 │   │   │   └── services/            # Medication API
-│   │   ├── family/                  # Family connections
-│   │   │   └── screens/
-│   │   │       ├── parent/          # Family code display
-│   │   │       └── child/           # Connect to parent
 │   │   ├── notifications/           # Push notifications
 │   │   │   ├── hooks/               # useNotifications
 │   │   │   └── services/            # Notification scheduling
+│   │   ├── onboarding/              # Onboarding flow
+│   │   │   ├── screens/
+│   │   │   │   ├── parent/          # Parent onboarding
+│   │   │   │   └── child/           # Child onboarding
+│   │   │   ├── components/          # Onboarding UI
+│   │   │   ├── hooks/               # useOnboarding
+│   │   │   └── services/            # Onboarding state
+│   │   ├── reports/                 # Reports & export
+│   │   │   ├── components/          # PDF/CSV export
+│   │   │   └── services/            # Report generation
 │   │   └── settings/                # App settings
 │   │       ├── screens/
 │   │       │   ├── parent/          # Parent settings
 │   │       │   └── child/           # Child settings
 │   │       ├── contexts/            # SettingsContext
 │   │       └── services/            # Settings storage
+│   ├── i18n/                        # Internationalization
+│   │   ├── locales/
+│   │   │   ├── ko/                  # Korean translations
+│   │   │   └── en/                  # English translations
+│   │   └── types.ts                 # Translation key types
 │   ├── navigation/                  # Root navigators
 │   │   ├── ParentNavigator.tsx      # Parent tab navigator
 │   │   └── ChildNavigator.tsx       # Child tab navigator
-│   ├── shared/                      # Shared across features
-│   │   ├── components/              # Common UI components
-│   │   ├── services/                # Supabase, API clients
-│   │   ├── types/                   # TypeScript types
-│   │   └── utils/                   # Helper functions
-│   └── assets/                      # Images, fonts
+│   └── shared/                      # Shared across features
+│       ├── contexts/                # ThemeContext, etc.
+│       ├── services/                # Supabase, API clients
+│       └── types/                   # TypeScript types
+├── assets/                          # App icons, splash, sounds
+├── supabase/                        # Supabase config & migrations
+├── docs/                            # Documentation
 ├── ios/                             # iOS native code
-├── android/                         # Android native code
 ├── .claude/
-│   ├── agents/                      # Custom AI agents (16 specialists)
-│   ├── skills/                      # Reusable skills (12 skills)
+│   ├── agents/                      # Custom AI agents
+│   ├── skills/                      # Reusable skills
 │   └── commands/                    # Slash commands
 ├── tailwind.config.js               # NativeWind configuration
 ├── global.css                       # Tailwind base styles

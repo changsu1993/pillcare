@@ -13,6 +13,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import OnboardingIllustration from '../../components/OnboardingIllustration';
 import OnboardingButton from '../../components/OnboardingButton';
@@ -29,6 +30,8 @@ const ParentOnboarding3Screen: React.FC<Props> = ({
   onToggleDontShow,
   onComplete,
 }) => {
+  const { t } = useTranslation(['onboarding', 'common']);
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Progress indicator */}
@@ -39,17 +42,19 @@ const ParentOnboarding3Screen: React.FC<Props> = ({
       {/* Content */}
       <View
         className="flex-1 justify-center items-center px-8"
-        accessibilityLabel="준비 완료 화면, 3개 중 3번째"
+        accessibilityLabel={t('onboarding:parent.step3.accessibilityLabel')}
       >
         {/* Checkmark icon */}
         <OnboardingIllustration type="checkmark" variant="parent" size={96} />
 
         {/* Title */}
-        <Text className="text-4xl font-bold text-success-700 text-center mt-8">준비 완료!</Text>
+        <Text className="text-4xl font-bold text-success-700 text-center mt-8">
+          {t('onboarding:parent.step3.completionTitle')}
+        </Text>
 
         {/* Message */}
         <Text className="text-2xl text-gray-700 text-center mt-4 leading-9">
-          이제 약 알림을 받을 수{'\n'}있습니다
+          {t('onboarding:parent.step3.completionMessage')}
         </Text>
       </View>
 
@@ -57,11 +62,11 @@ const ParentOnboarding3Screen: React.FC<Props> = ({
       <View className="px-8 pb-8">
         {/* Start button */}
         <OnboardingButton
-          label="시작하기"
+          label={t('onboarding:common.getStarted')}
           onPress={onComplete}
           variant="parent"
           type="primary"
-          accessibilityHint="앱을 시작합니다"
+          accessibilityHint={t('onboarding:accessibility.startAppHint')}
         />
 
         {/* Don't show again checkbox */}
@@ -71,8 +76,12 @@ const ParentOnboarding3Screen: React.FC<Props> = ({
           activeOpacity={0.7}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: dontShowAgain }}
-          accessibilityLabel="다시 보지 않기"
-          accessibilityHint={dontShowAgain ? '선택 해제하려면 누르세요' : '선택하려면 누르세요'}
+          accessibilityLabel={t('onboarding:common.dontShowAgain')}
+          accessibilityHint={
+            dontShowAgain
+              ? t('onboarding:accessibility.dontShowAgainChecked')
+              : t('onboarding:accessibility.dontShowAgainUnchecked')
+          }
         >
           <View
             className={`w-8 h-8 rounded-lg border-2 justify-center items-center mr-3 ${
@@ -81,7 +90,7 @@ const ParentOnboarding3Screen: React.FC<Props> = ({
           >
             {dontShowAgain && <Ionicons name="checkmark" size={20} color="#FFFFFF" />}
           </View>
-          <Text className="text-xl text-gray-700">다시 보지 않기</Text>
+          <Text className="text-xl text-gray-700">{t('onboarding:common.dontShowAgain')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

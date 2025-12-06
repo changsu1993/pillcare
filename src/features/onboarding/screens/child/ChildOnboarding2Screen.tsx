@@ -12,6 +12,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useTranslation } from 'react-i18next';
 
 import OnboardingIllustration from '../../components/OnboardingIllustration';
 import OnboardingButton from '../../components/OnboardingButton';
@@ -24,6 +25,8 @@ type Props = {
 };
 
 const ChildOnboarding2Screen: React.FC<Props> = ({ navigation, onSkip }) => {
+  const { t } = useTranslation(['onboarding', 'common']);
+
   const handleNext = () => {
     navigation.navigate('Step3');
   };
@@ -37,9 +40,9 @@ const ChildOnboarding2Screen: React.FC<Props> = ({ navigation, onSkip }) => {
           onPress={onSkip}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="건너뛰기"
+          accessibilityLabel={t('onboarding:common.skip')}
         >
-          <Text className="text-sm text-gray-500">건너뛰기</Text>
+          <Text className="text-sm text-gray-500">{t('onboarding:common.skip')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -49,11 +52,13 @@ const ChildOnboarding2Screen: React.FC<Props> = ({ navigation, onSkip }) => {
         <OnboardingIllustration type="medication" variant="child" />
 
         {/* Title */}
-        <Text className="text-xl font-bold text-gray-800 text-center mt-6">약 등록하기</Text>
+        <Text className="text-xl font-bold text-gray-800 text-center mt-6">
+          {t('onboarding:child.step2.heading')}
+        </Text>
 
         {/* Description */}
         <Text className="text-base text-gray-600 text-center mt-3 leading-6">
-          부모님이 드시는 약을 등록하고{'\n'}복용 시간을 설정할 수 있어요
+          {t('onboarding:child.step2.subDescription')}
         </Text>
 
         {/* Medication list preview */}
@@ -64,7 +69,9 @@ const ChildOnboarding2Screen: React.FC<Props> = ({ navigation, onSkip }) => {
               <View className="w-8 h-8 bg-success-100 rounded-full justify-center items-center mr-3">
                 <Text className="text-success font-bold">H</Text>
               </View>
-              <Text className="text-base font-medium text-gray-800">혈압약</Text>
+              <Text className="text-base font-medium text-gray-800">
+                {t('onboarding:child.step2.bloodPressure')}
+              </Text>
             </View>
             <Text className="text-sm text-gray-500">09:00</Text>
           </View>
@@ -75,24 +82,28 @@ const ChildOnboarding2Screen: React.FC<Props> = ({ navigation, onSkip }) => {
               <View className="w-8 h-8 bg-warning-100 rounded-full justify-center items-center mr-3">
                 <Text className="text-warning-700 font-bold">D</Text>
               </View>
-              <Text className="text-base font-medium text-gray-800">당뇨약</Text>
+              <Text className="text-base font-medium text-gray-800">
+                {t('onboarding:child.step2.diabetes')}
+              </Text>
             </View>
             <Text className="text-sm text-gray-500">09:00, 18:00</Text>
           </View>
         </View>
 
         {/* Tip */}
-        <Text className="text-sm text-gray-500 text-center mt-4">약 관리 탭에서 추가하세요</Text>
+        <Text className="text-sm text-gray-500 text-center mt-4">
+          {t('onboarding:child.step2.tip')}
+        </Text>
       </View>
 
       {/* Bottom button */}
       <View className="px-6 pb-8">
         <OnboardingButton
-          label="다음"
+          label={t('onboarding:common.next')}
           onPress={handleNext}
           variant="child"
           type="primary"
-          accessibilityHint="다음 화면으로 이동합니다"
+          accessibilityHint={t('onboarding:accessibility.nextHint')}
         />
       </View>
     </SafeAreaView>

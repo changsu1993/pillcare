@@ -18,50 +18,46 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { resetPasswordForEmail } from '../../../shared/services/supabase';
 import { AuthScreenProps } from '../../../shared/types/navigation.types';
 
 type Props = AuthScreenProps<'ForgotPassword'>;
 
 const ForgotPasswordScreen = ({ navigation }: Props) => {
+  const { t } = useTranslation(['auth', 'common']);
   const [email, setEmail] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleResetPassword = async (): Promise<void> => {
     // Validation
     if (!email.trim()) {
-      Alert.alert('입력 오류', '이메일을 입력해주세요.');
+      Alert.alert(t('auth:error.inputError'), t('auth:error.emptyEmail'));
       return;
     }
 
     // Basic email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
-      Alert.alert('입력 오류', '올바른 이메일 형식을 입력해주세요.');
+      Alert.alert(t('auth:error.inputError'), t('auth:error.invalidEmailFormat'));
       return;
     }
 
     try {
       setIsLoading(true);
       await resetPasswordForEmail(email.trim());
-      Alert.alert(
-        '이메일 전송 완료',
-        '비밀번호 재설정 링크가 이메일로 전송되었습니다. 이메일을 확인해주세요.',
-        [
-          {
-            text: '확인',
-            onPress: () => navigation.navigate('SignIn'),
-          },
-        ]
-      );
+      Alert.alert(t('auth:message.emailSent'), t('auth:message.resetEmailSent'), [
+        {
+          text: t('common:button.confirm'),
+          onPress: () => navigation.navigate('SignIn'),
+        },
+      ]);
     } catch (error) {
       console.error('Password reset error:', error);
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : '비밀번호 재설정 이메일 전송에 실패했습니다. 이메일 주소를 확인해주세요.';
+        error instanceof Error ? error.message : t('auth:error.resetEmailFailed');
 
-      Alert.alert('전송 실패', errorMessage);
+      Alert.alert(t('auth:error.sendFailed'), errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -80,11 +76,13 @@ const ForgotPasswordScreen = ({ navigation }: Props) => {
           {/* Header */}
           <View className="mb-8">
             <TouchableOpacity onPress={() => navigation.goBack()} className="mb-6">
-              <Text className="text-base text-primary">← 뒤로</Text>
+              <Text className="text-base text-primary">{`← ${t('auth:nav.back')}`}</Text>
             </TouchableOpacity>
-            <Text className="text-[32px] font-bold text-gray-900 mb-2">비밀번호 찾기</Text>
+            <Text className="text-[32px] font-bold text-gray-900 mb-2">
+              {t('auth:title.forgotPassword')}
+            </Text>
             <Text className="text-base text-gray-500 leading-6">
-              가입하신 이메일 주소를 입력하시면{'\n'}비밀번호 재설정 링크를 보내드립니다
+              {t('auth:subtitle.forgotPasswordDesc')}
             </Text>
           </View>
 
@@ -92,10 +90,12 @@ const ForgotPasswordScreen = ({ navigation }: Props) => {
           <View className="flex-1">
             {/* Email input */}
             <View className="mb-5">
-              <Text className="text-sm font-semibold text-gray-900 mb-2">이메일</Text>
+              <Text className="text-sm font-semibold text-gray-900 mb-2">
+                {t('auth:label.email')}
+              </Text>
               <TextInput
                 className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
-                placeholder="example@email.com"
+                placeholder={t('auth:placeholder.emailExample')}
                 placeholderTextColor="#9CA3AF"
                 value={email}
                 onChangeText={setEmail}
@@ -103,8 +103,8 @@ const ForgotPasswordScreen = ({ navigation }: Props) => {
                 autoCapitalize="none"
                 autoCorrect={false}
                 editable={!isLoading}
-                accessibilityLabel="이메일 입력"
-                accessibilityHint="비밀번호 재설정을 위한 이메일 주소를 입력하세요"
+                accessibilityLabel={t('auth:accessibility.emailInput')}
+                accessibilityHint={t('auth:accessibility.emailInputHint')}
               />
             </View>
 
@@ -113,23 +113,25 @@ const ForgotPasswordScreen = ({ navigation }: Props) => {
               className={`h-14 rounded-xl items-center justify-center mt-2 bg-primary ${isLoading ? 'opacity-60' : ''}`}
               onPress={handleResetPassword}
               disabled={isLoading}
-              accessibilityLabel="비밀번호 재설정 이메일 보내기"
+              accessibilityLabel={t('auth:accessibility.sendResetEmail')}
               accessibilityRole="button"
             >
               {isLoading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
                 <Text className="text-lg font-semibold text-white">
-                  비밀번호 재설정 이메일 보내기
+                  {t('auth:button.sendResetEmail')}
                 </Text>
               )}
             </TouchableOpacity>
 
             {/* Back to sign in link */}
             <View className="flex-row justify-center items-center mt-6">
-              <Text className="text-sm text-gray-500">비밀번호가 기억나셨나요? </Text>
+              <Text className="text-sm text-gray-500">{t('auth:link.rememberPassword')} </Text>
               <TouchableOpacity onPress={() => navigation.navigate('SignIn')} disabled={isLoading}>
-                <Text className="text-sm font-semibold text-primary">로그인하기</Text>
+                <Text className="text-sm font-semibold text-primary">
+                  {t('auth:link.goToSignIn')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

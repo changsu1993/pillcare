@@ -24,7 +24,8 @@
   "label": {
     "yes": "예",
     "no": "아니오",
-    "required": "필수"
+    "required": "필수",
+    "optional": "선택"
   },
   "time": {
     "today": "오늘",

@@ -11,7 +11,7 @@
  * - Toggle medication active/inactive
  */
 
-import React, { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -26,6 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import {
   getConnectedParent,
   getParentMedications,
@@ -39,6 +40,7 @@ type NavigationProp = NativeStackNavigationProp<ChildStackParamList>;
 
 const MedicationManageScreen = () => {
   const navigation = useNavigation<NavigationProp>();
+  const { t } = useTranslation(['medication', 'common']);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [parentInfo, setParentInfo] = useState<User | null>(null);
@@ -63,11 +65,11 @@ const MedicationManageScreen = () => {
       }
     } catch (err) {
       console.error('Error loading medications:', err);
-      setError('데이터를 불러올 수 없습니다');
+      setError(t('message.dataLoadError'));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   // Load data on initial mount
   useEffect(() => {
@@ -98,11 +100,11 @@ const MedicationManageScreen = () => {
    */
   const handleAddMedication = useCallback((): void => {
     if (!parentInfo) {
-      Alert.alert('오류', '부모님 연결이 필요합니다.');
+      Alert.alert(t('alert.loadError'), t('alert.parentConnectionRequired'));
       return;
     }
     navigation.navigate('AddMedication', { parentId: parentInfo.id });
-  }, [parentInfo, navigation]);
+  }, [parentInfo, navigation, t]);
 
   /**
    * Handle edit medication - memoized callback
@@ -118,27 +120,23 @@ const MedicationManageScreen = () => {
    * Handle delete medication
    */
   const handleDeleteMedication = (medication: Medication): void => {
-    Alert.alert(
-      '약 삭제',
-      `'${medication.name}'을(를) 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`,
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteMedication(medication.id);
-              setMedications((prev) => prev.filter((m) => m.id !== medication.id));
-              Alert.alert('완료', '약이 삭제되었습니다.');
-            } catch (err) {
-              console.error('Error deleting medication:', err);
-              Alert.alert('오류', '약 삭제에 실패했습니다.');
-            }
-          },
+    Alert.alert(t('alert.deleteTitle'), t('alert.deleteMessage', { name: medication.name }), [
+      { text: t('common:button.cancel'), style: 'cancel' },
+      {
+        text: t('common:button.delete'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteMedication(medication.id);
+            setMedications((prev) => prev.filter((m) => m.id !== medication.id));
+            Alert.alert(t('alert.deleteComplete'), t('alert.deleteSuccess'));
+          } catch (err) {
+            console.error('Error deleting medication:', err);
+            Alert.alert(t('alert.loadError'), t('alert.deleteFailed'));
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   /**
@@ -150,7 +148,7 @@ const MedicationManageScreen = () => {
       setMedications((prev) => prev.map((m) => (m.id === medication.id ? { ...m, active } : m)));
     } catch (err) {
       console.error('Error toggling medication active:', err);
-      Alert.alert('오류', '상태 변경에 실패했습니다.');
+      Alert.alert(t('alert.loadError'), t('alert.statusChangeError'));
     }
   };
 
@@ -159,13 +157,13 @@ const MedicationManageScreen = () => {
    */
   const frequencyMap = useMemo<Record<string, string>>(
     () => ({
-      once_daily: '하루 1회',
-      twice_daily: '하루 2회',
-      three_times_daily: '하루 3회',
-      as_needed: '필요시',
-      weekly: '주 1회',
+      once_daily: t('frequency.onceDaily'),
+      twice_daily: t('frequency.twiceDaily'),
+      three_times_daily: t('frequency.threeTimesDaily'),
+      as_needed: t('frequency.asNeeded'),
+      weekly: t('frequency.weeklyOnce'),
     }),
-    []
+    [t]
   );
 
   /**
@@ -190,7 +188,7 @@ const MedicationManageScreen = () => {
     return (
       <View className="flex-1 justify-center items-center bg-gray-50 p-6">
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="text-base text-gray-500 mt-3">불러오는 중...</Text>
+        <Text className="text-base text-gray-500 mt-3">{t('message.loadingData')}</Text>
       </View>
     );
   }
@@ -202,7 +200,7 @@ const MedicationManageScreen = () => {
         <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
         <Text className="text-base text-error text-center mt-3 mb-4">{error}</Text>
         <TouchableOpacity className="bg-primary px-6 py-3 rounded-lg" onPress={loadData}>
-          <Text className="text-base font-semibold text-white">다시 시도</Text>
+          <Text className="text-base font-semibold text-white">{t('common:button.retry')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -214,9 +212,11 @@ const MedicationManageScreen = () => {
       <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
         <View className="flex-1 justify-center items-center p-6">
           <Ionicons name="people-outline" size={64} color="#9CA3AF" />
-          <Text className="text-xl font-bold text-gray-900 mt-4 mb-2">부모님을 연결해주세요</Text>
+          <Text className="text-xl font-bold text-gray-900 mt-4 mb-2">
+            {t('message.connectParentTitle')}
+          </Text>
           <Text className="text-sm text-gray-500 text-center leading-5">
-            부모님의 약을 관리하려면{'\n'}먼저 가족 연결을 해주세요
+            {t('message.connectParentFirst')}
           </Text>
         </View>
       </SafeAreaView>
@@ -234,9 +234,11 @@ const MedicationManageScreen = () => {
       >
         {/* Header Info */}
         <View className="bg-white rounded-xl p-4 mb-4">
-          <Text className="text-lg font-bold text-gray-900 mb-1">{parentInfo.name}님의 약</Text>
+          <Text className="text-lg font-bold text-gray-900 mb-1">
+            {t('label.parentMedications', { name: parentInfo.name })}
+          </Text>
           <Text className="text-sm text-gray-500">
-            총 {medications.length}개의 약이 등록되어 있습니다
+            {t('label.totalMedications', { count: medications.length })}
           </Text>
         </View>
 
@@ -245,11 +247,9 @@ const MedicationManageScreen = () => {
           <View className="bg-white rounded-xl p-10 items-center">
             <Ionicons name="medical-outline" size={48} color="#9CA3AF" />
             <Text className="text-base font-semibold text-gray-900 mt-4 mb-2">
-              등록된 약이 없습니다
+              {t('empty.title')}
             </Text>
-            <Text className="text-sm text-gray-500 text-center">
-              부모님이 드시는 약을 등록해주세요
-            </Text>
+            <Text className="text-sm text-gray-500 text-center">{t('empty.childMessage')}</Text>
           </View>
         ) : (
           <View className="gap-3">
@@ -305,7 +305,7 @@ const MedicationManageScreen = () => {
                         medication.active ? 'text-success' : 'text-gray-500'
                       }`}
                     >
-                      {medication.active ? '알림 활성화' : '알림 비활성화'}
+                      {medication.active ? t('status.active') : t('status.inactive')}
                     </Text>
                   </View>
                 </View>
@@ -317,14 +317,18 @@ const MedicationManageScreen = () => {
                     onPress={() => handleEditMedication(medication.id)}
                   >
                     <Ionicons name="create-outline" size={18} color="#3B82F6" />
-                    <Text className="text-sm font-semibold text-primary">수정</Text>
+                    <Text className="text-sm font-semibold text-primary">
+                      {t('common:button.edit')}
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     className="flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-lg bg-error/10"
                     onPress={() => handleDeleteMedication(medication)}
                   >
                     <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                    <Text className="text-sm font-semibold text-error">삭제</Text>
+                    <Text className="text-sm font-semibold text-error">
+                      {t('common:button.delete')}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>

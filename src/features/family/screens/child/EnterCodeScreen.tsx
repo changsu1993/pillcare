@@ -21,6 +21,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { ChildStackScreenProps } from '../../../../shared/types/navigation.types';
 import { connectWithCode } from '../../../../shared/services/api';
 
@@ -29,6 +30,7 @@ type Props = ChildStackScreenProps<'EnterCode'>;
 const CODE_LENGTH = 6;
 
 const EnterCodeScreen = ({ navigation }: Props) => {
+  const { t } = useTranslation(['family', 'common']);
   const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -106,7 +108,7 @@ const EnterCodeScreen = ({ navigation }: Props) => {
     const codeToUse = fullCode || code.join('');
 
     if (codeToUse.length !== CODE_LENGTH) {
-      setErrorMessage('6자리 코드를 모두 입력해 주세요');
+      setErrorMessage(t('family:message.enterFullCode'));
       return;
     }
 
@@ -118,14 +120,14 @@ const EnterCodeScreen = ({ navigation }: Props) => {
 
       if (result.success) {
         setIsSuccess(true);
-        setParentName(result.parentName || '부모님');
+        setParentName(result.parentName || t('family:label.parent'));
       } else {
-        setErrorMessage(result.error || '연결에 실패했습니다');
+        setErrorMessage(result.error || t('family:message.connectionFailed'));
         // Shake animation could be added here
       }
     } catch (err) {
       console.error('Connection error:', err);
-      setErrorMessage('연결에 실패했습니다.\n다시 시도해 주세요.');
+      setErrorMessage(t('family:message.connectionFailedRetry'));
     } finally {
       setIsLoading(false);
     }
@@ -150,17 +152,18 @@ const EnterCodeScreen = ({ navigation }: Props) => {
           <View className="mb-6">
             <Ionicons name="checkmark-circle" size={100} color="#22C55E" />
           </View>
-          <Text className="text-4xl font-bold text-success mb-4">연결 완료!</Text>
+          <Text className="text-4xl font-bold text-success mb-4">
+            {t('family:title.connectionComplete')}
+          </Text>
           <Text className="text-lg text-gray-600 text-center leading-7 mb-10">
-            {parentName}님과 가족으로 연결되었습니다.{'\n'}
-            이제 부모님의 복약 현황을 확인할 수 있습니다.
+            {t('family:message.connectedWith', { name: parentName })}
           </Text>
           <TouchableOpacity
             className="bg-success px-12 py-4 rounded-2xl shadow-lg"
             onPress={handleSuccessContinue}
             activeOpacity={0.8}
           >
-            <Text className="text-lg font-bold text-white">확인</Text>
+            <Text className="text-lg font-bold text-white">{t('common:button.confirm')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -179,9 +182,11 @@ const EnterCodeScreen = ({ navigation }: Props) => {
             <View className="w-20 h-20 rounded-full bg-blue-100 justify-center items-center mb-5">
               <Ionicons name="people" size={48} color="#3B82F6" />
             </View>
-            <Text className="text-3xl font-bold text-gray-900 mb-3">가족 연결</Text>
+            <Text className="text-3xl font-bold text-gray-900 mb-3">
+              {t('family:title.connection')}
+            </Text>
             <Text className="text-base text-gray-500 text-center leading-6">
-              부모님이 알려주신 6자리 초대 코드를{'\n'}입력해 주세요
+              {t('family:instructions.enterCodeDescription')}
             </Text>
           </View>
 
@@ -207,7 +212,7 @@ const EnterCodeScreen = ({ navigation }: Props) => {
                   keyboardType="number-pad"
                   maxLength={CODE_LENGTH}
                   selectTextOnFocus
-                  accessibilityLabel={`코드 ${index + 1}번째 자리`}
+                  accessibilityLabel={t('family:label.codeDigit', { position: index + 1 })}
                 />
               ))}
             </View>
@@ -228,7 +233,7 @@ const EnterCodeScreen = ({ navigation }: Props) => {
                 activeOpacity={0.7}
               >
                 <Ionicons name="close-circle" size={20} color="#6B7280" />
-                <Text className="text-sm text-gray-500">코드 지우기</Text>
+                <Text className="text-sm text-gray-500">{t('family:button.clearCode')}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -247,7 +252,7 @@ const EnterCodeScreen = ({ navigation }: Props) => {
             ) : (
               <>
                 <Ionicons name="link" size={24} color="#FFFFFF" />
-                <Text className="text-lg font-bold text-white">연결하기</Text>
+                <Text className="text-lg font-bold text-white">{t('family:button.connect')}</Text>
               </>
             )}
           </TouchableOpacity>
@@ -256,8 +261,7 @@ const EnterCodeScreen = ({ navigation }: Props) => {
           <View className="flex-row items-start justify-center mt-6 gap-2">
             <Ionicons name="information-circle-outline" size={20} color="#9CA3AF" />
             <Text className="text-xs text-gray-400 leading-5">
-              코드는 24시간 동안만 유효합니다.{'\n'}
-              부모님께 새 코드를 요청해 주세요.
+              {t('family:message.codeValidityInfo')}
             </Text>
           </View>
         </View>

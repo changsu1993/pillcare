@@ -4,43 +4,106 @@
     "next": "Next",
     "back": "Back",
     "getStarted": "Get Started",
-    "dontShowAgain": "Don't show again"
+    "dontShowAgain": "Don't show again",
+    "startTutorial": "Start Tutorial",
+    "goHome": "Go to Home",
+    "goToConnectParent": "Connect with Parent"
+  },
+  "accessibility": {
+    "skipHint": "Skip the tutorial and start the app directly",
+    "startHint": "Start the tutorial",
+    "nextHint": "Go to the next screen",
+    "startAppHint": "Start the app",
+    "connectParentHint": "Go to parent connection screen",
+    "goHomeHint": "Go to home screen",
+    "dontShowAgainChecked": "Press to uncheck",
+    "dontShowAgainUnchecked": "Press to check"
   },
   "parent": {
+    "welcome": {
+      "title": "Welcome to\nPillCare",
+      "subtitle": "Let us show you how it works"
+    },
     "step1": {
       "title": "Welcome to\nPillCare",
-      "description": "Manage your medications with ease"
+      "description": "Manage your medications with ease",
+      "heading": "Get reminders when\nit's time for your medication",
+      "previewTitle": "Medication confirmation",
+      "tookButton": "I took it",
+      "missedButton": "I missed it",
+      "instruction": "Just tap one of two buttons",
+      "accessibilityLabel": "Medication reminder guide, step 1 of 3",
+      "accessibilityHint": "Press next button to continue"
     },
     "step2": {
       "title": "Get Medication\nReminders",
-      "description": "We'll remind you when\nit's time to take your medicine"
+      "description": "We'll remind you when\nit's time to take your medicine",
+      "heading": "Turn on voice guidance\nto hear medication names",
+      "exampleSpeech": "\"Take your blood pressure medicine\"",
+      "tip": "You can turn it on or off in settings",
+      "accessibilityLabel": "Voice guidance feature, step 2 of 3",
+      "accessibilityHint": "Press next button to continue"
     },
     "step3": {
       "title": "Log with\nOne Tap",
-      "description": "Just tap \"I took it\" to\nrecord your medication"
+      "description": "Just tap \"I took it\" to\nrecord your medication",
+      "completionTitle": "All Set!",
+      "completionMessage": "You can now receive\nmedication reminders",
+      "accessibilityLabel": "Setup complete, step 3 of 3"
     }
   },
   "child": {
+    "welcome": {
+      "tagline": "Help manage your parent's\nhealthy medication habits"
+    },
     "step1": {
       "title": "Welcome to\nPillCare",
-      "description": "Help manage your parent's medications"
+      "description": "Help manage your parent's medications",
+      "heading": "Connect with Parent",
+      "subDescription": "Enter the invitation code from your parent\nto monitor their medication status in real-time",
+      "tip": "Go to Settings > Family Connection to enter the code"
     },
     "step2": {
       "title": "Connect with\nYour Parent",
-      "description": "Use an invitation code to connect easily"
+      "description": "Use an invitation code to connect easily",
+      "heading": "Register Medications",
+      "subDescription": "Register your parent's medications\nand set reminder times",
+      "bloodPressure": "Blood Pressure Med",
+      "diabetes": "Diabetes Med",
+      "tip": "Add them in the Medications tab"
     },
     "step3": {
       "title": "Monitor in\nReal-time",
-      "description": "Check your parent's medication\nstatus anytime"
+      "description": "Check your parent's medication\nstatus anytime",
+      "heading": "Medication Adherence Report",
+      "subDescription": "View weekly/monthly adherence rates\nat a glance",
+      "weeklyRate": "This week's adherence: {{rate}}%",
+      "tip": "Check in the Reports tab",
+      "days": {
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat",
+        "sun": "Sun"
+      }
     },
     "step4": {
       "title": "Get Notified\nof Missed Doses",
-      "description": "We'll alert you right away if\nyour parent misses a dose"
+      "description": "We'll alert you right away if\nyour parent misses a dose",
+      "heading": "Get Missed Dose Alerts",
+      "subDescription": "We'll send you a push notification\nwhen your parent misses a medication",
+      "notificationNow": "now",
+      "notificationMessage": "Mom has not taken\nher blood pressure medication",
+      "tip": "Manage notifications in settings"
     },
     "step5": {
       "title": "Ready to\nGet Started?",
       "description": "Connect with your parent to\nstart monitoring",
-      "connectButton": "Connect with Parent"
+      "connectButton": "Connect with Parent",
+      "completionTitle": "All Set!",
+      "completionMessage": "Start managing your parent's\nhealthy medication habits"
     }
   }
 }

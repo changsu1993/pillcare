@@ -14,6 +14,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import OnboardingIllustration from '../../components/OnboardingIllustration';
 import OnboardingButton from '../../components/OnboardingButton';
@@ -25,6 +26,8 @@ type Props = {
 };
 
 const ChildWelcomeScreen: React.FC<Props> = ({ navigation, onSkip }) => {
+  const { t } = useTranslation(['onboarding', 'common']);
+
   const handleStart = () => {
     navigation.navigate('Step1');
   };
@@ -40,23 +43,23 @@ const ChildWelcomeScreen: React.FC<Props> = ({ navigation, onSkip }) => {
           className="text-3xl font-bold text-primary text-center mt-6"
           accessibilityRole="header"
         >
-          PillCare
+          {t('common:appName')}
         </Text>
 
         {/* Tagline */}
         <Text className="text-lg text-gray-600 text-center mt-3 leading-7">
-          부모님의 건강한 복약 습관을{'\n'}함께 관리하세요
+          {t('onboarding:child.welcome.tagline')}
         </Text>
       </View>
 
       {/* Bottom buttons */}
       <View className="px-6 pb-8">
         <OnboardingButton
-          label="튜토리얼 시작"
+          label={t('onboarding:common.startTutorial')}
           onPress={handleStart}
           variant="child"
           type="primary"
-          accessibilityHint="튜토리얼을 시작합니다"
+          accessibilityHint={t('onboarding:accessibility.startHint')}
         />
 
         <TouchableOpacity
@@ -64,10 +67,10 @@ const ChildWelcomeScreen: React.FC<Props> = ({ navigation, onSkip }) => {
           onPress={onSkip}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="건너뛰기"
-          accessibilityHint="튜토리얼을 건너뛰고 앱을 바로 시작합니다"
+          accessibilityLabel={t('onboarding:common.skip')}
+          accessibilityHint={t('onboarding:accessibility.skipHint')}
         >
-          <Text className="text-base text-primary">건너뛰기</Text>
+          <Text className="text-base text-primary">{t('onboarding:common.skip')}</Text>
           <Ionicons name="chevron-forward" size={16} color="#3B82F6" />
         </TouchableOpacity>
       </View>

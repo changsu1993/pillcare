@@ -14,6 +14,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useTranslation } from 'react-i18next';
 
 import OnboardingIllustration from '../../components/OnboardingIllustration';
 import OnboardingButton from '../../components/OnboardingButton';
@@ -25,6 +26,8 @@ type Props = {
 };
 
 const ParentWelcomeScreen: React.FC<Props> = ({ navigation, onSkip }) => {
+  const { t } = useTranslation(['onboarding', 'common']);
+
   const handleStart = () => {
     navigation.navigate('Step1');
   };
@@ -40,26 +43,26 @@ const ParentWelcomeScreen: React.FC<Props> = ({ navigation, onSkip }) => {
           className="text-4xl font-bold text-gray-900 text-center mt-8"
           accessibilityRole="header"
         >
-          PillCare에 오신 것을{'\n'}환영합니다
+          {t('onboarding:parent.welcome.title')}
         </Text>
 
         {/* Subtitle */}
         <Text
           className="text-2xl text-gray-700 text-center mt-4"
-          accessibilityLabel="간단한 사용법을 알려드릴게요"
+          accessibilityLabel={t('onboarding:parent.welcome.subtitle')}
         >
-          간단한 사용법을 알려드릴게요
+          {t('onboarding:parent.welcome.subtitle')}
         </Text>
       </View>
 
       {/* Bottom buttons */}
       <View className="px-8 pb-8">
         <OnboardingButton
-          label="시작하기"
+          label={t('onboarding:common.getStarted')}
           onPress={handleStart}
           variant="parent"
           type="primary"
-          accessibilityHint="튜토리얼을 시작합니다"
+          accessibilityHint={t('onboarding:accessibility.startHint')}
         />
 
         <TouchableOpacity
@@ -67,10 +70,10 @@ const ParentWelcomeScreen: React.FC<Props> = ({ navigation, onSkip }) => {
           onPress={onSkip}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="건너뛰기"
-          accessibilityHint="튜토리얼을 건너뛰고 앱을 바로 시작합니다"
+          accessibilityLabel={t('onboarding:common.skip')}
+          accessibilityHint={t('onboarding:accessibility.skipHint')}
         >
-          <Text className="text-xl text-gray-600 underline">건너뛰기</Text>
+          <Text className="text-xl text-gray-600 underline">{t('onboarding:common.skip')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

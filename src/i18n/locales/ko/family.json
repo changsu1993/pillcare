@@ -3,13 +3,17 @@
     "connection": "가족 연결",
     "invitationCode": "초대 코드",
     "enterCode": "코드 입력",
-    "connectedFamily": "연결된 가족"
+    "connectedFamily": "연결된 가족",
+    "connectedChildren": "연결된 자녀",
+    "connectionComplete": "연결 완료!"
   },
   "label": {
     "code": "초대 코드",
     "parent": "부모님",
     "child": "자녀",
-    "status": "연결 상태"
+    "status": "연결 상태",
+    "codeDigit": "코드 {{position}}번째 자리",
+    "invitationCodeLabel": "초대 코드 {{code}}"
   },
   "placeholder": {
     "enterCode": "초대 코드를 입력하세요"
@@ -22,18 +26,43 @@
   "button": {
     "generateCode": "코드 생성",
     "copyCode": "코드 복사",
+    "copied": "복사됨",
+    "share": "공유하기",
     "refreshCode": "새 코드 생성",
     "connect": "연결하기",
-    "disconnect": "연결 해제"
+    "disconnect": "연결 해제",
+    "clearCode": "코드 지우기",
+    "copyCodeAccessibility": "코드 복사하기",
+    "shareCodeAccessibility": "코드 공유하기"
   },
   "message": {
     "codeCopied": "코드가 복사되었습니다",
+    "codeCopiedTitle": "복사 완료",
+    "codeCopiedMessage": "초대 코드가 복사되었습니다.",
+    "codeCopyError": "코드를 복사할 수 없습니다.",
     "codeExpiry": "이 코드는 24시간 동안 유효합니다",
+    "codeExpiryShort": "24시간 후 만료됩니다",
     "shareCode": "이 코드를 자녀에게 공유하세요",
+    "shareCodeText": "PillCare 가족 연결 초대 코드: {{code}}\n\n이 코드를 PillCare 앱에 입력하여 가족으로 연결하세요.\n\n유효기간: 24시간",
+    "shareCodeTitle": "PillCare 초대 코드",
     "connected": "가족 연결이 완료되었습니다",
+    "connectedWith": "{{name}}님과 가족으로 연결되었습니다.\n이제 부모님의 복약 현황을 확인할 수 있습니다.",
     "disconnected": "가족 연결이 해제되었습니다",
     "invalidCode": "유효하지 않은 코드입니다",
-    "codeExpired": "만료된 코드입니다"
+    "codeExpired": "만료된 코드입니다",
+    "connectionFailed": "연결에 실패했습니다",
+    "connectionFailedRetry": "연결에 실패했습니다.\n다시 시도해 주세요.",
+    "generatingCode": "코드 생성 중...",
+    "codeGenerationError": "코드를 생성할 수 없습니다.\n다시 시도해 주세요.",
+    "enterFullCode": "6자리 코드를 모두 입력해 주세요",
+    "codeValidityInfo": "코드는 24시간 동안만 유효합니다.\n부모님께 새 코드를 요청해 주세요."
+  },
+  "instructions": {
+    "title": "가족 연결 방법",
+    "step1": "1. 아래 코드를 자녀분께 알려주세요",
+    "step2": "2. 자녀분이 앱에서 코드를 입력하면",
+    "step3": "3. 가족으로 연결됩니다",
+    "enterCodeDescription": "부모님이 알려주신 6자리 초대 코드를\n입력해 주세요"
   },
   "empty": {
     "parentTitle": "연결된 자녀가 없습니다",
@@ -43,6 +72,7 @@
   },
   "alert": {
     "disconnectTitle": "연결 해제",
-    "disconnectMessage": "정말로 가족 연결을 해제하시겠습니까?"
+    "disconnectMessage": "정말로 가족 연결을 해제하시겠습니까?",
+    "error": "오류"
   }
 }

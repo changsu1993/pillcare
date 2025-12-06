@@ -18,6 +18,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { signIn } from '../../../shared/services/supabase';
 import { AuthScreenProps } from '../../../shared/types/navigation.types';
 import SocialLoginButtons from '../components/SocialLoginButtons';
@@ -25,6 +26,7 @@ import SocialLoginButtons from '../components/SocialLoginButtons';
 type Props = AuthScreenProps<'SignIn'>;
 
 const SignInScreen = ({ navigation }: Props) => {
+  const { t } = useTranslation(['auth', 'common']);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -35,7 +37,7 @@ const SignInScreen = ({ navigation }: Props) => {
   const handleSignIn = async (): Promise<void> => {
     // Validation
     if (!email.trim() || !password.trim()) {
-      Alert.alert('입력 오류', '이메일과 비밀번호를 입력해주세요.');
+      Alert.alert(t('auth:error.inputError'), t('auth:error.emptyEmailPassword'));
       return;
     }
 
@@ -46,11 +48,9 @@ const SignInScreen = ({ navigation }: Props) => {
     } catch (error) {
       console.error('Sign in error:', error);
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.';
+        error instanceof Error ? error.message : t('auth:error.signInFailedDetail');
 
-      Alert.alert('로그인 실패', errorMessage);
+      Alert.alert(t('auth:error.signInFailed'), errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -73,10 +73,12 @@ const SignInScreen = ({ navigation }: Props) => {
               className="mb-6"
               disabled={isAnyLoading}
             >
-              <Text className="text-base text-primary">← 뒤로</Text>
+              <Text className="text-base text-primary">{`← ${t('auth:nav.back')}`}</Text>
             </TouchableOpacity>
-            <Text className="text-[32px] font-bold text-gray-900 mb-2">로그인</Text>
-            <Text className="text-base text-gray-500">PillCare에 오신 것을 환영합니다</Text>
+            <Text className="text-[32px] font-bold text-gray-900 mb-2">
+              {t('auth:title.signIn')}
+            </Text>
+            <Text className="text-base text-gray-500">{t('auth:subtitle.welcome')}</Text>
           </View>
 
           {/* Form */}
@@ -91,16 +93,18 @@ const SignInScreen = ({ navigation }: Props) => {
             {/* Divider */}
             <View className="flex-row items-center my-6">
               <View className="flex-1 h-[1px] bg-gray-200" />
-              <Text className="mx-4 text-sm text-gray-400">또는 이메일로 로그인</Text>
+              <Text className="mx-4 text-sm text-gray-400">{t('auth:divider.orEmailLogin')}</Text>
               <View className="flex-1 h-[1px] bg-gray-200" />
             </View>
 
             {/* Email input */}
             <View className="mb-5">
-              <Text className="text-sm font-semibold text-gray-900 mb-2">이메일</Text>
+              <Text className="text-sm font-semibold text-gray-900 mb-2">
+                {t('auth:label.email')}
+              </Text>
               <TextInput
                 className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
-                placeholder="example@email.com"
+                placeholder={t('auth:placeholder.emailExample')}
                 placeholderTextColor="#9CA3AF"
                 value={email}
                 onChangeText={setEmail}
@@ -113,10 +117,12 @@ const SignInScreen = ({ navigation }: Props) => {
 
             {/* Password input */}
             <View className="mb-5">
-              <Text className="text-sm font-semibold text-gray-900 mb-2">비밀번호</Text>
+              <Text className="text-sm font-semibold text-gray-900 mb-2">
+                {t('auth:label.password')}
+              </Text>
               <TextInput
                 className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
-                placeholder="비밀번호를 입력하세요"
+                placeholder={t('auth:placeholder.password')}
                 placeholderTextColor="#9CA3AF"
                 value={password}
                 onChangeText={setPassword}
@@ -133,14 +139,14 @@ const SignInScreen = ({ navigation }: Props) => {
                 onPress={() => navigation.navigate('FindEmail')}
                 disabled={isAnyLoading}
               >
-                <Text className="text-sm text-gray-500">아이디 찾기</Text>
+                <Text className="text-sm text-gray-500">{t('auth:link.findEmail')}</Text>
               </TouchableOpacity>
               <Text className="text-sm text-gray-300 mx-3">|</Text>
               <TouchableOpacity
                 onPress={() => navigation.navigate('ForgotPassword')}
                 disabled={isAnyLoading}
               >
-                <Text className="text-sm text-gray-500">비밀번호 찾기</Text>
+                <Text className="text-sm text-gray-500">{t('auth:link.forgotPassword')}</Text>
               </TouchableOpacity>
             </View>
 
@@ -153,18 +159,20 @@ const SignInScreen = ({ navigation }: Props) => {
               {isLoading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text className="text-lg font-semibold text-white">로그인</Text>
+                <Text className="text-lg font-semibold text-white">{t('auth:button.signIn')}</Text>
               )}
             </TouchableOpacity>
 
             {/* Sign up link */}
             <View className="flex-row justify-center items-center mt-6">
-              <Text className="text-sm text-gray-500">계정이 없으신가요? </Text>
+              <Text className="text-sm text-gray-500">{t('auth:link.noAccount')} </Text>
               <TouchableOpacity
                 onPress={() => navigation.navigate('SignUp')}
                 disabled={isAnyLoading}
               >
-                <Text className="text-sm font-semibold text-primary">회원가입</Text>
+                <Text className="text-sm font-semibold text-primary">
+                  {t('auth:button.signUp')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

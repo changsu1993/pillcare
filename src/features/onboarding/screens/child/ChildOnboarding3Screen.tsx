@@ -12,6 +12,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useTranslation } from 'react-i18next';
 
 import OnboardingIllustration from '../../components/OnboardingIllustration';
 import OnboardingButton from '../../components/OnboardingButton';
@@ -24,13 +25,23 @@ type Props = {
 };
 
 const ChildOnboarding3Screen: React.FC<Props> = ({ navigation, onSkip }) => {
+  const { t } = useTranslation(['onboarding', 'common']);
+
   const handleNext = () => {
     navigation.navigate('Step4');
   };
 
   // Sample bar heights for the mini chart (percentages)
   const barHeights = [100, 80, 100, 60, 100, 100, 80];
-  const days = ['월', '화', '수', '목', '금', '토', '일'];
+  const days = [
+    t('onboarding:child.step3.days.mon'),
+    t('onboarding:child.step3.days.tue'),
+    t('onboarding:child.step3.days.wed'),
+    t('onboarding:child.step3.days.thu'),
+    t('onboarding:child.step3.days.fri'),
+    t('onboarding:child.step3.days.sat'),
+    t('onboarding:child.step3.days.sun'),
+  ];
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -41,9 +52,9 @@ const ChildOnboarding3Screen: React.FC<Props> = ({ navigation, onSkip }) => {
           onPress={onSkip}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="건너뛰기"
+          accessibilityLabel={t('onboarding:common.skip')}
         >
-          <Text className="text-sm text-gray-500">건너뛰기</Text>
+          <Text className="text-sm text-gray-500">{t('onboarding:common.skip')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -53,11 +64,13 @@ const ChildOnboarding3Screen: React.FC<Props> = ({ navigation, onSkip }) => {
         <OnboardingIllustration type="chart" variant="child" />
 
         {/* Title */}
-        <Text className="text-xl font-bold text-gray-800 text-center mt-6">복약 현황 리포트</Text>
+        <Text className="text-xl font-bold text-gray-800 text-center mt-6">
+          {t('onboarding:child.step3.heading')}
+        </Text>
 
         {/* Description */}
         <Text className="text-base text-gray-600 text-center mt-3 leading-6">
-          주간/월간 복약률을 한눈에{'\n'}확인할 수 있어요
+          {t('onboarding:child.step3.subDescription')}
         </Text>
 
         {/* Mini bar chart preview */}
@@ -86,23 +99,25 @@ const ChildOnboarding3Screen: React.FC<Props> = ({ navigation, onSkip }) => {
           {/* Weekly stat */}
           <View className="mt-4 pt-3 border-t border-gray-200">
             <Text className="text-base font-bold text-primary text-center">
-              이번 주 복약률: 85%
+              {t('onboarding:child.step3.weeklyRate', { rate: 85 })}
             </Text>
           </View>
         </View>
 
         {/* Tip */}
-        <Text className="text-sm text-gray-500 text-center mt-4">리포트 탭에서 확인하세요</Text>
+        <Text className="text-sm text-gray-500 text-center mt-4">
+          {t('onboarding:child.step3.tip')}
+        </Text>
       </View>
 
       {/* Bottom button */}
       <View className="px-6 pb-8">
         <OnboardingButton
-          label="다음"
+          label={t('onboarding:common.next')}
           onPress={handleNext}
           variant="child"
           type="primary"
-          accessibilityHint="다음 화면으로 이동합니다"
+          accessibilityHint={t('onboarding:accessibility.nextHint')}
         />
       </View>
     </SafeAreaView>

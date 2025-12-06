@@ -18,6 +18,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { updatePassword } from '../../../shared/services/supabase';
 import { AuthScreenProps } from '../../../shared/types/navigation.types';
 
@@ -26,6 +27,7 @@ type Props = AuthScreenProps<'ResetPassword'>;
 const MIN_PASSWORD_LENGTH = 6;
 
 const ResetPasswordScreen = ({ navigation, route }: Props) => {
+  const { t } = useTranslation(['auth', 'common']);
   const email = route.params?.email;
 
   const [newPassword, setNewPassword] = useState<string>('');
@@ -39,17 +41,20 @@ const ResetPasswordScreen = ({ navigation, route }: Props) => {
   const handleResetPassword = async (): Promise<void> => {
     // Validation
     if (!newPassword.trim()) {
-      Alert.alert('입력 오류', '새 비밀번호를 입력해주세요.');
+      Alert.alert(t('auth:error.inputError'), t('auth:error.emptyNewPassword'));
       return;
     }
 
     if (newPassword.length < MIN_PASSWORD_LENGTH) {
-      Alert.alert('입력 오류', `비밀번호는 ${MIN_PASSWORD_LENGTH}자 이상이어야 합니다.`);
+      Alert.alert(
+        t('auth:error.inputError'),
+        t('auth:error.passwordMinLength', { count: MIN_PASSWORD_LENGTH })
+      );
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert('입력 오류', '비밀번호가 일치하지 않습니다.');
+      Alert.alert(t('auth:error.inputError'), t('auth:error.passwordMismatch'));
       return;
     }
 
@@ -58,11 +63,11 @@ const ResetPasswordScreen = ({ navigation, route }: Props) => {
       await updatePassword(newPassword);
 
       Alert.alert(
-        '비밀번호 변경 완료',
-        '비밀번호가 성공적으로 변경되었습니다.\n새 비밀번호로 로그인해주세요.',
+        t('auth:message.passwordChangeComplete'),
+        t('auth:message.passwordChangeSuccess'),
         [
           {
-            text: '확인',
+            text: t('common:button.confirm'),
             onPress: () => navigation.navigate('SignIn'),
           },
         ]
@@ -70,9 +75,9 @@ const ResetPasswordScreen = ({ navigation, route }: Props) => {
     } catch (error) {
       console.error('Password reset error:', error);
       const errorMessage =
-        error instanceof Error ? error.message : '비밀번호 변경에 실패했습니다. 다시 시도해주세요.';
+        error instanceof Error ? error.message : t('auth:error.passwordChangeFailed2');
 
-      Alert.alert('비밀번호 변경 실패', errorMessage);
+      Alert.alert(t('auth:error.passwordChangeFailed'), errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -91,11 +96,15 @@ const ResetPasswordScreen = ({ navigation, route }: Props) => {
           {/* Header */}
           <View className="mb-8">
             <TouchableOpacity onPress={() => navigation.goBack()} className="mb-6">
-              <Text className="text-base text-primary">← 뒤로</Text>
+              <Text className="text-base text-primary">{`← ${t('auth:nav.back')}`}</Text>
             </TouchableOpacity>
-            <Text className="text-[32px] font-bold text-gray-900 mb-2">새 비밀번호 설정</Text>
+            <Text className="text-[32px] font-bold text-gray-900 mb-2">
+              {t('auth:title.newPassword')}
+            </Text>
             <Text className="text-base text-gray-500">
-              {email ? `${email} 계정의 새 비밀번호를 설정합니다` : '새 비밀번호를 설정해주세요'}
+              {email
+                ? t('auth:subtitle.newPasswordWithEmail', { email })
+                : t('auth:subtitle.newPasswordDefault')}
             </Text>
           </View>
 
@@ -103,10 +112,12 @@ const ResetPasswordScreen = ({ navigation, route }: Props) => {
           <View className="flex-1">
             {/* New Password input */}
             <View className="mb-5">
-              <Text className="text-sm font-semibold text-gray-900 mb-2">새 비밀번호</Text>
+              <Text className="text-sm font-semibold text-gray-900 mb-2">
+                {t('auth:label.newPassword')}
+              </Text>
               <TextInput
                 className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
-                placeholder="새 비밀번호를 입력하세요"
+                placeholder={t('auth:placeholder.newPassword')}
                 placeholderTextColor="#9CA3AF"
                 value={newPassword}
                 onChangeText={setNewPassword}
@@ -120,17 +131,20 @@ const ResetPasswordScreen = ({ navigation, route }: Props) => {
                 <Text
                   className={`text-sm ${isPasswordLongEnough ? 'text-green-500' : 'text-error'}`}
                 >
-                  {isPasswordLongEnough ? 'v' : 'o'} {MIN_PASSWORD_LENGTH}자 이상
+                  {isPasswordLongEnough ? 'v' : 'o'}{' '}
+                  {t('auth:validation.minChars', { count: MIN_PASSWORD_LENGTH })}
                 </Text>
               </View>
             </View>
 
             {/* Confirm Password input */}
             <View className="mb-5">
-              <Text className="text-sm font-semibold text-gray-900 mb-2">비밀번호 확인</Text>
+              <Text className="text-sm font-semibold text-gray-900 mb-2">
+                {t('auth:label.confirmPassword')}
+              </Text>
               <TextInput
                 className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
-                placeholder="비밀번호를 다시 입력하세요"
+                placeholder={t('auth:placeholder.confirmPassword')}
                 placeholderTextColor="#9CA3AF"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
@@ -144,8 +158,8 @@ const ResetPasswordScreen = ({ navigation, route }: Props) => {
                 <View className="mt-2">
                   <Text className={`text-sm ${doPasswordsMatch ? 'text-green-500' : 'text-error'}`}>
                     {doPasswordsMatch
-                      ? 'v 비밀번호가 일치합니다'
-                      : 'o 비밀번호가 일치하지 않습니다'}
+                      ? `v ${t('auth:validation.passwordsMatch')}`
+                      : `o ${t('auth:validation.passwordsNotMatch')}`}
                   </Text>
                 </View>
               )}
@@ -162,15 +176,19 @@ const ResetPasswordScreen = ({ navigation, route }: Props) => {
               {isLoading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text className="text-lg font-semibold text-white">비밀번호 변경</Text>
+                <Text className="text-lg font-semibold text-white">
+                  {t('auth:button.changePassword')}
+                </Text>
               )}
             </TouchableOpacity>
 
             {/* Back to Sign In link */}
             <View className="flex-row justify-center items-center mt-6">
-              <Text className="text-sm text-gray-500">비밀번호가 기억나셨나요? </Text>
+              <Text className="text-sm text-gray-500">{t('auth:link.rememberPassword')} </Text>
               <TouchableOpacity onPress={() => navigation.navigate('SignIn')} disabled={isLoading}>
-                <Text className="text-sm font-semibold text-primary">로그인</Text>
+                <Text className="text-sm font-semibold text-primary">
+                  {t('auth:button.signIn')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

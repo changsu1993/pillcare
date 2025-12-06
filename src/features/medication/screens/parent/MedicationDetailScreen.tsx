@@ -13,6 +13,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { ParentScreenProps } from '../../../../shared/types/navigation.types';
 import {
   getMedication,
@@ -25,6 +26,7 @@ type Props = ParentScreenProps<'MedicationDetail'>;
 
 const MedicationDetailScreen = ({ route, navigation }: Props) => {
   const { medicationId } = route.params;
+  const { t } = useTranslation(['medication', 'common']);
   const [isLoading, setIsLoading] = useState(true);
   const [medication, setMedication] = useState<Medication | null>(null);
   const [logs, setLogs] = useState<MedicationLog[]>([]);
@@ -46,11 +48,11 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
       setLogs(logsData);
     } catch (err) {
       console.error('Error loading medication details:', err);
-      setError('약 정보를 불러올 수 없습니다');
+      setError(t('alert.loadMedicationError'));
     } finally {
       setIsLoading(false);
     }
-  }, [medicationId]);
+  }, [medicationId, t]);
 
   useEffect(() => {
     loadMedicationDetails();
@@ -60,22 +62,22 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
     if (!medication) return;
 
     Alert.alert(
-      '약 삭제',
-      `"${medication.name}"을(를) 삭제하시겠습니까?\n\n삭제하면 복약 알림도 함께 취소됩니다.`,
+      t('alert.deleteTitle'),
+      t('alert.deleteWithNotification', { name: medication.name }),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('common:button.cancel'), style: 'cancel' },
         {
-          text: '삭제',
+          text: t('common:button.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await deleteMedicationWithNotifications(medicationId);
-              Alert.alert('완료', '약이 삭제되었습니다.', [
-                { text: '확인', onPress: () => navigation.goBack() },
+              Alert.alert(t('alert.deleteComplete'), t('alert.deleteSuccess'), [
+                { text: t('common:button.confirm'), onPress: () => navigation.goBack() },
               ]);
             } catch (err) {
               console.error('Error deleting medication:', err);
-              Alert.alert('오류', '약을 삭제할 수 없습니다.');
+              Alert.alert(t('alert.loadError'), t('alert.deleteError'));
             }
           },
         },
@@ -87,7 +89,7 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
     return (
       <View className="flex-1 bg-gray-50 justify-center items-center p-6">
         <ActivityIndicator size="large" color="#22C55E" />
-        <Text className="text-xl text-gray-900 mt-4">불러오는 중...</Text>
+        <Text className="text-xl text-gray-900 mt-4">{t('message.loadingData')}</Text>
       </View>
     );
   }
@@ -96,13 +98,13 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
     return (
       <View className="flex-1 bg-gray-50 justify-center items-center p-6">
         <Text className="text-2xl text-error text-center mb-6">
-          {error || '약을 찾을 수 없습니다'}
+          {error || t('message.medicationNotFound')}
         </Text>
         <TouchableOpacity
           className="bg-blue-500 px-8 py-4 rounded-xl"
           onPress={() => navigation.goBack()}
         >
-          <Text className="text-xl font-semibold text-white text-center">뒤로</Text>
+          <Text className="text-xl font-semibold text-white text-center">{t('button.goBack')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -117,7 +119,7 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
         {/* Medication name */}
         <Text
           className="text-4xl font-bold text-gray-900 text-center mb-6"
-          accessibilityLabel={`약 이름: ${medication.name}`}
+          accessibilityLabel={t('accessibility.medicationName', { name: medication.name })}
           accessibilityRole="header"
         >
           {medication.name}
@@ -125,13 +127,15 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
 
         {/* Dosage */}
         <View className="bg-white p-6 rounded-2xl mb-4 border-2 border-gray-200">
-          <Text className="text-xl font-semibold text-gray-600 mb-2">복용량</Text>
+          <Text className="text-xl font-semibold text-gray-600 mb-2">{t('label.dosage')}</Text>
           <Text className="text-2xl font-semibold text-gray-900">{medication.dosage}</Text>
         </View>
 
         {/* Reminder times */}
         <View className="bg-white p-6 rounded-2xl mb-4 border-2 border-gray-200">
-          <Text className="text-xl font-semibold text-gray-600 mb-2">복용 시간</Text>
+          <Text className="text-xl font-semibold text-gray-600 mb-2">
+            {t('label.medicationTime')}
+          </Text>
           <View className="flex-row flex-wrap gap-3">
             {medication.reminder_times.map((time, index) => (
               <View key={index} className="bg-blue-100 px-5 py-3 rounded-xl">
@@ -143,7 +147,9 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
 
         {/* Duration */}
         <View className="bg-white p-6 rounded-2xl mb-4 border-2 border-gray-200">
-          <Text className="text-xl font-semibold text-gray-600 mb-2">복용 기간</Text>
+          <Text className="text-xl font-semibold text-gray-600 mb-2">
+            {t('label.medicationDuration')}
+          </Text>
           <Text className="text-2xl font-semibold text-gray-900">
             {new Date(medication.start_date).toLocaleDateString('ko-KR')}
             {medication.end_date && (
@@ -155,14 +161,14 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
         {/* Notes */}
         {medication.notes && (
           <View className="bg-white p-6 rounded-2xl mb-4 border-2 border-gray-200">
-            <Text className="text-xl font-semibold text-gray-600 mb-2">메모</Text>
+            <Text className="text-xl font-semibold text-gray-600 mb-2">{t('label.notes')}</Text>
             <Text className="text-2xl font-semibold text-gray-900">{medication.notes}</Text>
           </View>
         )}
 
         {/* 7-day history */}
         <View className="bg-white p-6 rounded-2xl mt-2 border-2 border-gray-200">
-          <Text className="text-2xl font-bold text-gray-900 mb-4">최근 7일 복약 이력</Text>
+          <Text className="text-2xl font-bold text-gray-900 mb-4">{t('label.recentHistory')}</Text>
           <View className="flex-row justify-between flex-wrap">
             {Array.from({ length: 7 }).map((_, index) => {
               const date = new Date();
@@ -204,30 +210,30 @@ const MedicationDetailScreen = ({ route, navigation }: Props) => {
             className="flex-1 bg-blue-500 h-[60px] justify-center items-center rounded-2xl shadow-sm"
             onPress={() => navigation.goBack()}
             activeOpacity={0.7}
-            accessibilityLabel="뒤로 가기"
-            accessibilityHint="이전 화면으로 돌아갑니다"
+            accessibilityLabel={t('accessibility.goBackButton')}
+            accessibilityHint={t('accessibility.goBackHint')}
             accessibilityRole="button"
           >
-            <Text className="text-2xl font-bold text-white">뒤로</Text>
+            <Text className="text-2xl font-bold text-white">{t('button.goBack')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             className="flex-1 bg-success h-[60px] justify-center items-center rounded-2xl shadow-sm"
             onPress={() => navigation.navigate('EditMedication', { medicationId })}
             activeOpacity={0.7}
-            accessibilityLabel="약 수정"
+            accessibilityLabel={t('common:button.edit')}
             accessibilityRole="button"
           >
-            <Text className="text-2xl font-bold text-white">수정</Text>
+            <Text className="text-2xl font-bold text-white">{t('common:button.edit')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             className="flex-1 bg-error h-[60px] justify-center items-center rounded-2xl shadow-sm"
             onPress={handleDelete}
             activeOpacity={0.7}
-            accessibilityLabel="약 삭제"
-            accessibilityHint="삭제 확인 화면이 표시됩니다"
+            accessibilityLabel={t('accessibility.deleteButton')}
+            accessibilityHint={t('accessibility.deleteHint')}
             accessibilityRole="button"
           >
-            <Text className="text-2xl font-bold text-white">삭제</Text>
+            <Text className="text-2xl font-bold text-white">{t('common:button.delete')}</Text>
           </TouchableOpacity>
         </View>
       </View>

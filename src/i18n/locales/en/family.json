@@ -3,13 +3,17 @@
     "connection": "Family Connection",
     "invitationCode": "Invitation Code",
     "enterCode": "Enter Code",
-    "connectedFamily": "Connected Family"
+    "connectedFamily": "Connected Family",
+    "connectedChildren": "Connected Children",
+    "connectionComplete": "Connected!"
   },
   "label": {
     "code": "Invitation Code",
     "parent": "Parent",
     "child": "Child",
-    "status": "Connection Status"
+    "status": "Connection Status",
+    "codeDigit": "Code digit {{position}}",
+    "invitationCodeLabel": "Invitation code {{code}}"
   },
   "placeholder": {
     "enterCode": "Enter invitation code"
@@ -22,18 +26,43 @@
   "button": {
     "generateCode": "Generate Code",
     "copyCode": "Copy Code",
+    "copied": "Copied",
+    "share": "Share",
     "refreshCode": "Generate New Code",
     "connect": "Connect",
-    "disconnect": "Disconnect"
+    "disconnect": "Disconnect",
+    "clearCode": "Clear code",
+    "copyCodeAccessibility": "Copy code",
+    "shareCodeAccessibility": "Share code"
   },
   "message": {
     "codeCopied": "Code copied to clipboard",
+    "codeCopiedTitle": "Copied",
+    "codeCopiedMessage": "Invitation code copied to clipboard.",
+    "codeCopyError": "Could not copy code.",
     "codeExpiry": "This code is valid for 24 hours",
+    "codeExpiryShort": "Expires in 24 hours",
     "shareCode": "Share this code with your child",
+    "shareCodeText": "PillCare Family Connection Code: {{code}}\n\nEnter this code in the PillCare app to connect as family.\n\nValid for: 24 hours",
+    "shareCodeTitle": "PillCare Invitation Code",
     "connected": "Family connection successful",
+    "connectedWith": "You are now connected with {{name}}.\nYou can now monitor your parent's medication adherence.",
     "disconnected": "Family connection removed",
     "invalidCode": "Invalid code",
-    "codeExpired": "This code has expired"
+    "codeExpired": "This code has expired",
+    "connectionFailed": "Connection failed",
+    "connectionFailedRetry": "Connection failed.\nPlease try again.",
+    "generatingCode": "Generating code...",
+    "codeGenerationError": "Could not generate code.\nPlease try again.",
+    "enterFullCode": "Please enter all 6 digits",
+    "codeValidityInfo": "Code is valid for 24 hours.\nPlease request a new code from your parent."
+  },
+  "instructions": {
+    "title": "How to Connect",
+    "step1": "1. Share the code below with your child",
+    "step2": "2. When your child enters the code in the app",
+    "step3": "3. You will be connected as family",
+    "enterCodeDescription": "Enter the 6-digit invitation code\nfrom your parent"
   },
   "empty": {
     "parentTitle": "No connected children",
@@ -43,6 +72,7 @@
   },
   "alert": {
     "disconnectTitle": "Disconnect",
-    "disconnectMessage": "Are you sure you want to disconnect from this family member?"
+    "disconnectMessage": "Are you sure you want to disconnect from this family member?",
+    "error": "Error"
   }
 }

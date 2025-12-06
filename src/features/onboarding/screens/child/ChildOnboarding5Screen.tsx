@@ -13,6 +13,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import OnboardingIllustration from '../../components/OnboardingIllustration';
 import OnboardingButton from '../../components/OnboardingButton';
@@ -31,6 +32,8 @@ const ChildOnboarding5Screen: React.FC<Props> = ({
   onComplete,
   onConnectParent,
 }) => {
+  const { t } = useTranslation(['onboarding', 'common']);
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Progress indicator - all dots filled */}
@@ -44,11 +47,13 @@ const ChildOnboarding5Screen: React.FC<Props> = ({
         <OnboardingIllustration type="checkmark" variant="child" size={72} />
 
         {/* Title */}
-        <Text className="text-2xl font-bold text-success-600 text-center mt-6">준비 완료!</Text>
+        <Text className="text-2xl font-bold text-success-600 text-center mt-6">
+          {t('onboarding:child.step5.completionTitle')}
+        </Text>
 
         {/* Message */}
         <Text className="text-base text-gray-600 text-center mt-3 leading-6">
-          이제 부모님의 건강한 복약{'\n'}습관을 함께 관리하세요
+          {t('onboarding:child.step5.completionMessage')}
         </Text>
       </View>
 
@@ -56,21 +61,21 @@ const ChildOnboarding5Screen: React.FC<Props> = ({
       <View className="px-6 pb-8">
         {/* Primary CTA - Connect parent */}
         <OnboardingButton
-          label="부모님 연결하러 가기"
+          label={t('onboarding:common.goToConnectParent')}
           onPress={onConnectParent}
           variant="child"
           type="primary"
-          accessibilityHint="부모님 연결 화면으로 이동합니다"
+          accessibilityHint={t('onboarding:accessibility.connectParentHint')}
         />
 
         {/* Secondary CTA - Go home */}
         <View className="mt-3">
           <OnboardingButton
-            label="홈으로 가기"
+            label={t('onboarding:common.goHome')}
             onPress={onComplete}
             variant="child"
             type="outline"
-            accessibilityHint="홈 화면으로 이동합니다"
+            accessibilityHint={t('onboarding:accessibility.goHomeHint')}
           />
         </View>
 
@@ -81,8 +86,12 @@ const ChildOnboarding5Screen: React.FC<Props> = ({
           activeOpacity={0.7}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: dontShowAgain }}
-          accessibilityLabel="다시 보지 않기"
-          accessibilityHint={dontShowAgain ? '선택 해제하려면 누르세요' : '선택하려면 누르세요'}
+          accessibilityLabel={t('onboarding:common.dontShowAgain')}
+          accessibilityHint={
+            dontShowAgain
+              ? t('onboarding:accessibility.dontShowAgainChecked')
+              : t('onboarding:accessibility.dontShowAgainUnchecked')
+          }
         >
           <View
             className={`w-5 h-5 rounded border justify-center items-center mr-2 ${
@@ -91,7 +100,7 @@ const ChildOnboarding5Screen: React.FC<Props> = ({
           >
             {dontShowAgain && <Ionicons name="checkmark" size={14} color="#FFFFFF" />}
           </View>
-          <Text className="text-sm text-gray-600">다시 보지 않기</Text>
+          <Text className="text-sm text-gray-600">{t('onboarding:common.dontShowAgain')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

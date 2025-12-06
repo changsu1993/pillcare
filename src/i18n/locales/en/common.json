@@ -24,7 +24,8 @@
   "label": {
     "yes": "Yes",
     "no": "No",
-    "required": "Required"
+    "required": "Required",
+    "optional": "Optional"
   },
   "time": {
     "today": "Today",

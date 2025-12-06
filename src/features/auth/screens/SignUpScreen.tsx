@@ -18,6 +18,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { signUp } from '../../../shared/services/supabase';
 import { AuthScreenProps } from '../../../shared/types/navigation.types';
 import { UserRole } from '../../../shared/types/database.types';
@@ -25,6 +26,7 @@ import { UserRole } from '../../../shared/types/database.types';
 type Props = AuthScreenProps<'SignUp'>;
 
 const SignUpScreen = ({ navigation }: Props) => {
+  const { t } = useTranslation(['auth', 'common']);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
@@ -36,7 +38,7 @@ const SignUpScreen = ({ navigation }: Props) => {
   const handleSignUp = async (): Promise<void> => {
     // Validation
     if (!email.trim() || !password || !name.trim()) {
-      Alert.alert('입력 오류', '필수 항목을 모두 입력해주세요.');
+      Alert.alert(t('auth:error.inputError'), t('auth:error.emptyRequiredFields'));
       return;
     }
 
@@ -44,7 +46,7 @@ const SignUpScreen = ({ navigation }: Props) => {
     // Reference: OWASP - Identification and Authentication Failures (A07:2021)
     // Requirements: At least 8 characters, at least one letter, at least one number
     if (password.length < 8) {
-      Alert.alert('비밀번호 오류', '비밀번호는 8자 이상이어야 합니다.');
+      Alert.alert(t('auth:error.inputError'), t('auth:error.invalidPasswordMin8'));
       return;
     }
 
@@ -52,12 +54,12 @@ const SignUpScreen = ({ navigation }: Props) => {
     const hasNumber = /[0-9]/.test(password);
 
     if (!hasLetter || !hasNumber) {
-      Alert.alert('비밀번호 오류', '비밀번호는 영문자와 숫자를 모두 포함해야 합니다.');
+      Alert.alert(t('auth:error.inputError'), t('auth:error.invalidPasswordFormat'));
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('비밀번호 오류', '비밀번호가 일치하지 않습니다.');
+      Alert.alert(t('auth:error.inputError'), t('auth:error.passwordMismatch'));
       return;
     }
 
@@ -73,21 +75,21 @@ const SignUpScreen = ({ navigation }: Props) => {
       });
 
       if (!data?.user) {
-        throw new Error('회원가입에 실패했습니다.');
+        throw new Error(t('auth:error.signUpFailed'));
       }
 
-      Alert.alert('회원가입 완료', '환영합니다! 로그인해주세요.', [
+      Alert.alert(t('auth:message.signUpComplete'), t('auth:message.signUpWelcome'), [
         {
-          text: '확인',
+          text: t('common:button.confirm'),
           onPress: () => navigation.navigate('SignIn'),
         },
       ]);
     } catch (error) {
       console.error('Sign up error:', error);
       const errorMessage =
-        error instanceof Error ? error.message : '회원가입에 실패했습니다. 다시 시도해주세요.';
+        error instanceof Error ? error.message : t('auth:error.signUpFailedDetail');
 
-      Alert.alert('회원가입 실패', errorMessage);
+      Alert.alert(t('auth:error.signUpFailed'), errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -106,17 +108,21 @@ const SignUpScreen = ({ navigation }: Props) => {
           {/* Header */}
           <View className="mb-6">
             <TouchableOpacity onPress={() => navigation.goBack()} className="mb-4">
-              <Text className="text-base text-primary">← 뒤로</Text>
+              <Text className="text-base text-primary">{`← ${t('auth:nav.back')}`}</Text>
             </TouchableOpacity>
-            <Text className="text-[32px] font-bold text-gray-900 mb-2">회원가입</Text>
-            <Text className="text-base text-gray-500">PillCare 시작하기</Text>
+            <Text className="text-[32px] font-bold text-gray-900 mb-2">
+              {t('auth:title.signUp')}
+            </Text>
+            <Text className="text-base text-gray-500">{t('auth:subtitle.getStarted')}</Text>
           </View>
 
           {/* Form */}
           <View className="flex-1">
             {/* Role selection */}
             <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-900 mb-2">사용자 유형</Text>
+              <Text className="text-sm font-semibold text-gray-900 mb-2">
+                {t('auth:label.userType')}
+              </Text>
               <View className="flex-row gap-3">
                 <TouchableOpacity
                   className={`flex-1 h-[52px] border-2 rounded-xl items-center justify-center ${
@@ -130,7 +136,7 @@ const SignUpScreen = ({ navigation }: Props) => {
                       role === 'parent' ? 'text-primary' : 'text-gray-500'
                     }`}
                   >
-                    부모 (복약 관리)
+                    {t('auth:role.parentShort')}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -145,7 +151,7 @@ const SignUpScreen = ({ navigation }: Props) => {
                       role === 'child' ? 'text-primary' : 'text-gray-500'
                     }`}
                   >
-                    자녀 (모니터링)
+                    {t('auth:role.childShort')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -153,10 +159,12 @@ const SignUpScreen = ({ navigation }: Props) => {
 
             {/* Name input */}
             <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-900 mb-2">이름 *</Text>
+              <Text className="text-sm font-semibold text-gray-900 mb-2">
+                {t('auth:label.nameRequired')}
+              </Text>
               <TextInput
                 className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
-                placeholder="홍길동"
+                placeholder={t('auth:placeholder.nameExample')}
                 placeholderTextColor="#9CA3AF"
                 value={name}
                 onChangeText={setName}
@@ -167,10 +175,12 @@ const SignUpScreen = ({ navigation }: Props) => {
 
             {/* Email input */}
             <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-900 mb-2">이메일 *</Text>
+              <Text className="text-sm font-semibold text-gray-900 mb-2">
+                {t('auth:label.emailRequired')}
+              </Text>
               <TextInput
                 className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
-                placeholder="example@email.com"
+                placeholder={t('auth:placeholder.emailExample')}
                 placeholderTextColor="#9CA3AF"
                 value={email}
                 onChangeText={setEmail}
@@ -183,10 +193,12 @@ const SignUpScreen = ({ navigation }: Props) => {
 
             {/* Phone input */}
             <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-900 mb-2">전화번호 (선택)</Text>
+              <Text className="text-sm font-semibold text-gray-900 mb-2">
+                {t('auth:label.phoneOptional')}
+              </Text>
               <TextInput
                 className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
-                placeholder="010-1234-5678"
+                placeholder={t('auth:placeholder.phoneExample')}
                 placeholderTextColor="#9CA3AF"
                 value={phone}
                 onChangeText={setPhone}
@@ -198,11 +210,11 @@ const SignUpScreen = ({ navigation }: Props) => {
             {/* Password input */}
             <View className="mb-4">
               <Text className="text-sm font-semibold text-gray-900 mb-2">
-                비밀번호 * (8자 이상, 영문+숫자 포함)
+                {t('auth:label.passwordRequired')}
               </Text>
               <TextInput
                 className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
-                placeholder="비밀번호를 입력하세요"
+                placeholder={t('auth:placeholder.password')}
                 placeholderTextColor="#9CA3AF"
                 value={password}
                 onChangeText={setPassword}
@@ -215,10 +227,12 @@ const SignUpScreen = ({ navigation }: Props) => {
 
             {/* Confirm password input */}
             <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-900 mb-2">비밀번호 확인 *</Text>
+              <Text className="text-sm font-semibold text-gray-900 mb-2">
+                {t('auth:label.confirmPasswordRequired')}
+              </Text>
               <TextInput
                 className="h-[52px] border-2 border-gray-200 rounded-xl px-4 text-base text-gray-900 bg-white"
-                placeholder="비밀번호를 다시 입력하세요"
+                placeholder={t('auth:placeholder.confirmPassword')}
                 placeholderTextColor="#9CA3AF"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
@@ -238,15 +252,17 @@ const SignUpScreen = ({ navigation }: Props) => {
               {isLoading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text className="text-lg font-semibold text-white">회원가입</Text>
+                <Text className="text-lg font-semibold text-white">{t('auth:button.signUp')}</Text>
               )}
             </TouchableOpacity>
 
             {/* Sign in link */}
             <View className="flex-row justify-center items-center mt-4">
-              <Text className="text-sm text-gray-500">이미 계정이 있으신가요? </Text>
+              <Text className="text-sm text-gray-500">{t('auth:link.hasAccount')} </Text>
               <TouchableOpacity onPress={() => navigation.navigate('SignIn')} disabled={isLoading}>
-                <Text className="text-sm font-semibold text-primary">로그인</Text>
+                <Text className="text-sm font-semibold text-primary">
+                  {t('auth:button.signIn')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

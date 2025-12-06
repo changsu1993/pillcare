@@ -13,6 +13,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import OnboardingIllustration from '../../components/OnboardingIllustration';
 import OnboardingButton from '../../components/OnboardingButton';
@@ -25,6 +26,8 @@ type Props = {
 };
 
 const ChildOnboarding4Screen: React.FC<Props> = ({ navigation, onSkip }) => {
+  const { t } = useTranslation(['onboarding', 'common']);
+
   const handleNext = () => {
     navigation.navigate('Step5');
   };
@@ -38,9 +41,9 @@ const ChildOnboarding4Screen: React.FC<Props> = ({ navigation, onSkip }) => {
           onPress={onSkip}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="건너뛰기"
+          accessibilityLabel={t('onboarding:common.skip')}
         >
-          <Text className="text-sm text-gray-500">건너뛰기</Text>
+          <Text className="text-sm text-gray-500">{t('onboarding:common.skip')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -50,11 +53,13 @@ const ChildOnboarding4Screen: React.FC<Props> = ({ navigation, onSkip }) => {
         <OnboardingIllustration type="bell" variant="child" />
 
         {/* Title */}
-        <Text className="text-xl font-bold text-gray-800 text-center mt-6">미복용 알림 받기</Text>
+        <Text className="text-xl font-bold text-gray-800 text-center mt-6">
+          {t('onboarding:child.step4.heading')}
+        </Text>
 
         {/* Description */}
         <Text className="text-base text-gray-600 text-center mt-3 leading-6">
-          부모님이 약을 안 드시면{'\n'}푸시 알림으로 알려드려요
+          {t('onboarding:child.step4.subDescription')}
         </Text>
 
         {/* Notification preview */}
@@ -62,30 +67,34 @@ const ChildOnboarding4Screen: React.FC<Props> = ({ navigation, onSkip }) => {
           {/* Notification header */}
           <View className="flex-row items-center px-4 py-3 bg-gray-50 border-b border-gray-100">
             <MaterialCommunityIcons name="pill" size={20} color="#3B82F6" />
-            <Text className="text-sm font-bold text-gray-800 ml-2">PillCare</Text>
-            <Text className="text-xs text-gray-400 ml-auto">지금</Text>
+            <Text className="text-sm font-bold text-gray-800 ml-2">{t('common:appName')}</Text>
+            <Text className="text-xs text-gray-400 ml-auto">
+              {t('onboarding:child.step4.notificationNow')}
+            </Text>
           </View>
 
           {/* Notification body */}
           <View className="p-4">
             <Text className="text-base text-gray-800 leading-6">
-              어머니가 혈압약을{'\n'}복용하지 않았습니다
+              {t('onboarding:child.step4.notificationMessage')}
             </Text>
           </View>
         </View>
 
         {/* Tip */}
-        <Text className="text-sm text-gray-500 text-center mt-4">설정에서 알림을 관리하세요</Text>
+        <Text className="text-sm text-gray-500 text-center mt-4">
+          {t('onboarding:child.step4.tip')}
+        </Text>
       </View>
 
       {/* Bottom button */}
       <View className="px-6 pb-8">
         <OnboardingButton
-          label="다음"
+          label={t('onboarding:common.next')}
           onPress={handleNext}
           variant="child"
           type="primary"
-          accessibilityHint="다음 화면으로 이동합니다"
+          accessibilityHint={t('onboarding:accessibility.nextHint')}
         />
       </View>
     </SafeAreaView>

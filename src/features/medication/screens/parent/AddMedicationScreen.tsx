@@ -27,6 +27,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { useTranslation } from 'react-i18next';
 import { ParentScreenProps } from '../../../../shared/types/navigation.types';
 import { createMedicationFromForm, MedicationFormData } from '../../../../shared/services/api';
 import TimePickerButton from '../../components/TimePickerButton';
@@ -39,7 +40,7 @@ type Props = ParentScreenProps<'AddMedication'>;
  */
 interface FrequencyOption {
   value: string;
-  label: string;
+  labelKey: string;
   timesPerDay: number;
 }
 
@@ -47,10 +48,10 @@ interface FrequencyOption {
  * 복용 횟수 옵션
  */
 const FREQUENCY_OPTIONS: FrequencyOption[] = [
-  { value: 'daily_1', label: '하루 1번', timesPerDay: 1 },
-  { value: 'daily_2', label: '하루 2번', timesPerDay: 2 },
-  { value: 'daily_3', label: '하루 3번', timesPerDay: 3 },
-  { value: 'as_needed', label: '필요시', timesPerDay: 0 },
+  { value: 'daily_1', labelKey: 'frequency.daily1', timesPerDay: 1 },
+  { value: 'daily_2', labelKey: 'frequency.daily2', timesPerDay: 2 },
+  { value: 'daily_3', labelKey: 'frequency.daily3', timesPerDay: 3 },
+  { value: 'as_needed', labelKey: 'frequency.asNeeded', timesPerDay: 0 },
 ];
 
 /**
@@ -64,12 +65,12 @@ const DEFAULT_TIMES: Record<string, string[]> = {
 };
 
 /**
- * 시간 라벨 (복용 횟수별)
+ * 시간 라벨 키 (복용 횟수별)
  */
-const TIME_LABELS: Record<number, string[]> = {
-  1: ['알림 시간'],
-  2: ['아침 알림', '저녁 알림'],
-  3: ['아침 알림', '점심 알림', '저녁 알림'],
+const TIME_LABEL_KEYS: Record<number, string[]> = {
+  1: ['timeLabel.single'],
+  2: ['timeLabel.morning', 'timeLabel.evening'],
+  3: ['timeLabel.morning', 'timeLabel.lunch', 'timeLabel.evening'],
 };
 
 /**
@@ -93,6 +94,8 @@ const formatDateKorean = (date: Date): string => {
 };
 
 const AddMedicationScreen = ({ navigation }: Props) => {
+  const { t } = useTranslation(['medication', 'common']);
+
   // 폼 상태
   const [name, setName] = useState<string>('');
   const [dosage, setDosage] = useState<string>('');
@@ -160,7 +163,9 @@ const AddMedicationScreen = ({ navigation }: Props) => {
     }
     if (event.type === 'set' && selectedDate) {
       if (selectedDate < startDate) {
-        Alert.alert('오류', '종료일은 시작일보다 이후여야 합니다.', [{ text: '확인' }]);
+        Alert.alert(t('alert.loadError'), t('alert.endDateError'), [
+          { text: t('common:button.confirm') },
+        ]);
         return;
       }
       setEndDate(selectedDate);
@@ -180,7 +185,9 @@ const AddMedicationScreen = ({ navigation }: Props) => {
    */
   const handleEndDateConfirm = (): void => {
     if (endDate && endDate < startDate) {
-      Alert.alert('오류', '종료일은 시작일보다 이후여야 합니다.', [{ text: '확인' }]);
+      Alert.alert(t('alert.loadError'), t('alert.endDateError'), [
+        { text: t('common:button.confirm') },
+      ]);
       setEndDate(null);
       setHasEndDate(false);
     }
@@ -192,17 +199,23 @@ const AddMedicationScreen = ({ navigation }: Props) => {
    */
   const validateForm = (): boolean => {
     if (!name.trim()) {
-      Alert.alert('입력 오류', '약 이름을 입력해주세요.', [{ text: '확인' }]);
+      Alert.alert(t('alert.inputError'), t('alert.nameRequired'), [
+        { text: t('common:button.confirm') },
+      ]);
       return false;
     }
 
     if (!dosage.trim()) {
-      Alert.alert('입력 오류', '복용량을 입력해주세요.', [{ text: '확인' }]);
+      Alert.alert(t('alert.inputError'), t('alert.dosageRequired'), [
+        { text: t('common:button.confirm') },
+      ]);
       return false;
     }
 
     if (frequency !== 'as_needed' && reminderTimes.length === 0) {
-      Alert.alert('입력 오류', '알림 시간을 설정해주세요.', [{ text: '확인' }]);
+      Alert.alert(t('alert.inputError'), t('alert.reminderTimeRequired'), [
+        { text: t('common:button.confirm') },
+      ]);
       return false;
     }
 
@@ -238,19 +251,23 @@ const AddMedicationScreen = ({ navigation }: Props) => {
       // 성공 알림
       const notificationMessage =
         notificationIds.length > 0
-          ? `${notificationIds.length}개의 알림이 예약되었습니다.`
-          : '알림 예약에 실패했습니다. 설정에서 알림 권한을 확인해주세요.';
+          ? t('alert.notificationScheduled', { count: notificationIds.length })
+          : t('alert.notificationFailed');
 
-      Alert.alert('저장 완료', `${medication.name}이(가) 등록되었습니다.\n${notificationMessage}`, [
-        {
-          text: '확인',
-          onPress: () => navigation.goBack(),
-        },
-      ]);
+      Alert.alert(
+        t('alert.saveComplete'),
+        t('alert.saveSuccess', { name: medication.name, notification: notificationMessage }),
+        [
+          {
+            text: t('common:button.confirm'),
+            onPress: () => navigation.goBack(),
+          },
+        ]
+      );
     } catch (error) {
       console.error('약 등록 실패:', error);
-      Alert.alert('저장 실패', '약 정보를 저장하는 중 오류가 발생했습니다.\n다시 시도해주세요.', [
-        { text: '확인' },
+      Alert.alert(t('alert.saveFailed'), t('alert.saveError'), [
+        { text: t('common:button.confirm') },
       ]);
     } finally {
       setIsLoading(false);
@@ -262,10 +279,10 @@ const AddMedicationScreen = ({ navigation }: Props) => {
    */
   const handleCancel = (): void => {
     if (name || dosage || notes) {
-      Alert.alert('작성 취소', '입력한 내용이 저장되지 않습니다.\n정말 취소하시겠습니까?', [
-        { text: '계속 작성', style: 'cancel' },
+      Alert.alert(t('alert.cancelTitle'), t('alert.cancelMessage'), [
+        { text: t('alert.continueWriting'), style: 'cancel' },
         {
-          text: '취소',
+          text: t('common:button.cancel'),
           style: 'destructive',
           onPress: () => navigation.goBack(),
         },
@@ -278,13 +295,26 @@ const AddMedicationScreen = ({ navigation }: Props) => {
   /**
    * 현재 선택된 복용 횟수 라벨
    */
-  const selectedFrequencyLabel =
-    FREQUENCY_OPTIONS.find((opt) => opt.value === frequency)?.label || '하루 1번';
+  const selectedFrequencyOption = FREQUENCY_OPTIONS.find((opt) => opt.value === frequency);
+  const selectedFrequencyLabel = selectedFrequencyOption
+    ? t(selectedFrequencyOption.labelKey as any)
+    : t('frequency.daily1');
 
   /**
    * 현재 선택된 복용 횟수의 시간 개수
    */
-  const timesPerDay = FREQUENCY_OPTIONS.find((opt) => opt.value === frequency)?.timesPerDay || 0;
+  const timesPerDay = selectedFrequencyOption?.timesPerDay || 0;
+
+  /**
+   * 시간 라벨 가져오기
+   */
+  const getTimeLabel = (index: number): string => {
+    const labelKeys = TIME_LABEL_KEYS[timesPerDay];
+    if (labelKeys && labelKeys[index]) {
+      return t(labelKeys[index] as any);
+    }
+    return t('timeLabel.reminder', { index: index + 1 });
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
@@ -300,47 +330,49 @@ const AddMedicationScreen = ({ navigation }: Props) => {
           {/* 약 이름 */}
           <View className="mb-6">
             <Text className="text-2xl font-bold text-gray-900 mb-3">
-              약 이름 <Text className="text-error">*</Text>
+              {t('label.name')} <Text className="text-error">*</Text>
             </Text>
             <TextInput
               className="bg-white border-2 border-gray-300 rounded-xl px-5 py-4 text-2xl text-gray-900 min-h-[64px]"
               value={name}
               onChangeText={setName}
-              placeholder="예: 혈압약, 당뇨약"
+              placeholder={t('placeholder.nameExample')}
               placeholderTextColor="#9CA3AF"
               maxLength={50}
-              accessibilityLabel="약 이름 입력"
-              accessibilityHint="복용할 약의 이름을 입력하세요"
+              accessibilityLabel={t('accessibility.nameInput')}
+              accessibilityHint={t('accessibility.nameHint')}
             />
           </View>
 
           {/* 복용량 */}
           <View className="mb-6">
             <Text className="text-2xl font-bold text-gray-900 mb-3">
-              복용량 <Text className="text-error">*</Text>
+              {t('label.dosage')} <Text className="text-error">*</Text>
             </Text>
             <TextInput
               className="bg-white border-2 border-gray-300 rounded-xl px-5 py-4 text-2xl text-gray-900 min-h-[64px]"
               value={dosage}
               onChangeText={setDosage}
-              placeholder="예: 1정, 2알, 5ml"
+              placeholder={t('placeholder.dosageExample')}
               placeholderTextColor="#9CA3AF"
               maxLength={20}
-              accessibilityLabel="복용량 입력"
-              accessibilityHint="한 번에 복용할 양을 입력하세요"
+              accessibilityLabel={t('accessibility.dosageInput')}
+              accessibilityHint={t('accessibility.dosageHint')}
             />
           </View>
 
           {/* 복용 횟수 */}
           <View className="mb-6">
             <Text className="text-2xl font-bold text-gray-900 mb-3">
-              복용 횟수 <Text className="text-error">*</Text>
+              {t('label.frequency')} <Text className="text-error">*</Text>
             </Text>
             <TouchableOpacity
               className="bg-white border-2 border-gray-300 rounded-xl px-5 py-4 min-h-[64px] justify-center"
               onPress={() => setShowFrequencyPicker(true)}
-              accessibilityLabel={`복용 횟수: ${selectedFrequencyLabel}`}
-              accessibilityHint="탭하여 복용 횟수를 변경합니다"
+              accessibilityLabel={t('accessibility.frequencyLabel', {
+                label: selectedFrequencyLabel,
+              })}
+              accessibilityHint={t('accessibility.frequencyHint')}
               accessibilityRole="button"
             >
               <Text className="text-2xl text-gray-900">{selectedFrequencyLabel}</Text>
@@ -351,7 +383,7 @@ const AddMedicationScreen = ({ navigation }: Props) => {
           {frequency !== 'as_needed' && timesPerDay > 0 && (
             <View className="mb-6">
               <Text className="text-2xl font-bold text-gray-900 mb-3">
-                알림 시간 <Text className="text-error">*</Text>
+                {t('label.reminderTime')} <Text className="text-error">*</Text>
               </Text>
               <View className="gap-3">
                 {Array.from({ length: timesPerDay }).map((_, index) => (
@@ -359,7 +391,7 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                     key={`time-${index}`}
                     value={reminderTimes[index] || '09:00'}
                     onTimeChange={(time) => handleTimeChange(index, time)}
-                    label={TIME_LABELS[timesPerDay]?.[index] || `알림 ${index + 1}`}
+                    label={getTimeLabel(index)}
                     testID={`time-picker-${index}`}
                   />
                 ))}
@@ -369,12 +401,14 @@ const AddMedicationScreen = ({ navigation }: Props) => {
 
           {/* 시작일 */}
           <View className="mb-6">
-            <Text className="text-2xl font-bold text-gray-900 mb-3">시작일</Text>
+            <Text className="text-2xl font-bold text-gray-900 mb-3">{t('label.startDate')}</Text>
             <TouchableOpacity
               className="bg-white border-2 border-gray-300 rounded-xl px-5 py-4 min-h-[64px] justify-center"
               onPress={() => setShowStartDatePicker(true)}
-              accessibilityLabel={`시작일: ${formatDateKorean(startDate)}`}
-              accessibilityHint="탭하여 시작일을 변경합니다"
+              accessibilityLabel={t('accessibility.startDateLabel', {
+                date: formatDateKorean(startDate),
+              })}
+              accessibilityHint={t('accessibility.startDateHint')}
               accessibilityRole="button"
             >
               <Text className="text-2xl text-gray-900">{formatDateKorean(startDate)}</Text>
@@ -383,7 +417,9 @@ const AddMedicationScreen = ({ navigation }: Props) => {
 
           {/* 종료일 */}
           <View className="mb-6">
-            <Text className="text-2xl font-bold text-gray-900 mb-3">종료일 (선택)</Text>
+            <Text className="text-2xl font-bold text-gray-900 mb-3">
+              {t('label.endDateOptional')}
+            </Text>
             <View className="flex-row items-center gap-3">
               <TouchableOpacity
                 className={`border-2 rounded-xl px-5 py-4 min-h-[64px] justify-center ${
@@ -400,8 +436,10 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                     setHasEndDate(true);
                   }
                 }}
-                accessibilityLabel={hasEndDate ? '종료일 설정됨' : '종료일 설정 안함'}
-                accessibilityHint="탭하여 종료일 설정을 변경합니다"
+                accessibilityLabel={
+                  hasEndDate ? t('accessibility.endDateSet') : t('accessibility.endDateNotSet')
+                }
+                accessibilityHint={t('accessibility.endDateToggleHint')}
                 accessibilityRole="switch"
               >
                 <Text
@@ -409,7 +447,7 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                     hasEndDate ? 'text-green-700 font-semibold' : 'text-gray-600'
                   }`}
                 >
-                  {hasEndDate ? '설정됨' : '설정 안함'}
+                  {hasEndDate ? t('status.set') : t('status.notSet')}
                 </Text>
               </TouchableOpacity>
 
@@ -417,12 +455,14 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                 <TouchableOpacity
                   className="flex-1 bg-white border-2 border-gray-300 rounded-xl px-5 py-4 min-h-[64px] justify-center"
                   onPress={() => setShowEndDatePicker(true)}
-                  accessibilityLabel={`종료일: ${endDate ? formatDateKorean(endDate) : '선택'}`}
-                  accessibilityHint="탭하여 종료일을 변경합니다"
+                  accessibilityLabel={t('accessibility.endDateLabel', {
+                    date: endDate ? formatDateKorean(endDate) : t('placeholder.selectDate'),
+                  })}
+                  accessibilityHint={t('accessibility.endDateHint')}
                   accessibilityRole="button"
                 >
                   <Text className="text-2xl text-gray-900">
-                    {endDate ? formatDateKorean(endDate) : '날짜 선택'}
+                    {endDate ? formatDateKorean(endDate) : t('placeholder.selectDate')}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -431,26 +471,30 @@ const AddMedicationScreen = ({ navigation }: Props) => {
 
           {/* 메모 */}
           <View className="mb-6">
-            <Text className="text-2xl font-bold text-gray-900 mb-3">메모 (선택)</Text>
+            <Text className="text-2xl font-bold text-gray-900 mb-3">
+              {t('label.notesOptional')}
+            </Text>
             <TextInput
               className="bg-white border-2 border-gray-300 rounded-xl px-5 py-4 text-2xl text-gray-900 min-h-[120px]"
               value={notes}
               onChangeText={setNotes}
-              placeholder="예: 식후 30분, 물과 함께 복용"
+              placeholder={t('placeholder.notesExample')}
               placeholderTextColor="#9CA3AF"
               maxLength={200}
               multiline
               numberOfLines={3}
               textAlignVertical="top"
-              accessibilityLabel="메모 입력"
-              accessibilityHint="추가 복용 정보를 입력하세요"
+              accessibilityLabel={t('accessibility.notesInput')}
+              accessibilityHint={t('accessibility.notesHint')}
             />
           </View>
 
           {/* 재고 관리 (선택) */}
           <View className="mb-6">
             <View className="flex-row items-center justify-between mb-3">
-              <Text className="text-2xl font-bold text-gray-900">재고 관리 (선택)</Text>
+              <Text className="text-2xl font-bold text-gray-900">
+                {t('label.inventoryTracking')}
+              </Text>
               <Switch
                 value={trackQuantity}
                 onValueChange={(value) => {
@@ -461,7 +505,7 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                 }}
                 trackColor={{ false: '#D1D5DB', true: '#86EFAC' }}
                 thumbColor={trackQuantity ? '#22C55E' : '#9CA3AF'}
-                accessibilityLabel="재고 관리 사용"
+                accessibilityLabel={t('accessibility.inventoryToggle')}
                 accessibilityRole="switch"
               />
             </View>
@@ -473,7 +517,7 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                   value={remainingQuantity}
                   onValueChange={setRemainingQuantity}
                   variant="parent"
-                  label="남은 약 수량"
+                  label={t('label.remainingQuantity')}
                   min={0}
                   max={9999}
                   step={10}
@@ -482,7 +526,9 @@ const AddMedicationScreen = ({ navigation }: Props) => {
 
                 {/* 1회 복용량 */}
                 <View className="mt-4">
-                  <Text className="text-xl font-semibold text-gray-700 mb-2">1회 복용 수량</Text>
+                  <Text className="text-xl font-semibold text-gray-700 mb-2">
+                    {t('label.quantityPerDose')}
+                  </Text>
                   <View className="flex-row items-center gap-3">
                     {[1, 2, 3].map((qty) => (
                       <TouchableOpacity
@@ -493,7 +539,7 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                             : 'bg-gray-100 border-2 border-gray-300'
                         }`}
                         onPress={() => setQuantityPerDose(qty)}
-                        accessibilityLabel={`${qty}개`}
+                        accessibilityLabel={t('accessibility.quantityLabel', { count: qty })}
                         accessibilityRole="radio"
                         accessibilityState={{ selected: quantityPerDose === qty }}
                       >
@@ -502,7 +548,8 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                             quantityPerDose === qty ? 'text-white' : 'text-gray-700'
                           }`}
                         >
-                          {qty}개
+                          {qty}
+                          {t('unit.count')}
                         </Text>
                       </TouchableOpacity>
                     ))}
@@ -519,11 +566,11 @@ const AddMedicationScreen = ({ navigation }: Props) => {
             className="flex-1 bg-gray-100 rounded-xl py-5 items-center justify-center min-h-[72px]"
             onPress={handleCancel}
             disabled={isLoading}
-            accessibilityLabel="취소"
-            accessibilityHint="약 등록을 취소하고 이전 화면으로 돌아갑니다"
+            accessibilityLabel={t('accessibility.cancelButton')}
+            accessibilityHint={t('accessibility.cancelHint')}
             accessibilityRole="button"
           >
-            <Text className="text-2xl font-bold text-gray-600">취소</Text>
+            <Text className="text-2xl font-bold text-gray-600">{t('common:button.cancel')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -532,14 +579,14 @@ const AddMedicationScreen = ({ navigation }: Props) => {
             }`}
             onPress={handleSave}
             disabled={isLoading}
-            accessibilityLabel="저장"
-            accessibilityHint="약 정보를 저장합니다"
+            accessibilityLabel={t('accessibility.saveButton')}
+            accessibilityHint={t('accessibility.saveHint')}
             accessibilityRole="button"
           >
             {isLoading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text className="text-2xl font-bold text-white">저장</Text>
+              <Text className="text-2xl font-bold text-white">{t('common:button.save')}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -555,14 +602,14 @@ const AddMedicationScreen = ({ navigation }: Props) => {
         <View className="flex-1 bg-black/50 justify-end">
           <View className="bg-white rounded-t-3xl pb-8">
             <View className="flex-row justify-between items-center px-5 py-4 border-b border-gray-200">
-              <Text className="text-2xl font-bold text-gray-900">복용 횟수 선택</Text>
+              <Text className="text-2xl font-bold text-gray-900">{t('title.frequencySelect')}</Text>
               <TouchableOpacity
                 className="px-4 py-2"
                 onPress={() => setShowFrequencyPicker(false)}
-                accessibilityLabel="닫기"
+                accessibilityLabel={t('accessibility.closeButton')}
                 accessibilityRole="button"
               >
-                <Text className="text-xl text-gray-600">닫기</Text>
+                <Text className="text-xl text-gray-600">{t('common:button.close')}</Text>
               </TouchableOpacity>
             </View>
 
@@ -573,7 +620,7 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                   frequency === option.value ? 'bg-green-100' : ''
                 }`}
                 onPress={() => handleFrequencyChange(option.value)}
-                accessibilityLabel={option.label}
+                accessibilityLabel={t(option.labelKey as any)}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: frequency === option.value }}
               >
@@ -582,7 +629,7 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                     frequency === option.value ? 'font-bold text-green-700' : 'text-gray-900'
                   }`}
                 >
-                  {option.label}
+                  {t(option.labelKey as any)}
                 </Text>
                 {frequency === option.value && (
                   <Text className="text-2xl font-bold text-success">OK</Text>
@@ -629,21 +676,25 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                 <TouchableOpacity
                   className="px-4 py-2 min-w-[60px]"
                   onPress={() => setShowStartDatePicker(false)}
-                  accessibilityLabel="취소"
+                  accessibilityLabel={t('common:button.cancel')}
                   accessibilityRole="button"
                 >
-                  <Text className="text-xl text-gray-600">취소</Text>
+                  <Text className="text-xl text-gray-600">{t('common:button.cancel')}</Text>
                 </TouchableOpacity>
 
-                <Text className="text-2xl font-bold text-gray-900">시작일 선택</Text>
+                <Text className="text-2xl font-bold text-gray-900">
+                  {t('title.startDateSelect')}
+                </Text>
 
                 <TouchableOpacity
                   className="px-4 py-2 min-w-[60px]"
                   onPress={handleStartDateConfirm}
-                  accessibilityLabel="확인"
+                  accessibilityLabel={t('common:button.confirm')}
                   accessibilityRole="button"
                 >
-                  <Text className="text-xl font-semibold text-success">확인</Text>
+                  <Text className="text-xl font-semibold text-success">
+                    {t('common:button.confirm')}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
@@ -674,21 +725,23 @@ const AddMedicationScreen = ({ navigation }: Props) => {
                 <TouchableOpacity
                   className="px-4 py-2 min-w-[60px]"
                   onPress={() => setShowEndDatePicker(false)}
-                  accessibilityLabel="취소"
+                  accessibilityLabel={t('common:button.cancel')}
                   accessibilityRole="button"
                 >
-                  <Text className="text-xl text-gray-600">취소</Text>
+                  <Text className="text-xl text-gray-600">{t('common:button.cancel')}</Text>
                 </TouchableOpacity>
 
-                <Text className="text-2xl font-bold text-gray-900">종료일 선택</Text>
+                <Text className="text-2xl font-bold text-gray-900">{t('title.endDateSelect')}</Text>
 
                 <TouchableOpacity
                   className="px-4 py-2 min-w-[60px]"
                   onPress={handleEndDateConfirm}
-                  accessibilityLabel="확인"
+                  accessibilityLabel={t('common:button.confirm')}
                   accessibilityRole="button"
                 >
-                  <Text className="text-xl font-semibold text-success">확인</Text>
+                  <Text className="text-xl font-semibold text-success">
+                    {t('common:button.confirm')}
+                  </Text>
                 </TouchableOpacity>
               </View>
 

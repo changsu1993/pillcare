@@ -13,6 +13,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useTranslation } from 'react-i18next';
 
 import OnboardingIllustration from '../../components/OnboardingIllustration';
 import OnboardingButton from '../../components/OnboardingButton';
@@ -25,6 +26,8 @@ type Props = {
 };
 
 const ChildOnboarding1Screen: React.FC<Props> = ({ navigation, onSkip }) => {
+  const { t } = useTranslation(['onboarding', 'common']);
+
   const handleNext = () => {
     navigation.navigate('Step2');
   };
@@ -38,10 +41,10 @@ const ChildOnboarding1Screen: React.FC<Props> = ({ navigation, onSkip }) => {
           onPress={onSkip}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="건너뛰기"
-          accessibilityHint="튜토리얼을 건너뛰고 앱을 바로 시작합니다"
+          accessibilityLabel={t('onboarding:common.skip')}
+          accessibilityHint={t('onboarding:accessibility.skipHint')}
         >
-          <Text className="text-sm text-gray-500">건너뛰기</Text>
+          <Text className="text-sm text-gray-500">{t('onboarding:common.skip')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -51,11 +54,13 @@ const ChildOnboarding1Screen: React.FC<Props> = ({ navigation, onSkip }) => {
         <OnboardingIllustration type="connection" variant="child" />
 
         {/* Title */}
-        <Text className="text-xl font-bold text-gray-800 text-center mt-6">부모님과 연결하기</Text>
+        <Text className="text-xl font-bold text-gray-800 text-center mt-6">
+          {t('onboarding:child.step1.heading')}
+        </Text>
 
         {/* Description */}
         <Text className="text-base text-gray-600 text-center mt-3 leading-6 px-4">
-          부모님이 생성한 초대 코드를 입력하면{'\n'}복약 현황을 실시간으로 확인할 수 있어요
+          {t('onboarding:child.step1.subDescription')}
         </Text>
 
         {/* Code input preview */}
@@ -76,18 +81,18 @@ const ChildOnboarding1Screen: React.FC<Props> = ({ navigation, onSkip }) => {
 
         {/* Tip */}
         <Text className="text-sm text-gray-500 text-center mt-4">
-          설정 {'>'} 가족 연결에서 초대 코드를 입력하세요
+          {t('onboarding:child.step1.tip')}
         </Text>
       </View>
 
       {/* Bottom button */}
       <View className="px-6 pb-8">
         <OnboardingButton
-          label="다음"
+          label={t('onboarding:common.next')}
           onPress={handleNext}
           variant="child"
           type="primary"
-          accessibilityHint="다음 화면으로 이동합니다"
+          accessibilityHint={t('onboarding:accessibility.nextHint')}
         />
       </View>
     </SafeAreaView>

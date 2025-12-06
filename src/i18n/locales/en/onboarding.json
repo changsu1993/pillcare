@@ -1,0 +1,46 @@
+{
+  "common": {
+    "skip": "Skip",
+    "next": "Next",
+    "back": "Back",
+    "getStarted": "Get Started",
+    "dontShowAgain": "Don't show again"
+  },
+  "parent": {
+    "step1": {
+      "title": "Welcome to\nPillCare",
+      "description": "Manage your medications with ease"
+    },
+    "step2": {
+      "title": "Get Medication\nReminders",
+      "description": "We'll remind you when\nit's time to take your medicine"
+    },
+    "step3": {
+      "title": "Log with\nOne Tap",
+      "description": "Just tap \"I took it\" to\nrecord your medication"
+    }
+  },
+  "child": {
+    "step1": {
+      "title": "Welcome to\nPillCare",
+      "description": "Help manage your parent's medications"
+    },
+    "step2": {
+      "title": "Connect with\nYour Parent",
+      "description": "Use an invitation code to connect easily"
+    },
+    "step3": {
+      "title": "Monitor in\nReal-time",
+      "description": "Check your parent's medication\nstatus anytime"
+    },
+    "step4": {
+      "title": "Get Notified\nof Missed Doses",
+      "description": "We'll alert you right away if\nyour parent misses a dose"
+    },
+    "step5": {
+      "title": "Ready to\nGet Started?",
+      "description": "Connect with your parent to\nstart monitoring",
+      "connectButton": "Connect with Parent"
+    }
+  }
+}

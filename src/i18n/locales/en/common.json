@@ -1,0 +1,38 @@
+{
+  "appName": "PillCare",
+  "loading": "Loading...",
+  "loadingProfile": "Setting up profile...",
+  "error": {
+    "generic": "An error occurred",
+    "network": "Please check your network connection",
+    "unknown": "An unknown error occurred"
+  },
+  "button": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "retry": "Retry",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "close": "Close",
+    "add": "Add"
+  },
+  "label": {
+    "yes": "Yes",
+    "no": "No",
+    "required": "Required"
+  },
+  "time": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow"
+  },
+  "date": {
+    "year": "",
+    "month": "",
+    "day": ""
+  }
+}

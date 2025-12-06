@@ -9,6 +9,7 @@
  */
 
 import './global.css';
+import './src/i18n'; // Initialize i18n
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';

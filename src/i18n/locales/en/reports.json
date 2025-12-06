@@ -1,0 +1,45 @@
+{
+  "title": {
+    "main": "Reports",
+    "weekly": "Weekly Report",
+    "monthly": "Monthly Report",
+    "adherence": "Adherence Report"
+  },
+  "period": {
+    "week": "1 Week",
+    "month": "1 Month",
+    "threeMonths": "3 Months",
+    "custom": "Custom Range"
+  },
+  "chart": {
+    "adherenceRate": "Adherence Rate",
+    "takenCount": "Doses Taken",
+    "missedCount": "Doses Missed",
+    "trend": "Trend"
+  },
+  "summary": {
+    "title": "Summary",
+    "averageAdherence": "Average Adherence",
+    "totalTaken": "Total Taken",
+    "totalMissed": "Total Missed",
+    "bestDay": "Best Day",
+    "improvement": "vs. Last Week"
+  },
+  "export": {
+    "title": "Export Report",
+    "pdf": "Export as PDF",
+    "csv": "Export as CSV",
+    "success": "Report saved successfully",
+    "error": "Failed to generate report"
+  },
+  "empty": {
+    "title": "No Data Available",
+    "message": "No medication records for the selected period"
+  },
+  "medication": {
+    "name": "Medication",
+    "adherence": "Adherence",
+    "taken": "Taken",
+    "missed": "Missed"
+  }
+}

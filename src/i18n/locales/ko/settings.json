@@ -1,0 +1,79 @@
+{
+  "title": {
+    "main": "설정",
+    "profile": "프로필",
+    "editProfile": "프로필 수정",
+    "notifications": "알림 설정",
+    "language": "언어 설정",
+    "theme": "테마 설정",
+    "about": "앱 정보",
+    "export": "데이터 내보내기"
+  },
+  "section": {
+    "account": "계정",
+    "preferences": "환경설정",
+    "data": "데이터",
+    "support": "지원",
+    "family": "가족"
+  },
+  "label": {
+    "name": "이름",
+    "email": "이메일",
+    "phone": "전화번호",
+    "role": "사용자 유형",
+    "voiceGuidance": "음성 안내",
+    "vibration": "진동",
+    "voiceSpeed": "음성 속도",
+    "darkMode": "다크 모드",
+    "language": "언어"
+  },
+  "voiceSpeed": {
+    "slow": "느리게",
+    "normal": "보통",
+    "fast": "빠르게"
+  },
+  "theme": {
+    "light": "라이트 모드",
+    "dark": "다크 모드",
+    "system": "시스템 설정"
+  },
+  "button": {
+    "editProfile": "프로필 수정",
+    "changePassword": "비밀번호 변경",
+    "signOut": "로그아웃",
+    "deleteAccount": "계정 삭제",
+    "familyCode": "가족 초대 코드",
+    "connectFamily": "가족 연결하기",
+    "exportData": "데이터 내보내기"
+  },
+  "export": {
+    "title": "데이터 내보내기",
+    "format": "파일 형식",
+    "pdf": "PDF 리포트",
+    "csv": "CSV 데이터",
+    "dateRange": "기간 선택",
+    "week": "최근 1주일",
+    "month": "최근 1개월",
+    "threeMonths": "최근 3개월",
+    "all": "전체",
+    "preview": "미리보기",
+    "share": "공유하기",
+    "generating": "파일 생성 중..."
+  },
+  "about": {
+    "version": "버전",
+    "terms": "이용약관",
+    "privacy": "개인정보 처리방침",
+    "licenses": "오픈소스 라이선스",
+    "contact": "문의하기"
+  },
+  "message": {
+    "saved": "저장되었습니다",
+    "signOutConfirm": "정말 로그아웃 하시겠습니까?",
+    "deleteAccountConfirm": "정말 계정을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다."
+  },
+  "placeholder": {
+    "name": "이름을 입력하세요",
+    "phone": "전화번호를 입력하세요"
+  }
+}

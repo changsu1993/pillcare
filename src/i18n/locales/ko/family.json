@@ -1,0 +1,48 @@
+{
+  "title": {
+    "connection": "가족 연결",
+    "invitationCode": "초대 코드",
+    "enterCode": "코드 입력",
+    "connectedFamily": "연결된 가족"
+  },
+  "label": {
+    "code": "초대 코드",
+    "parent": "부모님",
+    "child": "자녀",
+    "status": "연결 상태"
+  },
+  "placeholder": {
+    "enterCode": "초대 코드를 입력하세요"
+  },
+  "status": {
+    "connected": "연결됨",
+    "pending": "대기 중",
+    "notConnected": "연결되지 않음"
+  },
+  "button": {
+    "generateCode": "코드 생성",
+    "copyCode": "코드 복사",
+    "refreshCode": "새 코드 생성",
+    "connect": "연결하기",
+    "disconnect": "연결 해제"
+  },
+  "message": {
+    "codeCopied": "코드가 복사되었습니다",
+    "codeExpiry": "이 코드는 24시간 동안 유효합니다",
+    "shareCode": "이 코드를 자녀에게 공유하세요",
+    "connected": "가족 연결이 완료되었습니다",
+    "disconnected": "가족 연결이 해제되었습니다",
+    "invalidCode": "유효하지 않은 코드입니다",
+    "codeExpired": "만료된 코드입니다"
+  },
+  "empty": {
+    "parentTitle": "연결된 자녀가 없습니다",
+    "parentMessage": "초대 코드를 생성하여 자녀에게 공유하세요",
+    "childTitle": "부모님을 연결해주세요",
+    "childMessage": "부모님의 복약 현황을 확인하려면\n먼저 가족 연결을 해주세요"
+  },
+  "alert": {
+    "disconnectTitle": "연결 해제",
+    "disconnectMessage": "정말로 가족 연결을 해제하시겠습니까?"
+  }
+}

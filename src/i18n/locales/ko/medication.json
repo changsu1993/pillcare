@@ -1,0 +1,80 @@
+{
+  "title": {
+    "list": "약 목록",
+    "add": "약 추가하기",
+    "edit": "약 수정하기",
+    "detail": "약 상세정보",
+    "calendar": "복약 이력",
+    "reminder": "복약 알림"
+  },
+  "label": {
+    "name": "약 이름",
+    "dosage": "복용량",
+    "frequency": "복용 빈도",
+    "reminderTime": "알림 시간",
+    "startDate": "시작일",
+    "endDate": "종료일",
+    "notes": "메모",
+    "quantity": "남은 수량",
+    "refillAlert": "재고 알림"
+  },
+  "placeholder": {
+    "name": "약 이름을 입력하세요",
+    "dosage": "예: 1정, 5ml",
+    "notes": "메모를 입력하세요 (선택)"
+  },
+  "frequency": {
+    "daily": "매일",
+    "weekly": "매주",
+    "asNeeded": "필요시"
+  },
+  "status": {
+    "taken": "복용 완료",
+    "pending": "복용 대기 중",
+    "missed": "미복용",
+    "skipped": "건너뜀"
+  },
+  "button": {
+    "add": "+ 약 추가하기",
+    "took": "복용했어요",
+    "skip": "건너뛰기",
+    "viewCalendar": "복약 이력 보기",
+    "addTime": "시간 추가"
+  },
+  "alert": {
+    "deleteTitle": "약 삭제",
+    "deleteMessage": "'{{name}}'을(를) 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.",
+    "skipTitle": "건너뛰기",
+    "skipMessage": "이 약을 건너뛰는 이유를 선택해주세요"
+  },
+  "skipReason": {
+    "sideEffect": "부작용",
+    "forgot": "깜빡함",
+    "noMedicine": "약이 없음",
+    "doctorAdvice": "의사 지시",
+    "other": "기타"
+  },
+  "empty": {
+    "title": "등록된 약이 없습니다",
+    "message": "약을 추가하여 복약 관리를 시작하세요",
+    "today": "오늘 드실 약이\n없습니다"
+  },
+  "refill": {
+    "title": "재고 부족 알림",
+    "message": "{{name}}의 재고가 {{count}}개 남았습니다",
+    "lowStock": "재고 부족",
+    "outOfStock": "재고 없음"
+  },
+  "notification": {
+    "title": "복약 시간",
+    "body": "{{name}} 복용 시간입니다",
+    "permissionTitle": "알림 권한 필요",
+    "permissionMessage": "약 복용 알림을 받으려면 알림 권한이 필요합니다.",
+    "goToSettings": "설정으로 이동"
+  },
+  "message": {
+    "saved": "저장되었습니다",
+    "deleted": "삭제되었습니다",
+    "allScheduled": "모든 약의 알림이 예약되었습니다"
+  }
+}

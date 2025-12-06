@@ -1,0 +1,36 @@
+{
+  "parent": {
+    "title": "Today's Medications",
+    "greeting": "Hello, {{name}}",
+    "noMedications": "No medications for today",
+    "addMedication": "Add Medication",
+    "viewHistory": "View History"
+  },
+  "child": {
+    "title": "Parent's Medication Status",
+    "greeting": "{{name}}'s Status",
+    "todayMedications": "Today's Medications",
+    "adherenceRate": "Today's Adherence",
+    "callParent": "Call Parent",
+    "noParent": "No parent connected",
+    "connectParent": "Connect with Parent"
+  },
+  "stats": {
+    "taken": "Taken",
+    "pending": "Pending",
+    "missed": "Missed",
+    "total": "Total"
+  },
+  "timeline": {
+    "title": "Medication Timeline",
+    "noData": "No medications scheduled for today"
+  },
+  "date": {
+    "today": "Today",
+    "format": "MMM D (ddd)"
+  },
+  "alert": {
+    "noPhoneNumber": "No Phone Number",
+    "noPhoneMessage": "Your parent's phone number is not registered"
+  }
+}

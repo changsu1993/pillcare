@@ -1,0 +1,48 @@
+{
+  "title": {
+    "connection": "Family Connection",
+    "invitationCode": "Invitation Code",
+    "enterCode": "Enter Code",
+    "connectedFamily": "Connected Family"
+  },
+  "label": {
+    "code": "Invitation Code",
+    "parent": "Parent",
+    "child": "Child",
+    "status": "Connection Status"
+  },
+  "placeholder": {
+    "enterCode": "Enter invitation code"
+  },
+  "status": {
+    "connected": "Connected",
+    "pending": "Pending",
+    "notConnected": "Not Connected"
+  },
+  "button": {
+    "generateCode": "Generate Code",
+    "copyCode": "Copy Code",
+    "refreshCode": "Generate New Code",
+    "connect": "Connect",
+    "disconnect": "Disconnect"
+  },
+  "message": {
+    "codeCopied": "Code copied to clipboard",
+    "codeExpiry": "This code is valid for 24 hours",
+    "shareCode": "Share this code with your child",
+    "connected": "Family connection successful",
+    "disconnected": "Family connection removed",
+    "invalidCode": "Invalid code",
+    "codeExpired": "This code has expired"
+  },
+  "empty": {
+    "parentTitle": "No connected children",
+    "parentMessage": "Generate an invitation code to share with your child",
+    "childTitle": "Connect with your parent",
+    "childMessage": "Connect with your parent to\nmonitor their medication adherence"
+  },
+  "alert": {
+    "disconnectTitle": "Disconnect",
+    "disconnectMessage": "Are you sure you want to disconnect from this family member?"
+  }
+}

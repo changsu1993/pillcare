@@ -1,0 +1,79 @@
+{
+  "title": {
+    "main": "Settings",
+    "profile": "Profile",
+    "editProfile": "Edit Profile",
+    "notifications": "Notification Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "about": "About",
+    "export": "Export Data"
+  },
+  "section": {
+    "account": "Account",
+    "preferences": "Preferences",
+    "data": "Data",
+    "support": "Support",
+    "family": "Family"
+  },
+  "label": {
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone Number",
+    "role": "User Type",
+    "voiceGuidance": "Voice Guidance",
+    "vibration": "Vibration",
+    "voiceSpeed": "Voice Speed",
+    "darkMode": "Dark Mode",
+    "language": "Language"
+  },
+  "voiceSpeed": {
+    "slow": "Slow",
+    "normal": "Normal",
+    "fast": "Fast"
+  },
+  "theme": {
+    "light": "Light Mode",
+    "dark": "Dark Mode",
+    "system": "System Default"
+  },
+  "button": {
+    "editProfile": "Edit Profile",
+    "changePassword": "Change Password",
+    "signOut": "Sign Out",
+    "deleteAccount": "Delete Account",
+    "familyCode": "Family Invitation Code",
+    "connectFamily": "Connect Family",
+    "exportData": "Export Data"
+  },
+  "export": {
+    "title": "Export Data",
+    "format": "File Format",
+    "pdf": "PDF Report",
+    "csv": "CSV Data",
+    "dateRange": "Date Range",
+    "week": "Last Week",
+    "month": "Last Month",
+    "threeMonths": "Last 3 Months",
+    "all": "All Time",
+    "preview": "Preview",
+    "share": "Share",
+    "generating": "Generating file..."
+  },
+  "about": {
+    "version": "Version",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "licenses": "Open Source Licenses",
+    "contact": "Contact Us"
+  },
+  "message": {
+    "saved": "Saved successfully",
+    "signOutConfirm": "Are you sure you want to sign out?",
+    "deleteAccountConfirm": "Are you sure you want to delete your account?\nThis action cannot be undone."
+  },
+  "placeholder": {
+    "name": "Enter your name",
+    "phone": "Enter your phone number"
+  }
+}

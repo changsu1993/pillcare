@@ -1,0 +1,45 @@
+{
+  "title": {
+    "main": "리포트",
+    "weekly": "주간 리포트",
+    "monthly": "월간 리포트",
+    "adherence": "복약 순응도"
+  },
+  "period": {
+    "week": "1주일",
+    "month": "1개월",
+    "threeMonths": "3개월",
+    "custom": "기간 선택"
+  },
+  "chart": {
+    "adherenceRate": "복약률",
+    "takenCount": "복용 횟수",
+    "missedCount": "미복용 횟수",
+    "trend": "추이"
+  },
+  "summary": {
+    "title": "요약",
+    "averageAdherence": "평균 복약률",
+    "totalTaken": "총 복용",
+    "totalMissed": "총 미복용",
+    "bestDay": "최고 복약일",
+    "improvement": "지난 주 대비"
+  },
+  "export": {
+    "title": "리포트 내보내기",
+    "pdf": "PDF로 내보내기",
+    "csv": "CSV로 내보내기",
+    "success": "리포트가 저장되었습니다",
+    "error": "리포트 생성에 실패했습니다"
+  },
+  "empty": {
+    "title": "데이터가 없습니다",
+    "message": "선택한 기간에 복약 기록이 없습니다"
+  },
+  "medication": {
+    "name": "약 이름",
+    "adherence": "복약률",
+    "taken": "복용",
+    "missed": "미복용"
+  }
+}

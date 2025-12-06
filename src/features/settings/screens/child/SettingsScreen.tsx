@@ -20,6 +20,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase, signOut, getCurrentUser } from '../../../../shared/services/supabase';
@@ -47,6 +48,7 @@ interface UserProfile {
 type NavigationProp = NativeStackNavigationProp<ChildStackParamList, 'Settings'>;
 
 const ChildSettingsScreen = () => {
+  const { t } = useTranslation(['settings', 'common']);
   const navigation = useNavigation<NavigationProp>();
   const { isDarkMode, themeMode, setTheme } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
@@ -106,9 +108,11 @@ const ChildSettingsScreen = () => {
       if (enabled) {
         const hasPermission = await requestNotificationPermissions();
         if (!hasPermission) {
-          Alert.alert('알림 권한 필요', '알림을 받으려면 설정에서 알림 권한을 허용해주세요.', [
-            { text: '확인' },
-          ]);
+          Alert.alert(
+            t('settings:notification.permissionRequired'),
+            t('settings:notification.permissionMessage'),
+            [{ text: t('common:button.confirm') }]
+          );
           return;
         }
       }
@@ -124,10 +128,10 @@ const ChildSettingsScreen = () => {
         await updateNotificationPreferences({ missed_medication_alert: false });
       }
     } catch (error) {
-      console.error('알림 설정 저장 실패:', error);
+      console.error('Notification settings save failed:', error);
       // Revert on error
       setNotificationsEnabled(!enabled);
-      Alert.alert('오류', '설정을 저장할 수 없습니다.');
+      Alert.alert(t('common:error.generic'), t('settings:error.saveFailed'));
     } finally {
       setIsSavingPrefs(false);
     }
@@ -144,9 +148,11 @@ const ChildSettingsScreen = () => {
       if (enabled && !notificationsEnabled) {
         const hasPermission = await requestNotificationPermissions();
         if (!hasPermission) {
-          Alert.alert('알림 권한 필요', '미복용 알림을 받으려면 알림 권한을 허용해주세요.', [
-            { text: '확인' },
-          ]);
+          Alert.alert(
+            t('settings:notification.permissionRequired'),
+            t('settings:notification.missedPermissionMessage'),
+            [{ text: t('common:button.confirm') }]
+          );
           return;
         }
         setNotificationsEnabled(true);
@@ -158,10 +164,10 @@ const ChildSettingsScreen = () => {
       // Save to database
       await updateNotificationPreferences({ missed_medication_alert: enabled });
     } catch (error) {
-      console.error('미복용 알림 설정 저장 실패:', error);
+      console.error('Missed alert settings save failed:', error);
       // Revert on error
       setMissedAlertEnabled(!enabled);
-      Alert.alert('오류', '설정을 저장할 수 없습니다.');
+      Alert.alert(t('common:error.generic'), t('settings:error.saveFailed'));
     } finally {
       setIsSavingPrefs(false);
     }
@@ -172,23 +178,23 @@ const ChildSettingsScreen = () => {
   };
 
   const handleRemoveConnection = (connection: FamilyConnection) => {
-    const parentName = connection.parent?.name || '부모님';
+    const parentName = connection.parent?.name || t('settings:family.parent');
     Alert.alert(
-      '연결 해제',
-      `${parentName}님과의 연결을 해제하시겠습니까?\n\n연결 해제 시 부모님의 복약 현황을 확인할 수 없습니다.`,
+      t('settings:family.disconnectTitle'),
+      t('settings:family.disconnectParentMessage', { name: parentName }),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('common:button.cancel'), style: 'cancel' },
         {
-          text: '해제',
+          text: t('settings:family.disconnect'),
           style: 'destructive',
           onPress: async () => {
             try {
               await removeFamilyConnection(connection.id);
               await loadData();
-              Alert.alert('완료', '연결이 해제되었습니다.');
+              Alert.alert(t('common:button.done'), t('settings:family.disconnected'));
             } catch (error) {
               console.error('Error removing connection:', error);
-              Alert.alert('오류', '연결 해제에 실패했습니다.');
+              Alert.alert(t('common:error.generic'), t('settings:family.disconnectFailed'));
             }
           },
         },
@@ -197,17 +203,17 @@ const ChildSettingsScreen = () => {
   };
 
   const handleLogout = () => {
-    Alert.alert('로그아웃', '정말 로그아웃 하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
+    Alert.alert(t('settings:button.signOut'), t('settings:message.signOutConfirm'), [
+      { text: t('common:button.cancel'), style: 'cancel' },
       {
-        text: '로그아웃',
+        text: t('settings:button.signOut'),
         style: 'destructive',
         onPress: async () => {
           try {
             await signOut();
           } catch (error) {
-            console.error('로그아웃 실패:', error);
-            Alert.alert('오류', '로그아웃에 실패했습니다.');
+            console.error('Sign out failed:', error);
+            Alert.alert(t('common:error.generic'), t('settings:error.signOutFailed'));
           }
         },
       },
@@ -217,12 +223,12 @@ const ChildSettingsScreen = () => {
   const handleViewTutorial = async () => {
     try {
       await resetOnboardingStatus('child');
-      Alert.alert('튜토리얼 다시 보기', '다음 로그인 시 튜토리얼이 다시 표시됩니다.', [
-        { text: '확인' },
+      Alert.alert(t('settings:tutorial.title'), t('settings:tutorial.message'), [
+        { text: t('common:button.confirm') },
       ]);
     } catch (error) {
       console.error('Error resetting onboarding:', error);
-      Alert.alert('오류', '설정을 변경할 수 없습니다.');
+      Alert.alert(t('common:error.generic'), t('settings:error.saveFailed'));
     }
   };
 
@@ -232,7 +238,7 @@ const ChildSettingsScreen = () => {
       await setTheme(mode);
     } catch (error) {
       console.error('Error saving theme setting:', error);
-      Alert.alert('오류', '테마 설정을 저장할 수 없습니다.');
+      Alert.alert(t('common:error.generic'), t('settings:error.themeSaveFailed'));
     } finally {
       setIsSavingPrefs(false);
     }
@@ -241,13 +247,13 @@ const ChildSettingsScreen = () => {
   const getThemeLabel = (mode: ThemeMode): string => {
     switch (mode) {
       case 'light':
-        return '라이트';
+        return t('settings:theme.light');
       case 'dark':
-        return '다크';
+        return t('settings:theme.dark');
       case 'system':
-        return '시스템 설정';
+        return t('settings:theme.system');
       default:
-        return '시스템 설정';
+        return t('settings:theme.system');
     }
   };
 
@@ -262,9 +268,11 @@ const ChildSettingsScreen = () => {
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
       <ScrollView className="flex-1">
-        {/* 프로필 섹션 */}
+        {/* Profile section */}
         <View className="bg-white mt-4 px-4 py-3 border-t border-b border-gray-200">
-          <Text className="text-xs font-semibold text-gray-500 mb-3 uppercase">프로필</Text>
+          <Text className="text-xs font-semibold text-gray-500 mb-3 uppercase">
+            {t('settings:title.profile')}
+          </Text>
           <View className="flex-row items-center py-2">
             <View className="w-[60px] h-[60px] rounded-full bg-primary justify-center items-center">
               <Text className="text-2xl font-bold text-white">
@@ -273,17 +281,19 @@ const ChildSettingsScreen = () => {
             </View>
             <View className="ml-4 flex-1">
               <Text className="text-lg font-semibold text-gray-900">
-                {profile?.name || '이름 없음'}
+                {profile?.name || t('settings:profile.noName')}
               </Text>
               <Text className="text-sm text-gray-500 mt-0.5">{profile?.email}</Text>
               <View className="mt-1.5 bg-primary-100 px-2.5 py-1 rounded-xl self-start">
-                <Text className="text-xs font-semibold text-primary">자녀</Text>
+                <Text className="text-xs font-semibold text-primary">
+                  {t('settings:family.child')}
+                </Text>
               </View>
             </View>
             <TouchableOpacity
               className="w-10 h-10 rounded-full bg-gray-100 justify-center items-center"
               onPress={() => navigation.navigate('ProfileEdit')}
-              accessibilityLabel="프로필 수정"
+              accessibilityLabel={t('settings:button.editProfile')}
               accessibilityRole="button"
             >
               <Ionicons name="create-outline" size={20} color="#6B7280" />
@@ -291,7 +301,7 @@ const ChildSettingsScreen = () => {
           </View>
         </View>
 
-        {/* 알림 설정 섹션 */}
+        {/* Notification settings section */}
         <View
           className={`mt-4 px-4 py-3 border-t border-b ${
             isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
@@ -302,7 +312,7 @@ const ChildSettingsScreen = () => {
               isDarkMode ? 'text-gray-400' : 'text-gray-500'
             }`}
           >
-            알림 설정
+            {t('settings:title.notifications')}
           </Text>
 
           <View
@@ -317,7 +327,7 @@ const ChildSettingsScreen = () => {
                 color={isDarkMode ? '#9CA3AF' : '#6B7280'}
               />
               <Text className={`text-base ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-                푸시 알림
+                {t('settings:notification.pushNotifications')}
               </Text>
             </View>
             <Switch
@@ -342,12 +352,12 @@ const ChildSettingsScreen = () => {
               />
               <View>
                 <Text className={`text-base ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-                  미복용 알림
+                  {t('settings:notification.missedAlert')}
                 </Text>
                 <Text
                   className={`text-xs mt-0.5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}
                 >
-                  부모님이 약을 놓치면 알림을 받습니다
+                  {t('settings:notification.missedAlertDescription')}
                 </Text>
               </View>
             </View>
@@ -361,7 +371,7 @@ const ChildSettingsScreen = () => {
           </View>
         </View>
 
-        {/* 테마 설정 섹션 */}
+        {/* Theme settings section */}
         <View
           className={`mt-4 px-4 py-3 border-t border-b ${
             isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
@@ -372,7 +382,7 @@ const ChildSettingsScreen = () => {
               isDarkMode ? 'text-gray-400' : 'text-gray-500'
             }`}
           >
-            화면 테마
+            {t('settings:title.theme')}
           </Text>
 
           {/* Light mode option */}
@@ -450,7 +460,7 @@ const ChildSettingsScreen = () => {
                 <Text
                   className={`text-xs mt-0.5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}
                 >
-                  기기 설정에 따라 자동 변경
+                  {t('settings:theme.systemDescription')}
                 </Text>
               </View>
             </View>
@@ -468,9 +478,11 @@ const ChildSettingsScreen = () => {
           </TouchableOpacity>
         </View>
 
-        {/* 가족 연결 섹션 */}
+        {/* Family connection section */}
         <View className="bg-white mt-4 px-4 py-3 border-t border-b border-gray-200">
-          <Text className="text-xs font-semibold text-gray-500 mb-3 uppercase">가족 연결</Text>
+          <Text className="text-xs font-semibold text-gray-500 mb-3 uppercase">
+            {t('settings:section.family')}
+          </Text>
 
           {/* Connected parent list */}
           {connectedParent ? (
@@ -487,7 +499,9 @@ const ChildSettingsScreen = () => {
                   </Text>
                   <Text className="text-xs text-gray-500 mt-0.5">{connectedParent.email}</Text>
                   <View className="mt-1.5 bg-success-100 px-2.5 py-1 rounded-xl self-start">
-                    <Text className="text-xs font-semibold text-success-600">부모님</Text>
+                    <Text className="text-xs font-semibold text-success-600">
+                      {t('settings:family.parent')}
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -497,7 +511,9 @@ const ChildSettingsScreen = () => {
                   onPress={() => handleRemoveConnection(familyConnections[0])}
                 >
                   <Ionicons name="unlink" size={18} color="#EF4444" />
-                  <Text className="text-sm font-semibold text-error">연결 해제</Text>
+                  <Text className="text-sm font-semibold text-error">
+                    {t('settings:family.disconnect')}
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -505,10 +521,10 @@ const ChildSettingsScreen = () => {
             <View className="items-center py-6 bg-gray-50 rounded-xl mb-3 border border-gray-200 border-dashed">
               <Ionicons name="people-outline" size={48} color="#D1D5DB" />
               <Text className="text-base font-semibold text-gray-500 mt-3">
-                연결된 부모님이 없습니다
+                {t('settings:family.noParent')}
               </Text>
               <Text className="text-xs text-gray-400 mt-1 text-center">
-                부모님의 초대 코드를 입력하여 연결하세요
+                {t('settings:family.enterCodeHint')}
               </Text>
             </View>
           )}
@@ -519,14 +535,18 @@ const ChildSettingsScreen = () => {
             onPress={handleEnterCode}
           >
             <Ionicons name="keypad-outline" size={24} color="#3B82F6" />
-            <Text className="flex-1 text-base font-semibold text-primary">초대 코드 입력</Text>
+            <Text className="flex-1 text-base font-semibold text-primary">
+              {t('settings:family.enterCode')}
+            </Text>
             <Ionicons name="chevron-forward" size={20} color="#3B82F6" />
           </TouchableOpacity>
         </View>
 
-        {/* 기타 섹션 */}
+        {/* Other section */}
         <View className="bg-white mt-4 px-4 py-3 border-t border-b border-gray-200">
-          <Text className="text-xs font-semibold text-gray-500 mb-3 uppercase">기타</Text>
+          <Text className="text-xs font-semibold text-gray-500 mb-3 uppercase">
+            {t('settings:section.support')}
+          </Text>
 
           <TouchableOpacity
             className="flex-row items-center justify-between py-3.5 border-b border-gray-100"
@@ -534,7 +554,7 @@ const ChildSettingsScreen = () => {
           >
             <View className="flex-row items-center gap-3">
               <Ionicons name="book-outline" size={24} color="#6B7280" />
-              <Text className="text-base text-gray-900">튜토리얼 다시 보기</Text>
+              <Text className="text-base text-gray-900">{t('settings:tutorial.viewTitle')}</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
@@ -542,7 +562,7 @@ const ChildSettingsScreen = () => {
           <TouchableOpacity className="flex-row items-center justify-between py-3.5 border-b border-gray-100">
             <View className="flex-row items-center gap-3">
               <Ionicons name="help-circle-outline" size={24} color="#6B7280" />
-              <Text className="text-base text-gray-900">도움말</Text>
+              <Text className="text-base text-gray-900">{t('settings:support.help')}</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
@@ -550,7 +570,7 @@ const ChildSettingsScreen = () => {
           <TouchableOpacity className="flex-row items-center justify-between py-3.5 border-b border-gray-100">
             <View className="flex-row items-center gap-3">
               <Ionicons name="document-text-outline" size={24} color="#6B7280" />
-              <Text className="text-base text-gray-900">이용약관</Text>
+              <Text className="text-base text-gray-900">{t('settings:about.terms')}</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
@@ -558,23 +578,25 @@ const ChildSettingsScreen = () => {
           <TouchableOpacity className="flex-row items-center justify-between py-3.5 border-b border-gray-100">
             <View className="flex-row items-center gap-3">
               <Ionicons name="shield-checkmark-outline" size={24} color="#6B7280" />
-              <Text className="text-base text-gray-900">개인정보 처리방침</Text>
+              <Text className="text-base text-gray-900">{t('settings:about.privacy')}</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
         </View>
 
-        {/* 로그아웃 버튼 */}
+        {/* Logout button */}
         <TouchableOpacity
           className="flex-row items-center justify-center gap-2 mt-6 mx-4 py-3.5 bg-error-50 rounded-xl border border-error-200"
           onPress={handleLogout}
         >
           <Ionicons name="log-out-outline" size={24} color="#EF4444" />
-          <Text className="text-base font-semibold text-error">로그아웃</Text>
+          <Text className="text-base font-semibold text-error">{t('settings:button.signOut')}</Text>
         </TouchableOpacity>
 
-        {/* 앱 버전 */}
-        <Text className="text-center text-xs text-gray-400 mt-6 mb-8">PillCare v1.0.0</Text>
+        {/* App version */}
+        <Text className="text-center text-xs text-gray-400 mt-6 mb-8">
+          {t('common:appName')} v1.0.0
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );

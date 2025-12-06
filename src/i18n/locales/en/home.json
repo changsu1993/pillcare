@@ -1,0 +1,63 @@
+{
+  "parent": {
+    "title": "Today's Medications",
+    "greeting": "Hello, {{name}}",
+    "noMedications": "No medications for today",
+    "addMedication": "Add Medication",
+    "viewHistory": "View History"
+  },
+  "child": {
+    "title": "Parent's Medication Status",
+    "greeting": "{{name}}'s Status",
+    "todayMedications": "Today's Medications",
+    "adherenceRate": "Today's Adherence",
+    "callParent": "Call Parent",
+    "noParent": "No parent connected",
+    "connectParent": "Connect with Parent",
+    "noParentTitle": "Connect with your parent",
+    "noParentMessage": "To view your parent's medication status,\nplease connect with them first"
+  },
+  "stats": {
+    "taken": "Taken",
+    "pending": "Pending",
+    "missed": "Missed",
+    "total": "Total"
+  },
+  "timeline": {
+    "title": "Medication Timeline",
+    "noData": "No medications scheduled for today"
+  },
+  "date": {
+    "today": "Today",
+    "format": "MMM D (ddd)"
+  },
+  "alert": {
+    "noPhoneNumber": "No Phone Number",
+    "noPhoneMessage": "Your parent's phone number is not registered"
+  },
+  "error": {
+    "loadMedications": "Unable to load medication information",
+    "loadData": "Unable to load data",
+    "cannotCall": "Unable to make a call"
+  },
+  "notification": {
+    "permissionRequired": "Notification permission required",
+    "permissionMessage": "Please allow notification permissions in settings to receive medication reminders.",
+    "later": "Later"
+  },
+  "dev": {
+    "title": "Developer Tools",
+    "testNotification": "Test Notification",
+    "testNotificationMessage": "A notification will appear in 5 seconds.",
+    "testNotificationFailed": "Failed to send test notification.",
+    "scheduledNotifications": "Scheduled Notifications",
+    "scheduledNotificationsCount": "Currently {{count}} notifications are scheduled.",
+    "checkScheduled": "Check Scheduled"
+  },
+  "accessibility": {
+    "viewDetails": "view details",
+    "medicationCardHint": "Tap to view medication details",
+    "addMedicationHint": "Tap to add a new medication",
+    "viewHistoryHint": "Tap to view medication history calendar"
+  }
+}

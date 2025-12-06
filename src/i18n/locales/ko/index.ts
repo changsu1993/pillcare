@@ -1,0 +1,26 @@
+/**
+ * Korean (ko) Translation Resources
+ *
+ * Base language for PillCare app.
+ * All other languages should follow this structure.
+ */
+
+import common from './common.json';
+import auth from './auth.json';
+import medication from './medication.json';
+import family from './family.json';
+import settings from './settings.json';
+import onboarding from './onboarding.json';
+import home from './home.json';
+import reports from './reports.json';
+
+export default {
+  common,
+  auth,
+  medication,
+  family,
+  settings,
+  onboarding,
+  home,
+  reports,
+};

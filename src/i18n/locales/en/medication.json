@@ -1,0 +1,80 @@
+{
+  "title": {
+    "list": "Medications",
+    "add": "Add Medication",
+    "edit": "Edit Medication",
+    "detail": "Medication Details",
+    "calendar": "Medication History",
+    "reminder": "Medication Reminder"
+  },
+  "label": {
+    "name": "Medication Name",
+    "dosage": "Dosage",
+    "frequency": "Frequency",
+    "reminderTime": "Reminder Time",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "notes": "Notes",
+    "quantity": "Remaining Quantity",
+    "refillAlert": "Refill Alert"
+  },
+  "placeholder": {
+    "name": "Enter medication name",
+    "dosage": "e.g., 1 tablet, 5ml",
+    "notes": "Enter notes (optional)"
+  },
+  "frequency": {
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "asNeeded": "As Needed"
+  },
+  "status": {
+    "taken": "Taken",
+    "pending": "Pending",
+    "missed": "Missed",
+    "skipped": "Skipped"
+  },
+  "button": {
+    "add": "+ Add Medication",
+    "took": "I took it",
+    "skip": "Skip",
+    "viewCalendar": "View History",
+    "addTime": "Add Time"
+  },
+  "alert": {
+    "deleteTitle": "Delete Medication",
+    "deleteMessage": "Are you sure you want to delete '{{name}}'?\nThis action cannot be undone.",
+    "skipTitle": "Skip Medication",
+    "skipMessage": "Please select a reason for skipping"
+  },
+  "skipReason": {
+    "sideEffect": "Side Effect",
+    "forgot": "Forgot",
+    "noMedicine": "Out of Medicine",
+    "doctorAdvice": "Doctor's Advice",
+    "other": "Other"
+  },
+  "empty": {
+    "title": "No medications registered",
+    "message": "Add a medication to start tracking",
+    "today": "No medications\nfor today"
+  },
+  "refill": {
+    "title": "Low Stock Alert",
+    "message": "{{name}} has {{count}} doses remaining",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock"
+  },
+  "notification": {
+    "title": "Medication Time",
+    "body": "Time to take {{name}}",
+    "permissionTitle": "Notification Permission Required",
+    "permissionMessage": "Please enable notifications to receive medication reminders.",
+    "goToSettings": "Go to Settings"
+  },
+  "message": {
+    "saved": "Saved successfully",
+    "deleted": "Deleted successfully",
+    "allScheduled": "All medication reminders have been scheduled"
+  }
+}

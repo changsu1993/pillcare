@@ -23,6 +23,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import {
   getTodayScheduledMedications,
   scheduleAllMedicationNotifications,
@@ -46,48 +47,62 @@ type Props = ParentScreenProps<'Home'>;
 interface MedicationCardProps {
   medication: ScheduledMedication;
   onPress: (medicationId: string) => void;
+  takenText: string;
+  pendingText: string;
+  accessibilityViewDetails: string;
+  accessibilityHintText: string;
 }
 
-const MedicationCard = memo(({ medication, onPress }: MedicationCardProps) => {
-  const handlePress = useCallback(() => {
-    onPress(medication.medication_id);
-  }, [medication.medication_id, onPress]);
+const MedicationCard = memo(
+  ({
+    medication,
+    onPress,
+    takenText,
+    pendingText,
+    accessibilityViewDetails,
+    accessibilityHintText,
+  }: MedicationCardProps) => {
+    const handlePress = useCallback(() => {
+      onPress(medication.medication_id);
+    }, [medication.medication_id, onPress]);
 
-  return (
-    <TouchableOpacity
-      className={`bg-white rounded-2xl p-6 border-[3px] shadow-sm ${
-        medication.taken ? 'border-success opacity-60' : 'border-yellow-400'
-      }`}
-      onPress={handlePress}
-      activeOpacity={0.7}
-      accessibilityLabel={`${medication.medication_name} 상세 보기`}
-      accessibilityHint="탭하여 약 상세 정보를 확인합니다"
-      accessibilityRole="button"
-    >
-      {/* Medication name */}
-      <Text className="text-3xl font-bold text-gray-900 mb-2">{medication.medication_name}</Text>
+    return (
+      <TouchableOpacity
+        className={`bg-white rounded-2xl p-6 border-[3px] shadow-sm ${
+          medication.taken ? 'border-success opacity-60' : 'border-yellow-400'
+        }`}
+        onPress={handlePress}
+        activeOpacity={0.7}
+        accessibilityLabel={`${medication.medication_name} ${accessibilityViewDetails}`}
+        accessibilityHint={accessibilityHintText}
+        accessibilityRole="button"
+      >
+        {/* Medication name */}
+        <Text className="text-3xl font-bold text-gray-900 mb-2">{medication.medication_name}</Text>
 
-      {/* Dosage */}
-      <Text className="text-2xl text-gray-600 mb-4">{medication.dosage}</Text>
+        {/* Dosage */}
+        <Text className="text-2xl text-gray-600 mb-4">{medication.dosage}</Text>
 
-      {/* Status */}
-      <View className="mb-3">
-        {medication.taken ? (
-          <Text className="text-2xl font-semibold text-success">복용 완료</Text>
-        ) : (
-          <Text className="text-2xl font-semibold text-warning">복용 대기 중</Text>
-        )}
-      </View>
+        {/* Status */}
+        <View className="mb-3">
+          {medication.taken ? (
+            <Text className="text-2xl font-semibold text-success">{takenText}</Text>
+          ) : (
+            <Text className="text-2xl font-semibold text-warning">{pendingText}</Text>
+          )}
+        </View>
 
-      {/* Scheduled time */}
-      <Text className="text-xl text-gray-700">{medication.scheduled_time}</Text>
-    </TouchableOpacity>
-  );
-});
+        {/* Scheduled time */}
+        <Text className="text-xl text-gray-700">{medication.scheduled_time}</Text>
+      </TouchableOpacity>
+    );
+  }
+);
 
 MedicationCard.displayName = 'MedicationCard';
 
 const ParentHomeScreen = ({ navigation }: Props) => {
+  const { t } = useTranslation(['home', 'common', 'medication']);
   const { isDarkMode } = useTheme();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [scheduledMedications, setScheduledMedications] = useState<ScheduledMedication[]>([]);
@@ -146,25 +161,27 @@ const ParentHomeScreen = ({ navigation }: Props) => {
       setHasNotificationPermission(hasPermission);
 
       if (!hasPermission) {
-        // 권한이 없으면 안내 메시지 표시 및 설정으로 이동 옵션 제공
-        Alert.alert('알림 권한 필요', '약 복용 알림을 받으려면 알림 권한이 필요합니다.', [
-          { text: '나중에', style: 'cancel' },
-          {
-            text: '설정으로 이동',
-            onPress: () => Linking.openSettings(),
-          },
-        ]);
+        Alert.alert(
+          t('medication:notification.permissionTitle'),
+          t('medication:notification.permissionMessage'),
+          [
+            { text: t('home:notification.later'), style: 'cancel' },
+            {
+              text: t('medication:notification.goToSettings'),
+              onPress: () => Linking.openSettings(),
+            },
+          ]
+        );
       } else {
-        // 권한이 있으면 모든 약의 알림 예약
         try {
           await scheduleAllMedicationNotifications();
-          console.log('모든 약의 알림이 예약되었습니다.');
+          console.log(t('medication:message.allScheduled'));
         } catch (error) {
-          console.error('알림 예약 실패:', error);
+          console.error('Notification scheduling failed:', error);
         }
       }
     } catch (error) {
-      console.error('알림 권한 확인 실패:', error);
+      console.error('Notification permission check failed:', error);
     }
   };
 
@@ -180,36 +197,42 @@ const ParentHomeScreen = ({ navigation }: Props) => {
       setAllMedications(medications);
     } catch (err) {
       console.error('Error loading medications:', err);
-      setError('복약 정보를 불러올 수 없습니다');
+      setError(t('home:error.loadMedications'));
     } finally {
       setIsLoading(false);
     }
   };
 
   /**
-   * 테스트 알림 전송 (개발/디버깅용)
+   * Test notification (dev/debug only)
    */
   const handleTestNotification = async (): Promise<void> => {
     try {
       await sendTestNotification();
-      Alert.alert('테스트 알림', '5초 후에 알림이 표시됩니다.', [{ text: '확인' }]);
+      Alert.alert(t('home:dev.testNotification'), t('home:dev.testNotificationMessage'), [
+        { text: t('common:button.confirm') },
+      ]);
     } catch (error) {
-      console.error('테스트 알림 실패:', error);
-      Alert.alert('오류', '테스트 알림 전송에 실패했습니다.', [{ text: '확인' }]);
+      console.error('Test notification failed:', error);
+      Alert.alert(t('common:error.generic'), t('home:dev.testNotificationFailed'), [
+        { text: t('common:button.confirm') },
+      ]);
     }
   };
 
   /**
-   * 예약된 알림 확인 (개발/디버깅용)
+   * Check scheduled notifications (dev/debug only)
    */
   const handleCheckScheduledNotifications = async (): Promise<void> => {
     try {
       const notifications = await getAllScheduledNotifications();
-      Alert.alert('예약된 알림', `현재 ${notifications.length}개의 알림이 예약되어 있습니다.`, [
-        { text: '확인' },
-      ]);
+      Alert.alert(
+        t('home:dev.scheduledNotifications'),
+        t('home:dev.scheduledNotificationsCount', { count: notifications.length }),
+        [{ text: t('common:button.confirm') }]
+      );
     } catch (error) {
-      console.error('예약된 알림 확인 실패:', error);
+      console.error('Check scheduled notifications failed:', error);
     }
   };
 
@@ -220,7 +243,7 @@ const ParentHomeScreen = ({ navigation }: Props) => {
       >
         <ActivityIndicator size="large" color="#22C55E" />
         <Text className={`text-xl mt-4 ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-          불러오는 중...
+          {t('common:loading')}
         </Text>
       </View>
     );
@@ -236,7 +259,7 @@ const ParentHomeScreen = ({ navigation }: Props) => {
           className="bg-blue-500 px-8 py-4 rounded-xl"
           onPress={loadTodayMedications}
         >
-          <Text className="text-xl font-semibold text-white">다시 시도</Text>
+          <Text className="text-xl font-semibold text-white">{t('common:button.retry')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -247,7 +270,7 @@ const ParentHomeScreen = ({ navigation }: Props) => {
     return (
       <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, gap: 16 }}>
-          {/* 알림 권한 경고 (권한이 없을 때만 표시) */}
+          {/* Notification permission warning */}
           {!hasNotificationPermission && (
             <View
               className={`rounded-xl p-5 mb-4 border-2 border-warning ${isDarkMode ? 'bg-yellow-900/30' : 'bg-yellow-100'}`}
@@ -255,23 +278,25 @@ const ParentHomeScreen = ({ navigation }: Props) => {
               <Text
                 className={`text-xl font-bold mb-2 text-center ${isDarkMode ? 'text-yellow-200' : 'text-yellow-900'}`}
               >
-                ⚠️ 알림 권한이 필요합니다
+                {t('home:notification.permissionRequired')}
               </Text>
               <Text
                 className={`text-base mb-4 text-center leading-5 ${isDarkMode ? 'text-yellow-300' : 'text-yellow-900'}`}
               >
-                약 복용 알림을 받으려면 설정에서 권한을 허용해주세요.
+                {t('home:notification.permissionMessage')}
               </Text>
               <TouchableOpacity
                 className="bg-warning px-6 py-3 rounded-lg self-center"
                 onPress={handleOpenSettings}
               >
-                <Text className="text-base font-semibold text-white">설정으로 이동</Text>
+                <Text className="text-base font-semibold text-white">
+                  {t('medication:notification.goToSettings')}
+                </Text>
               </TouchableOpacity>
             </View>
           )}
 
-          {/* 개발/테스트용 버튼 - SECURITY: Only show in development mode */}
+          {/* Dev/test buttons - SECURITY: Only show in development mode */}
           {/* Reference: OWASP - Security Misconfiguration (A05:2021) */}
           {__DEV__ && (
             <View
@@ -280,20 +305,24 @@ const ParentHomeScreen = ({ navigation }: Props) => {
               <Text
                 className={`text-sm font-semibold mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
               >
-                개발자 도구
+                {t('home:dev.title')}
               </Text>
               <View className="flex-row gap-2">
                 <TouchableOpacity
                   className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
                   onPress={handleTestNotification}
                 >
-                  <Text className="text-xs font-semibold text-white">테스트 알림</Text>
+                  <Text className="text-xs font-semibold text-white">
+                    {t('home:dev.testNotification')}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
                   onPress={handleCheckScheduledNotifications}
                 >
-                  <Text className="text-xs font-semibold text-white">예약된 알림 확인</Text>
+                  <Text className="text-xs font-semibold text-white">
+                    {t('home:dev.checkScheduled')}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -304,32 +333,33 @@ const ParentHomeScreen = ({ navigation }: Props) => {
             <Text
               className={`text-3xl text-center leading-10 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
             >
-              오늘 드실 약이{'\n'}
-              없습니다
+              {t('medication:empty.today')}
             </Text>
           </View>
 
-          {/* 약 추가하기 버튼 */}
+          {/* Add medication button */}
           <TouchableOpacity
             className="bg-success rounded-2xl py-6 px-8 items-center justify-center min-h-[72px] mt-4 shadow-lg"
             onPress={handleAddMedication}
-            accessibilityLabel="약 추가하기"
-            accessibilityHint="탭하여 새로운 약을 등록합니다"
+            accessibilityLabel={t('home:parent.addMedication')}
+            accessibilityHint={t('home:accessibility.addMedicationHint')}
             accessibilityRole="button"
           >
-            <Text className="text-3xl font-bold text-white">+ 약 추가하기</Text>
+            <Text className="text-3xl font-bold text-white">{t('medication:button.add')}</Text>
           </TouchableOpacity>
 
-          {/* 복약 이력 보기 버튼 */}
+          {/* View medication history button */}
           <TouchableOpacity
             className="bg-blue-500 rounded-2xl py-6 px-8 items-center justify-center min-h-[72px] mt-4 shadow-lg flex-row"
             onPress={handleViewCalendar}
-            accessibilityLabel="복약 이력 보기"
-            accessibilityHint="탭하여 복약 이력 캘린더를 확인합니다"
+            accessibilityLabel={t('home:parent.viewHistory')}
+            accessibilityHint={t('home:accessibility.viewHistoryHint')}
             accessibilityRole="button"
           >
             <Text className="text-4xl mr-3">&#128197;</Text>
-            <Text className="text-3xl font-bold text-white">복약 이력 보기</Text>
+            <Text className="text-3xl font-bold text-white">
+              {t('medication:button.viewCalendar')}
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
@@ -339,7 +369,7 @@ const ParentHomeScreen = ({ navigation }: Props) => {
   return (
     <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, gap: 16 }}>
-        {/* 알림 권한 경고 (권한이 없을 때만 표시) */}
+        {/* Notification permission warning */}
         {!hasNotificationPermission && (
           <View
             className={`rounded-xl p-5 mb-4 border-2 border-warning ${isDarkMode ? 'bg-yellow-900/30' : 'bg-yellow-100'}`}
@@ -347,23 +377,25 @@ const ParentHomeScreen = ({ navigation }: Props) => {
             <Text
               className={`text-xl font-bold mb-2 text-center ${isDarkMode ? 'text-yellow-200' : 'text-yellow-900'}`}
             >
-              &#9888;&#65039; 알림 권한이 필요합니다
+              {t('home:notification.permissionRequired')}
             </Text>
             <Text
               className={`text-base mb-4 text-center leading-5 ${isDarkMode ? 'text-yellow-300' : 'text-yellow-900'}`}
             >
-              약 복용 알림을 받으려면 설정에서 권한을 허용해주세요.
+              {t('home:notification.permissionMessage')}
             </Text>
             <TouchableOpacity
               className="bg-warning px-6 py-3 rounded-lg self-center"
               onPress={handleOpenSettings}
             >
-              <Text className="text-base font-semibold text-white">설정으로 이동</Text>
+              <Text className="text-base font-semibold text-white">
+                {t('medication:notification.goToSettings')}
+              </Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* 개발/테스트용 버튼 - SECURITY: Only show in development mode */}
+        {/* Dev/test buttons - SECURITY: Only show in development mode */}
         {/* Reference: OWASP - Security Misconfiguration (A05:2021) */}
         {__DEV__ && (
           <View
@@ -372,20 +404,24 @@ const ParentHomeScreen = ({ navigation }: Props) => {
             <Text
               className={`text-sm font-semibold mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
             >
-              개발자 도구
+              {t('home:dev.title')}
             </Text>
             <View className="flex-row gap-2">
               <TouchableOpacity
                 className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
                 onPress={handleTestNotification}
               >
-                <Text className="text-xs font-semibold text-white">테스트 알림</Text>
+                <Text className="text-xs font-semibold text-white">
+                  {t('home:dev.testNotification')}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 className="flex-1 bg-blue-500 py-2.5 rounded-lg items-center"
                 onPress={handleCheckScheduledNotifications}
               >
-                <Text className="text-xs font-semibold text-white">예약된 알림 확인</Text>
+                <Text className="text-xs font-semibold text-white">
+                  {t('home:dev.checkScheduled')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -402,30 +438,40 @@ const ParentHomeScreen = ({ navigation }: Props) => {
 
         {/* Medication list - using memoized cards */}
         {scheduledMedications.map((med) => (
-          <MedicationCard key={med.id} medication={med} onPress={handleMedicationPress} />
+          <MedicationCard
+            key={med.id}
+            medication={med}
+            onPress={handleMedicationPress}
+            takenText={t('medication:status.taken')}
+            pendingText={t('medication:status.pending')}
+            accessibilityViewDetails={t('home:accessibility.viewDetails')}
+            accessibilityHintText={t('home:accessibility.medicationCardHint')}
+          />
         ))}
 
-        {/* 약 추가하기 버튼 */}
+        {/* Add medication button */}
         <TouchableOpacity
           className="bg-success rounded-2xl py-6 px-8 items-center justify-center min-h-[72px] mt-4 shadow-lg"
           onPress={handleAddMedication}
-          accessibilityLabel="약 추가하기"
-          accessibilityHint="탭하여 새로운 약을 등록합니다"
+          accessibilityLabel={t('home:parent.addMedication')}
+          accessibilityHint={t('home:accessibility.addMedicationHint')}
           accessibilityRole="button"
         >
-          <Text className="text-3xl font-bold text-white">+ 약 추가하기</Text>
+          <Text className="text-3xl font-bold text-white">{t('medication:button.add')}</Text>
         </TouchableOpacity>
 
-        {/* 복약 이력 보기 버튼 */}
+        {/* View medication history button */}
         <TouchableOpacity
           className="bg-blue-500 rounded-2xl py-6 px-8 items-center justify-center min-h-[72px] mt-4 shadow-lg flex-row"
           onPress={handleViewCalendar}
-          accessibilityLabel="복약 이력 보기"
-          accessibilityHint="탭하여 복약 이력 캘린더를 확인합니다"
+          accessibilityLabel={t('home:parent.viewHistory')}
+          accessibilityHint={t('home:accessibility.viewHistoryHint')}
           accessibilityRole="button"
         >
           <Text className="text-4xl mr-3">&#128197;</Text>
-          <Text className="text-3xl font-bold text-white">복약 이력 보기</Text>
+          <Text className="text-3xl font-bold text-white">
+            {t('medication:button.viewCalendar')}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

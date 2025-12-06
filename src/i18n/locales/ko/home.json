@@ -1,0 +1,63 @@
+{
+  "parent": {
+    "title": "오늘의 약",
+    "greeting": "{{name}}님, 안녕하세요",
+    "noMedications": "오늘 드실 약이 없습니다",
+    "addMedication": "약 추가하기",
+    "viewHistory": "복약 이력 보기"
+  },
+  "child": {
+    "title": "부모님 복약 현황",
+    "greeting": "{{name}}님의 복약 현황",
+    "todayMedications": "오늘의 복약",
+    "adherenceRate": "오늘 복약률",
+    "callParent": "부모님께 전화",
+    "noParent": "연결된 부모님이 없습니다",
+    "connectParent": "부모님과 연결하기",
+    "noParentTitle": "부모님을 연결해주세요",
+    "noParentMessage": "부모님의 복약 현황을 확인하려면\n먼저 가족 연결을 해주세요"
+  },
+  "stats": {
+    "taken": "복용",
+    "pending": "대기",
+    "missed": "미복용",
+    "total": "전체"
+  },
+  "timeline": {
+    "title": "복약 타임라인",
+    "noData": "오늘 예정된 복약이 없습니다"
+  },
+  "date": {
+    "today": "오늘",
+    "format": "M월 D일 (ddd)"
+  },
+  "alert": {
+    "noPhoneNumber": "전화번호 없음",
+    "noPhoneMessage": "부모님의 전화번호가 등록되어 있지 않습니다"
+  },
+  "error": {
+    "loadMedications": "복약 정보를 불러올 수 없습니다",
+    "loadData": "데이터를 불러올 수 없습니다",
+    "cannotCall": "전화를 걸 수 없습니다"
+  },
+  "notification": {
+    "permissionRequired": "알림 권한이 필요합니다",
+    "permissionMessage": "약 복용 알림을 받으려면 설정에서 권한을 허용해주세요.",
+    "later": "나중에"
+  },
+  "dev": {
+    "title": "개발자 도구",
+    "testNotification": "테스트 알림",
+    "testNotificationMessage": "5초 후에 알림이 표시됩니다.",
+    "testNotificationFailed": "테스트 알림 전송에 실패했습니다.",
+    "scheduledNotifications": "예약된 알림",
+    "scheduledNotificationsCount": "현재 {{count}}개의 알림이 예약되어 있습니다.",
+    "checkScheduled": "예약된 알림 확인"
+  },
+  "accessibility": {
+    "viewDetails": "상세 보기",
+    "medicationCardHint": "탭하여 약 상세 정보를 확인합니다",
+    "addMedicationHint": "탭하여 새로운 약을 등록합니다",
+    "viewHistoryHint": "탭하여 복약 이력 캘린더를 확인합니다"
+  }
+}

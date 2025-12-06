@@ -323,8 +323,9 @@ All agents use **Opus** model for best performance.
 | **ui-ux-designer** | User-centered design |
 | **product-strategist** | Product roadmap and market analysis |
 | **business-analyst** | KPI tracking and reporting |
+| **i18n-specialist** | Internationalization and localization |
 
-### Skills (12 Reusable Workflows)
+### Skills (16 Reusable Workflows)
 
 | Skill | Description |
 |-------|-------------|
@@ -340,6 +341,10 @@ All agents use **Opus** model for best performance.
 | **clean-cache** | Clear caches and reset environment |
 | **generate-types** | Generate Supabase TypeScript types |
 | **performance-audit** | App performance analysis |
+| **setup-i18n** | Initialize i18n with i18next |
+| **extract-strings** | Extract hardcoded strings for i18n |
+| **add-translation** | Add translations for new language |
+| **validate-translations** | Validate translation completeness |
 
 ### Commands (Slash Commands)
 

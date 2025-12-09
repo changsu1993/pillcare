@@ -19,7 +19,9 @@
   },
   "stats": {
     "taken": "Taken",
+    "takenComplete": "Taken",
     "pending": "Pending",
+    "pendingStatus": "Pending",
     "missed": "Missed",
     "total": "Total"
   },
@@ -59,5 +61,36 @@
     "medicationCardHint": "Tap to view medication details",
     "addMedicationHint": "Tap to add a new medication",
     "viewHistoryHint": "Tap to view medication history calendar"
+  },
+  "calendar": {
+    "title": "Medication Calendar",
+    "monthlyStatus": "This Month's Status",
+    "adherenceRate": "Adherence Rate",
+    "takenTotal": "Taken/Scheduled",
+    "prevMonth": "Previous Month",
+    "nextMonth": "Next Month",
+    "prevMonthHint": "View previous month's medication history",
+    "nextMonthHint": "View next month's medication history",
+    "yearMonth": "{{month}}/{{year}}",
+    "dayRecord": "{{month}}/{{day}} Records",
+    "noRecordForDay": "No medication records for this day",
+    "unknown": "Unknown",
+    "takenComplete": "Taken",
+    "notTaken": "Not Taken",
+    "legend": {
+      "above80": "80% or above",
+      "between50and79": "50-79%",
+      "below50": "Below 50%",
+      "noRecord": "No record"
+    },
+    "weekdays": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    }
   }
 }

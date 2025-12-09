@@ -28,6 +28,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import {
   getUserProfile,
   getMonthlyAdherenceData,
@@ -50,6 +51,7 @@ interface DayLog {
 }
 
 const MedicationCalendarScreen = ({ navigation }: Props) => {
+  const { t } = useTranslation(['home', 'common']);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<User | null>(null);
@@ -77,11 +79,11 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
       setMonthlyData(monthly);
     } catch (err) {
       console.error('Error loading calendar data:', err);
-      setError('데이터를 불러올 수 없습니다');
+      setError(t('home:error.loadData'));
     } finally {
       setIsLoading(false);
     }
-  }, [selectedMonth]);
+  }, [selectedMonth, t]);
 
   useEffect(() => {
     loadData();
@@ -143,7 +145,7 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
         const scheduledTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
         return {
-          medicationName: log.medications?.name || '알 수 없음',
+          medicationName: log.medications?.name || t('home:calendar.unknown'),
           dosage: log.medications?.dosage || '',
           scheduledTime,
           taken: log.taken,
@@ -261,12 +263,15 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
     return { rate, taken: totalTaken, total: totalScheduled };
   };
 
+  // Weekday keys for i18n
+  const weekdayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
+
   // Loading state
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-gray-50 p-6">
         <ActivityIndicator size="large" color="#22C55E" />
-        <Text className="text-2xl text-gray-900 mt-4">불러오는 중...</Text>
+        <Text className="text-2xl text-gray-900 mt-4">{t('common:loading')}</Text>
       </View>
     );
   }
@@ -282,7 +287,7 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
             className="bg-success px-8 py-5 rounded-2xl min-h-[60px]"
             onPress={loadData}
           >
-            <Text className="text-2xl font-semibold text-white">다시 시도</Text>
+            <Text className="text-2xl font-semibold text-white">{t('common:button.retry')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -304,20 +309,22 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
         {/* Monthly Summary Card */}
         <View className="bg-white rounded-2xl p-6 mb-5 shadow-sm">
           <Text className="text-xl font-bold text-gray-900 mb-4 text-center">
-            이번 달 복약 현황
+            {t('home:calendar.monthlyStatus')}
           </Text>
           <View className="flex-row justify-around items-center">
             <View className="items-center">
               <Text className={`text-5xl font-bold ${getRateTextColor(monthlyStats.rate)}`}>
                 {monthlyStats.rate}%
               </Text>
-              <Text className="text-base text-gray-700 mt-2">복약률</Text>
+              <Text className="text-base text-gray-700 mt-2">
+                {t('home:calendar.adherenceRate')}
+              </Text>
             </View>
             <View className="items-center">
               <Text className="text-3xl font-bold text-gray-900">
                 {monthlyStats.taken}/{monthlyStats.total}
               </Text>
-              <Text className="text-base text-gray-700 mt-2">복용/예정</Text>
+              <Text className="text-base text-gray-700 mt-2">{t('home:calendar.takenTotal')}</Text>
             </View>
           </View>
         </View>
@@ -329,20 +336,23 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
             <TouchableOpacity
               onPress={goToPreviousMonth}
               className="p-3 rounded-xl bg-gray-100 min-h-[60px] min-w-[60px] items-center justify-center"
-              accessibilityLabel="이전 달"
-              accessibilityHint="이전 달의 복약 이력을 확인합니다"
+              accessibilityLabel={t('home:calendar.prevMonth')}
+              accessibilityHint={t('home:calendar.prevMonthHint')}
               accessibilityRole="button"
             >
               <Ionicons name="chevron-back" size={28} color="#374151" />
             </TouchableOpacity>
             <Text className="text-2xl font-bold text-gray-900">
-              {selectedMonth.year}년 {selectedMonth.month}월
+              {t('home:calendar.yearMonth', {
+                year: selectedMonth.year,
+                month: selectedMonth.month,
+              })}
             </Text>
             <TouchableOpacity
               onPress={goToNextMonth}
               className="p-3 rounded-xl bg-gray-100 min-h-[60px] min-w-[60px] items-center justify-center"
-              accessibilityLabel="다음 달"
-              accessibilityHint="다음 달의 복약 이력을 확인합니다"
+              accessibilityLabel={t('home:calendar.nextMonth')}
+              accessibilityHint={t('home:calendar.nextMonthHint')}
               accessibilityRole="button"
             >
               <Ionicons name="chevron-forward" size={28} color="#374151" />
@@ -351,14 +361,14 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
 
           {/* Weekday Headers */}
           <View className="flex-row mb-3">
-            {['일', '월', '화', '수', '목', '금', '토'].map((day, index) => (
+            {weekdayKeys.map((dayKey, index) => (
               <Text
-                key={day}
+                key={dayKey}
                 className={`flex-1 text-center text-lg font-bold ${
                   index === 0 ? 'text-error' : index === 6 ? 'text-primary' : 'text-gray-600'
                 }`}
               >
-                {day}
+                {t(`home:calendar.weekdays.${dayKey}`)}
               </Text>
             ))}
           </View>
@@ -399,19 +409,21 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
           <View className="flex-row flex-wrap justify-center gap-4 mt-5 pt-5 border-t-2 border-gray-200">
             <View className="flex-row items-center gap-2">
               <View className="w-5 h-5 rounded bg-success/20 border border-gray-300" />
-              <Text className="text-base text-gray-600">80% 이상</Text>
+              <Text className="text-base text-gray-600">{t('home:calendar.legend.above80')}</Text>
             </View>
             <View className="flex-row items-center gap-2">
               <View className="w-5 h-5 rounded bg-warning/20 border border-gray-300" />
-              <Text className="text-base text-gray-600">50-79%</Text>
+              <Text className="text-base text-gray-600">
+                {t('home:calendar.legend.between50and79')}
+              </Text>
             </View>
             <View className="flex-row items-center gap-2">
               <View className="w-5 h-5 rounded bg-error/20 border border-gray-300" />
-              <Text className="text-base text-gray-600">50% 미만</Text>
+              <Text className="text-base text-gray-600">{t('home:calendar.legend.below50')}</Text>
             </View>
             <View className="flex-row items-center gap-2">
               <View className="w-5 h-5 rounded bg-gray-100 border border-gray-200" />
-              <Text className="text-base text-gray-600">기록 없음</Text>
+              <Text className="text-base text-gray-600">{t('home:calendar.legend.noRecord')}</Text>
             </View>
           </View>
         </View>
@@ -420,13 +432,15 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
         {selectedDate && (
           <View className="bg-white rounded-2xl p-6 shadow-sm">
             <Text className="text-2xl font-bold text-gray-900 mb-4">
-              {new Date(selectedDate).getMonth() + 1}월 {new Date(selectedDate).getDate()}일 복약
-              기록
+              {t('home:calendar.dayRecord', {
+                month: new Date(selectedDate).getMonth() + 1,
+                day: new Date(selectedDate).getDate(),
+              })}
             </Text>
 
             {selectedDayLogs.length === 0 ? (
               <View className="py-8 items-center">
-                <Text className="text-xl text-gray-700">이날은 복약 기록이 없습니다</Text>
+                <Text className="text-xl text-gray-700">{t('home:calendar.noRecordForDay')}</Text>
               </View>
             ) : (
               <View className="gap-4">
@@ -452,7 +466,7 @@ const MedicationCalendarScreen = ({ navigation }: Props) => {
                         log.taken ? 'text-success' : 'text-error'
                       }`}
                     >
-                      {log.taken ? '복용 완료' : '미복용'}
+                      {log.taken ? t('home:calendar.takenComplete') : t('home:calendar.notTaken')}
                     </Text>
                   </View>
                 ))}

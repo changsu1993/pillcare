@@ -151,6 +151,10 @@
     "permissionMessage": "Please enable notifications to receive medication reminders.",
     "goToSettings": "Go to Settings"
   },
+  "unknown": {
+    "name": "Unknown medication",
+    "dosage": "No dosage info"
+  },
   "message": {
     "saved": "Saved successfully",
     "deleted": "Deleted successfully",

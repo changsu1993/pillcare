@@ -28,6 +28,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import {
   getConnectedParent,
   getWeeklyAdherenceData,
@@ -58,6 +59,7 @@ interface MonthlyData {
 }
 
 const ReportsScreen = () => {
+  const { t } = useTranslation(['reports', 'home', 'common']);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [parentInfo, setParentInfo] = useState<User | null>(null);
@@ -110,11 +112,11 @@ const ReportsScreen = () => {
       setWeeklyTrends(trends.map((t: WeeklyTrend) => t.adherence_rate));
     } catch (err) {
       console.error('Error loading reports:', err);
-      setError('데이터를 불러올 수 없습니다');
+      setError(t('home:error.loadData'));
     } finally {
       setIsLoading(false);
     }
-  }, [selectedMonth]);
+  }, [selectedMonth, t]);
 
   useEffect(() => {
     loadData();
@@ -164,9 +166,9 @@ const ReportsScreen = () => {
   };
 
   const getDayName = (dateStr: string): string => {
-    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
     const date = new Date(dateStr);
-    return days[date.getDay()];
+    return t(`reports:weekday.${dayKeys[date.getDay()]}`);
   };
 
   const generateCalendarGrid = (): (number | null)[][] => {
@@ -233,7 +235,7 @@ const ReportsScreen = () => {
     return (
       <View className="flex-1 justify-center items-center bg-gray-50 p-6">
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="text-base text-gray-500 mt-3">불러오는 중...</Text>
+        <Text className="text-base text-gray-500 mt-3">{t('common:loading')}</Text>
       </View>
     );
   }
@@ -245,7 +247,7 @@ const ReportsScreen = () => {
         <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
         <Text className="text-base text-error text-center mt-3 mb-4">{error}</Text>
         <TouchableOpacity className="bg-primary px-6 py-3 rounded-lg" onPress={loadData}>
-          <Text className="text-base font-semibold text-white">다시 시도</Text>
+          <Text className="text-base font-semibold text-white">{t('common:button.retry')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -257,9 +259,11 @@ const ReportsScreen = () => {
       <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
         <View className="flex-1 justify-center items-center p-6">
           <Ionicons name="people-outline" size={64} color="#9CA3AF" />
-          <Text className="text-xl font-bold text-gray-900 mt-4 mb-2">부모님을 연결해주세요</Text>
+          <Text className="text-xl font-bold text-gray-900 mt-4 mb-2">
+            {t('reports:noParent.title')}
+          </Text>
           <Text className="text-sm text-gray-500 text-center leading-5">
-            부모님의 복약 리포트를 확인하려면{'\n'}먼저 가족 연결을 해주세요
+            {t('reports:noParent.message')}
           </Text>
         </View>
       </SafeAreaView>
@@ -283,22 +287,22 @@ const ReportsScreen = () => {
           onPress={() => setShowExportModal(true)}
         >
           <Ionicons name="download-outline" size={20} color="#3B82F6" />
-          <Text className="text-primary font-semibold ml-2">데이터 내보내기</Text>
+          <Text className="text-primary font-semibold ml-2">{t('reports:export.exportData')}</Text>
         </TouchableOpacity>
 
         {/* Summary Cards */}
         <View className="flex-row gap-3 mb-4">
           <View className="flex-1 bg-white rounded-xl p-4 items-center shadow-sm">
-            <Text className="text-sm text-gray-500 mb-2">주간 복약률</Text>
+            <Text className="text-sm text-gray-500 mb-2">{t('reports:adherence.weekly')}</Text>
             <Text className={`text-3xl font-bold ${getRateColor(weeklyRate)}`}>{weeklyRate}%</Text>
-            <Text className="text-xs text-gray-400 mt-1">최근 7일</Text>
+            <Text className="text-xs text-gray-400 mt-1">{t('reports:adherence.last7days')}</Text>
           </View>
           <View className="flex-1 bg-white rounded-xl p-4 items-center shadow-sm">
-            <Text className="text-sm text-gray-500 mb-2">월간 복약률</Text>
+            <Text className="text-sm text-gray-500 mb-2">{t('reports:adherence.monthly')}</Text>
             <Text className={`text-3xl font-bold ${getRateColor(monthlyRate)}`}>
               {monthlyRate}%
             </Text>
-            <Text className="text-xs text-gray-400 mt-1">최근 30일</Text>
+            <Text className="text-xs text-gray-400 mt-1">{t('reports:adherence.last30days')}</Text>
           </View>
         </View>
 
@@ -308,7 +312,9 @@ const ReportsScreen = () => {
         {/* Per-Medication Adherence Cards */}
         {medicationAdherences.length > 0 && (
           <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-            <Text className="text-base font-bold text-gray-900 mb-4">약별 복약률</Text>
+            <Text className="text-base font-bold text-gray-900 mb-4">
+              {t('reports:adherence.byMedication')}
+            </Text>
             {medicationAdherences.map((med) => (
               <MedicationAdherenceCard
                 key={med.medication_id}
@@ -338,7 +344,9 @@ const ReportsScreen = () => {
 
         {/* Weekly Bar Chart */}
         <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-          <Text className="text-base font-bold text-gray-900 mb-4">주간 복약률</Text>
+          <Text className="text-base font-bold text-gray-900 mb-4">
+            {t('reports:adherence.weekly')}
+          </Text>
           <View className="flex-row justify-between h-40 pt-5">
             {weeklyData.map((day) => (
               <View key={day.date} className="flex-1 items-center">
@@ -362,7 +370,10 @@ const ReportsScreen = () => {
               <Ionicons name="chevron-back" size={24} color="#374151" />
             </TouchableOpacity>
             <Text className="text-base font-bold text-gray-900">
-              {selectedMonth.year}년 {selectedMonth.month}월
+              {t('home:calendar.yearMonth', {
+                year: selectedMonth.year,
+                month: selectedMonth.month,
+              })}
             </Text>
             <TouchableOpacity onPress={goToNextMonth} className="p-1">
               <Ionicons name="chevron-forward" size={24} color="#374151" />
@@ -370,14 +381,14 @@ const ReportsScreen = () => {
           </View>
 
           <View className="flex-row mb-2">
-            {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
+            {(['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const).map((dayKey, index) => (
               <Text
-                key={day}
+                key={dayKey}
                 className={`flex-1 text-center text-xs font-semibold ${
-                  day === '일' ? 'text-error' : day === '토' ? 'text-primary' : 'text-gray-500'
+                  index === 0 ? 'text-error' : index === 6 ? 'text-primary' : 'text-gray-500'
                 }`}
               >
-                {day}
+                {t(`reports:weekday.${dayKey}`)}
               </Text>
             ))}
           </View>
@@ -407,47 +418,58 @@ const ReportsScreen = () => {
           <View className="flex-row flex-wrap justify-center gap-3 mt-4 pt-4 border-t border-gray-200">
             <View className="flex-row items-center gap-1">
               <View className="w-3 h-3 rounded bg-success/30" />
-              <Text className="text-[11px] text-gray-500">80% 이상</Text>
+              <Text className="text-[11px] text-gray-500">{t('reports:legend.above80')}</Text>
             </View>
             <View className="flex-row items-center gap-1">
               <View className="w-3 h-3 rounded bg-warning/30" />
-              <Text className="text-[11px] text-gray-500">50-79%</Text>
+              <Text className="text-[11px] text-gray-500">
+                {t('reports:legend.between50and79')}
+              </Text>
             </View>
             <View className="flex-row items-center gap-1">
               <View className="w-3 h-3 rounded bg-error/30" />
-              <Text className="text-[11px] text-gray-500">50% 미만</Text>
+              <Text className="text-[11px] text-gray-500">{t('reports:legend.below50')}</Text>
             </View>
             <View className="flex-row items-center gap-1">
               <View className="w-3 h-3 rounded bg-gray-100" />
-              <Text className="text-[11px] text-gray-500">기록 없음</Text>
+              <Text className="text-[11px] text-gray-500">{t('reports:legend.noRecord')}</Text>
             </View>
           </View>
         </View>
 
         {/* Statistics Summary */}
         <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-          <Text className="text-base font-bold text-gray-900 mb-4">이번 주 통계</Text>
+          <Text className="text-base font-bold text-gray-900 mb-4">
+            {t('reports:weeklyStats.title')}
+          </Text>
           <View className="flex-row justify-around">
             <View className="items-center">
               <Ionicons name="checkmark-circle" size={24} color="#22C55E" />
               <Text className="text-xl font-bold text-gray-900 mt-2 mb-1">
-                {weeklyData.reduce((sum, d) => sum + d.taken, 0)}회
+                {weeklyData.reduce((sum, d) => sum + d.taken, 0)}
+                {t('reports:weeklyStats.times')}
               </Text>
-              <Text className="text-xs text-gray-500">복용 완료</Text>
+              <Text className="text-xs text-gray-500">
+                {t('reports:weeklyStats.takenComplete')}
+              </Text>
             </View>
             <View className="items-center">
               <Ionicons name="close-circle" size={24} color="#EF4444" />
               <Text className="text-xl font-bold text-gray-900 mt-2 mb-1">
-                {weeklyData.reduce((sum, d) => sum + (d.total - d.taken), 0)}회
+                {weeklyData.reduce((sum, d) => sum + (d.total - d.taken), 0)}
+                {t('reports:weeklyStats.times')}
               </Text>
-              <Text className="text-xs text-gray-500">미복용</Text>
+              <Text className="text-xs text-gray-500">{t('reports:weeklyStats.notTaken')}</Text>
             </View>
             <View className="items-center">
               <Ionicons name="medical" size={24} color="#3B82F6" />
               <Text className="text-xl font-bold text-gray-900 mt-2 mb-1">
-                {weeklyData.reduce((sum, d) => sum + d.total, 0)}회
+                {weeklyData.reduce((sum, d) => sum + d.total, 0)}
+                {t('reports:weeklyStats.times')}
               </Text>
-              <Text className="text-xs text-gray-500">총 예정</Text>
+              <Text className="text-xs text-gray-500">
+                {t('reports:weeklyStats.totalScheduled')}
+              </Text>
             </View>
           </View>
         </View>

@@ -24,6 +24,7 @@
     "notConnected": "Not Connected"
   },
   "button": {
+    "enterCode": "Enter Code",
     "generateCode": "Generate Code",
     "copyCode": "Copy Code",
     "copied": "Copied",

@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import { getAppointment, deleteAppointment } from '../../../../shared/services/api';
 import { Appointment } from '../../../../shared/types/database.types';
 import { ChildStackParamList } from '../../../../shared/types/navigation.types';
@@ -22,46 +23,8 @@ import { ChildStackParamList } from '../../../../shared/types/navigation.types';
 type NavigationProp = NativeStackNavigationProp<ChildStackParamList>;
 type RouteProps = RouteProp<ChildStackParamList, 'AppointmentDetail'>;
 
-/**
- * Format date to Korean format with time
- */
-const formatDateTimeKorean = (dateStr: string): string => {
-  const date = new Date(dateStr);
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-
-  const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
-  const weekday = weekdays[date.getDay()];
-
-  return `${year}년 ${month}월 ${day}일 (${weekday}) ${hours}:${minutes}`;
-};
-
-/**
- * Calculate D-day
- */
-const calculateDDay = (dateStr: string): { text: string; isPast: boolean; isToday: boolean } => {
-  const appointmentDate = new Date(dateStr);
-  const today = new Date();
-
-  appointmentDate.setHours(0, 0, 0, 0);
-  today.setHours(0, 0, 0, 0);
-
-  const diffTime = appointmentDate.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) {
-    return { text: '오늘', isPast: false, isToday: true };
-  } else if (diffDays > 0) {
-    return { text: `D-${diffDays}`, isPast: false, isToday: false };
-  } else {
-    return { text: `${Math.abs(diffDays)}일 전`, isPast: true, isToday: false };
-  }
-};
-
 const AppointmentDetailScreen = () => {
+  const { t } = useTranslation(['appointments', 'common']);
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteProps>();
   const { appointmentId } = route.params;
@@ -69,6 +32,59 @@ const AppointmentDetailScreen = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  /**
+   * Format date to localized format with time
+   */
+  const formatDateTimeLocalized = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+
+    const weekdayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
+    const weekday = t(`appointments:dateFormat.weekdays.${weekdayKeys[date.getDay()]}`);
+
+    return t('appointments:dateFormat.full', {
+      year,
+      month,
+      day,
+      weekday,
+      time: `${hours}:${minutes}`,
+    });
+  };
+
+  /**
+   * Calculate D-day
+   */
+  const calculateDDay = (dateStr: string): { text: string; isPast: boolean; isToday: boolean } => {
+    const appointmentDate = new Date(dateStr);
+    const today = new Date();
+
+    appointmentDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    const diffTime = appointmentDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      return { text: t('appointments:dday.today'), isPast: false, isToday: true };
+    } else if (diffDays > 0) {
+      return {
+        text: t('appointments:dday.dMinus', { days: diffDays }),
+        isPast: false,
+        isToday: false,
+      };
+    } else {
+      return {
+        text: t('appointments:dday.daysAgo', { days: Math.abs(diffDays) }),
+        isPast: true,
+        isToday: false,
+      };
+    }
+  };
 
   /**
    * Load appointment data
@@ -81,14 +97,14 @@ const AppointmentDetailScreen = () => {
         setAppointment(data);
       } catch (err) {
         console.error('Error loading appointment:', err);
-        setError('예약 정보를 불러올 수 없습니다');
+        setError(t('appointments:error.loadFailed'));
       } finally {
         setIsLoading(false);
       }
     };
 
     loadAppointment();
-  }, [appointmentId]);
+  }, [appointmentId, t]);
 
   /**
    * Handle edit
@@ -105,25 +121,25 @@ const AppointmentDetailScreen = () => {
     if (!appointment) return;
 
     Alert.alert(
-      '예약 삭제',
-      `'${appointment.title}'을(를) 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`,
+      t('appointments:delete.title'),
+      t('appointments:delete.confirm', { title: appointment.title }),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('common:button.cancel'), style: 'cancel' },
         {
-          text: '삭제',
+          text: t('appointments:action.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await deleteAppointment(appointment.id);
-              Alert.alert('완료', '예약이 삭제되었습니다.', [
+              Alert.alert(t('appointments:delete.successTitle'), t('appointments:delete.success'), [
                 {
-                  text: '확인',
+                  text: t('common:button.confirm'),
                   onPress: () => navigation.goBack(),
                 },
               ]);
             } catch (err) {
               console.error('Error deleting appointment:', err);
-              Alert.alert('오류', '예약 삭제에 실패했습니다.');
+              Alert.alert(t('appointments:delete.errorTitle'), t('appointments:delete.error'));
             }
           },
         },
@@ -136,7 +152,7 @@ const AppointmentDetailScreen = () => {
     return (
       <View className="flex-1 justify-center items-center bg-gray-50 p-6">
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="text-base text-gray-500 mt-3">불러오는 중...</Text>
+        <Text className="text-base text-gray-500 mt-3">{t('common:loading')}</Text>
       </View>
     );
   }
@@ -148,13 +164,15 @@ const AppointmentDetailScreen = () => {
         <View className="flex-1 justify-center items-center p-6">
           <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
           <Text className="text-base text-error text-center mt-3 mb-4">
-            {error || '예약 정보를 찾을 수 없습니다'}
+            {error || t('appointments:error.notFound')}
           </Text>
           <TouchableOpacity
             className="bg-primary px-6 py-3 rounded-lg"
             onPress={() => navigation.goBack()}
           >
-            <Text className="text-base font-semibold text-white">돌아가기</Text>
+            <Text className="text-base font-semibold text-white">
+              {t('appointments:action.goBack')}
+            </Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -187,7 +205,7 @@ const AppointmentDetailScreen = () => {
         <View className="bg-white rounded-xl p-6 mb-4">
           <View className="flex-row items-center mb-2">
             <Text className="text-3xl mr-3">🏥</Text>
-            <Text className="text-sm text-gray-500">병원</Text>
+            <Text className="text-sm text-gray-500">{t('appointments:detail.hospital')}</Text>
           </View>
           <Text className="text-2xl font-bold text-gray-900">{appointment.hospital_name}</Text>
         </View>
@@ -196,7 +214,7 @@ const AppointmentDetailScreen = () => {
         <View className="bg-white rounded-xl p-6 mb-4">
           <View className="flex-row items-center mb-2">
             <Ionicons name="document-text-outline" size={24} color="#6B7280" />
-            <Text className="text-sm text-gray-500 ml-2">예약 내용</Text>
+            <Text className="text-sm text-gray-500 ml-2">{t('appointments:detail.content')}</Text>
           </View>
           <Text className="text-xl font-semibold text-gray-900">{appointment.title}</Text>
         </View>
@@ -205,10 +223,10 @@ const AppointmentDetailScreen = () => {
         <View className="bg-white rounded-xl p-6 mb-4">
           <View className="flex-row items-center mb-2">
             <Ionicons name="calendar-outline" size={24} color="#6B7280" />
-            <Text className="text-sm text-gray-500 ml-2">예약 일시</Text>
+            <Text className="text-sm text-gray-500 ml-2">{t('appointments:detail.dateTime')}</Text>
           </View>
           <Text className="text-xl font-semibold text-gray-900">
-            {formatDateTimeKorean(appointment.appointment_date)}
+            {formatDateTimeLocalized(appointment.appointment_date)}
           </Text>
         </View>
 
@@ -217,7 +235,7 @@ const AppointmentDetailScreen = () => {
           <View className="bg-white rounded-xl p-6 mb-4">
             <View className="flex-row items-center mb-2">
               <Ionicons name="information-circle-outline" size={24} color="#6B7280" />
-              <Text className="text-sm text-gray-500 ml-2">메모</Text>
+              <Text className="text-sm text-gray-500 ml-2">{t('appointments:detail.notes')}</Text>
             </View>
             <Text className="text-base text-gray-700 leading-6">{appointment.notes}</Text>
           </View>
@@ -231,7 +249,9 @@ const AppointmentDetailScreen = () => {
           >
             <View className="flex-row items-center gap-2">
               <Ionicons name="create-outline" size={20} color="#FFFFFF" />
-              <Text className="text-base font-semibold text-white">수정</Text>
+              <Text className="text-base font-semibold text-white">
+                {t('appointments:action.edit')}
+              </Text>
             </View>
           </TouchableOpacity>
 
@@ -241,7 +261,9 @@ const AppointmentDetailScreen = () => {
           >
             <View className="flex-row items-center gap-2">
               <Ionicons name="trash-outline" size={20} color="#FFFFFF" />
-              <Text className="text-base font-semibold text-white">삭제</Text>
+              <Text className="text-base font-semibold text-white">
+                {t('appointments:action.delete')}
+              </Text>
             </View>
           </TouchableOpacity>
         </View>

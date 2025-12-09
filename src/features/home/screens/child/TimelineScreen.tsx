@@ -21,12 +21,14 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { getTodayLogs, getFamilyConnections } from '../../../../shared/services/api';
 import { MedicationLog, User } from '../../../../shared/types/database.types';
 
 // TimelineScreen은 더 이상 사용되지 않음 (HomeScreen으로 대체됨)
 
 const ChildTimelineScreen = () => {
+  const { t } = useTranslation(['home', 'common', 'family', 'medication']);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [medications, setMedications] = useState<MedicationLog[]>([]);
@@ -52,7 +54,7 @@ const ChildTimelineScreen = () => {
       setMedications(logs);
     } catch (err) {
       console.error('Error loading timeline:', err);
-      setError('데이터를 불러올 수 없습니다');
+      setError(t('home:error.loadData'));
     } finally {
       setIsLoading(false);
     }
@@ -74,7 +76,7 @@ const ChildTimelineScreen = () => {
     return (
       <View className="flex-1 justify-center items-center bg-gray-50 p-6">
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="text-base text-gray-900 mt-3">불러오는 중...</Text>
+        <Text className="text-base text-gray-900 mt-3">{t('common:loading')}</Text>
       </View>
     );
   }
@@ -84,7 +86,7 @@ const ChildTimelineScreen = () => {
       <View className="flex-1 justify-center items-center bg-gray-50 p-6">
         <Text className="text-base text-error text-center mb-4">{error}</Text>
         <TouchableOpacity className="bg-primary px-6 py-3 rounded-lg" onPress={loadData}>
-          <Text className="text-base font-semibold text-white">다시 시도</Text>
+          <Text className="text-base font-semibold text-white">{t('common:button.retry')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -96,9 +98,13 @@ const ChildTimelineScreen = () => {
       <SafeAreaView className="flex-1 bg-gray-50">
         <View className="flex-1 justify-center items-center">
           <Text className="text-6xl mb-4">👨‍👩‍👧</Text>
-          <Text className="text-xl text-gray-500 text-center mb-6">부모님을 연결해주세요</Text>
+          <Text className="text-xl text-gray-500 text-center mb-6">
+            {t('home:child.noParentTitle')}
+          </Text>
           <TouchableOpacity className="bg-primary px-8 py-3.5 rounded-xl">
-            <Text className="text-base font-semibold text-white">초대 코드 입력</Text>
+            <Text className="text-base font-semibold text-white">
+              {t('family:button.enterCode')}
+            </Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -117,10 +123,10 @@ const ChildTimelineScreen = () => {
         {/* Parent info card */}
         <View className="bg-white rounded-xl p-5 mb-6 shadow-sm">
           <Text className="text-xl font-bold text-gray-900 mb-4">
-            {parentInfo?.name || '부모님'}님
+            {t('home:child.greeting', { name: parentInfo?.name || t('family:label.parent') })}
           </Text>
           <View className="flex-row justify-between items-center">
-            <Text className="text-base text-gray-500">오늘 복약률</Text>
+            <Text className="text-base text-gray-500">{t('home:child.adherenceRate')}</Text>
             <Text
               className={`text-3xl font-bold ${
                 adherenceRate >= 80
@@ -138,7 +144,7 @@ const ChildTimelineScreen = () => {
         {/* Timeline */}
         {medications.length === 0 ? (
           <View className="p-8 items-center">
-            <Text className="text-base text-gray-400">오늘 예정된 복약이 없습니다</Text>
+            <Text className="text-base text-gray-400">{t('home:timeline.noData')}</Text>
           </View>
         ) : (
           <View className="pl-2">
@@ -172,15 +178,15 @@ const ChildTimelineScreen = () => {
                     }`}
                   >
                     <Text className="text-base font-semibold text-gray-900 mb-1">
-                      {med.medications?.name || '약 이름 없음'}
+                      {med.medications?.name || t('medication:unknown.name')}
                     </Text>
                     <Text className="text-sm text-gray-500 mb-2">
-                      {med.medications?.dosage || '복용량 정보 없음'}
+                      {med.medications?.dosage || t('medication:unknown.dosage')}
                     </Text>
                     <Text
                       className={`text-sm font-semibold ${med.taken ? 'text-success' : 'text-warning'}`}
                     >
-                      {med.taken ? '복용 완료' : '대기 중'}
+                      {med.taken ? t('home:stats.takenComplete') : t('home:stats.pendingStatus')}
                     </Text>
                   </View>
                 </View>

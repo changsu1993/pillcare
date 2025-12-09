@@ -151,6 +151,10 @@
     "permissionMessage": "약 복용 알림을 받으려면 알림 권한이 필요합니다.",
     "goToSettings": "설정으로 이동"
   },
+  "unknown": {
+    "name": "약 이름 없음",
+    "dosage": "복용량 정보 없음"
+  },
   "message": {
     "saved": "저장되었습니다",
     "deleted": "삭제되었습니다",

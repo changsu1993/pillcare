@@ -13,6 +13,7 @@ import settings from './settings.json';
 import onboarding from './onboarding.json';
 import home from './home.json';
 import reports from './reports.json';
+import appointments from './appointments.json';
 
 export default {
   common,
@@ -23,4 +24,5 @@ export default {
   onboarding,
   home,
   reports,
+  appointments,
 };

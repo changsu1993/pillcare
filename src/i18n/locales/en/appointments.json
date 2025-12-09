@@ -1,0 +1,47 @@
+{
+  "title": "Appointments",
+  "detail": {
+    "title": "Appointment Details",
+    "hospital": "Hospital",
+    "content": "Appointment",
+    "dateTime": "Date & Time",
+    "notes": "Notes"
+  },
+  "dday": {
+    "today": "Today",
+    "dMinus": "D-{{days}}",
+    "daysAgo": "{{days}} days ago"
+  },
+  "dateFormat": {
+    "full": "{{weekday}}, {{month}}/{{day}}/{{year}} {{time}}",
+    "weekdays": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    }
+  },
+  "action": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "goBack": "Go Back"
+  },
+  "delete": {
+    "title": "Delete Appointment",
+    "confirm": "Are you sure you want to delete '{{title}}'?\nThis action cannot be undone.",
+    "cancel": "Cancel",
+    "success": "Appointment deleted successfully.",
+    "successTitle": "Done",
+    "error": "Failed to delete appointment.",
+    "errorTitle": "Error",
+    "confirmButton": "OK"
+  },
+  "error": {
+    "loadFailed": "Unable to load appointment information",
+    "notFound": "Appointment not found"
+  },
+  "loading": "Loading..."
+}

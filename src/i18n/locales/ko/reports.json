@@ -30,7 +30,8 @@
     "pdf": "PDF로 내보내기",
     "csv": "CSV로 내보내기",
     "success": "리포트가 저장되었습니다",
-    "error": "리포트 생성에 실패했습니다"
+    "error": "리포트 생성에 실패했습니다",
+    "exportData": "데이터 내보내기"
   },
   "empty": {
     "title": "데이터가 없습니다",
@@ -41,5 +42,49 @@
     "adherence": "복약률",
     "taken": "복용",
     "missed": "미복용"
+  },
+  "timePattern": {
+    "title": "시간대별 미복약 패턴",
+    "chartLabel": "시간대별 미복약 패턴 차트",
+    "morning": "아침",
+    "afternoon": "점심",
+    "evening": "저녁",
+    "night": "밤",
+    "warning": "{{period}} 주의",
+    "footerNote": "미복약 비율이 높은 시간대를 확인하세요",
+    "accessibilityLabel": "{{period}} 시간대, 미복약률 {{rate}}%, {{total}}회 중 {{missed}}회 미복용"
+  },
+  "weeklyStats": {
+    "title": "이번 주 통계",
+    "takenComplete": "복용 완료",
+    "notTaken": "미복용",
+    "totalScheduled": "총 예정",
+    "times": "회"
+  },
+  "adherence": {
+    "weekly": "주간 복약률",
+    "monthly": "월간 복약률",
+    "last7days": "최근 7일",
+    "last30days": "최근 30일",
+    "byMedication": "약별 복약률"
+  },
+  "legend": {
+    "above80": "80% 이상",
+    "between50and79": "50-79%",
+    "below50": "50% 미만",
+    "noRecord": "기록 없음"
+  },
+  "noParent": {
+    "title": "부모님을 연결해주세요",
+    "message": "부모님의 복약 리포트를 확인하려면\n먼저 가족 연결을 해주세요"
+  },
+  "weekday": {
+    "sun": "일",
+    "mon": "월",
+    "tue": "화",
+    "wed": "수",
+    "thu": "목",
+    "fri": "금",
+    "sat": "토"
   }
 }

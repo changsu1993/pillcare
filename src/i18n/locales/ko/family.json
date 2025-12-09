@@ -24,6 +24,7 @@
     "notConnected": "연결되지 않음"
   },
   "button": {
+    "enterCode": "초대 코드 입력",
     "generateCode": "코드 생성",
     "copyCode": "코드 복사",
     "copied": "복사됨",

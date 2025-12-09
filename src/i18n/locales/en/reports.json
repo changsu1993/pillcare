@@ -30,7 +30,8 @@
     "pdf": "Export as PDF",
     "csv": "Export as CSV",
     "success": "Report saved successfully",
-    "error": "Failed to generate report"
+    "error": "Failed to generate report",
+    "exportData": "Export Data"
   },
   "empty": {
     "title": "No Data Available",
@@ -41,5 +42,49 @@
     "adherence": "Adherence",
     "taken": "Taken",
     "missed": "Missed"
+  },
+  "timePattern": {
+    "title": "Missed Medication Pattern by Time",
+    "chartLabel": "Missed medication pattern chart by time period",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "night": "Night",
+    "warning": "{{period}} Alert",
+    "footerNote": "Check the time periods with high missed rates",
+    "accessibilityLabel": "{{period}} time period, {{rate}}% missed rate, {{missed}} missed out of {{total}}"
+  },
+  "weeklyStats": {
+    "title": "This Week's Statistics",
+    "takenComplete": "Taken",
+    "notTaken": "Missed",
+    "totalScheduled": "Total Scheduled",
+    "times": "times"
+  },
+  "adherence": {
+    "weekly": "Weekly Adherence",
+    "monthly": "Monthly Adherence",
+    "last7days": "Last 7 days",
+    "last30days": "Last 30 days",
+    "byMedication": "Adherence by Medication"
+  },
+  "legend": {
+    "above80": "80% or above",
+    "between50and79": "50-79%",
+    "below50": "Below 50%",
+    "noRecord": "No record"
+  },
+  "noParent": {
+    "title": "Connect with your parent",
+    "message": "Please connect with your parent first\nto view their medication reports"
+  },
+  "weekday": {
+    "sun": "Sun",
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat"
   }
 }

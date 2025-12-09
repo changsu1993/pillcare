@@ -23,11 +23,8 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Modal,
-  Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useTranslation } from 'react-i18next';
 import { ParentScreenProps } from '../../../../shared/types/navigation.types';
 import {
@@ -35,77 +32,14 @@ import {
   updateMedicationWithNotifications,
   MedicationFormData,
 } from '../../../../shared/services/api';
+import { FREQUENCY_OPTIONS, DEFAULT_TIMES, TIME_LABEL_KEYS } from '../../constants';
+import { formatDateToString, formatDateKorean, parseDate } from '../../utils';
 import TimePickerButton from '../../components/TimePickerButton';
-import QuantityInput from '../../components/QuantityInput';
-import type { FrequencyLabelKey, TimeLabelKey } from '../../../../i18n/types';
+import FrequencyPickerModal from '../../components/FrequencyPickerModal';
+import DatePickerModal from '../../components/DatePickerModal';
+import InventoryTrackingSection from '../../components/InventoryTrackingSection';
 
 type Props = ParentScreenProps<'EditMedication'>;
-
-/**
- * 복용 횟수 옵션 타입
- */
-interface FrequencyOption {
-  value: string;
-  labelKey: FrequencyLabelKey;
-  timesPerDay: number;
-}
-
-/**
- * 복용 횟수 옵션
- */
-const FREQUENCY_OPTIONS: FrequencyOption[] = [
-  { value: 'daily_1', labelKey: 'frequency.daily1', timesPerDay: 1 },
-  { value: 'daily_2', labelKey: 'frequency.daily2', timesPerDay: 2 },
-  { value: 'daily_3', labelKey: 'frequency.daily3', timesPerDay: 3 },
-  { value: 'as_needed', labelKey: 'frequency.asNeeded', timesPerDay: 0 },
-];
-
-/**
- * 기본 알림 시간 (복용 횟수별)
- */
-const DEFAULT_TIMES: Record<string, string[]> = {
-  daily_1: ['09:00'],
-  daily_2: ['09:00', '21:00'],
-  daily_3: ['09:00', '14:00', '21:00'],
-  as_needed: [],
-};
-
-/**
- * 시간 라벨 키 (복용 횟수별)
- */
-const TIME_LABEL_KEYS: Record<number, TimeLabelKey[]> = {
-  1: ['timeLabel.single'],
-  2: ['timeLabel.morning', 'timeLabel.evening'],
-  3: ['timeLabel.morning', 'timeLabel.lunch', 'timeLabel.evening'],
-};
-
-/**
- * 날짜를 YYYY-MM-DD 형식으로 포맷
- */
-const formatDateToString = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-/**
- * 날짜를 한국어 형식으로 포맷
- */
-const formatDateKorean = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  return `${year}년 ${month}월 ${day}일`;
-};
-
-/**
- * YYYY-MM-DD 문자열을 Date 객체로 변환
- */
-const parseDate = (dateStr: string): Date => {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  return new Date(year, month - 1, day);
-};
 
 const EditMedicationScreen = ({ navigation, route }: Props) => {
   const { medicationId } = route.params;
@@ -199,7 +133,6 @@ const EditMedicationScreen = ({ navigation, route }: Props) => {
   const handleFrequencyChange = useCallback((selectedFrequency: string) => {
     setFrequency(selectedFrequency);
     setReminderTimes(DEFAULT_TIMES[selectedFrequency] || []);
-    setShowFrequencyPicker(false);
   }, []);
 
   /**
@@ -212,63 +145,6 @@ const EditMedicationScreen = ({ navigation, route }: Props) => {
       return newTimes;
     });
   }, []);
-
-  /**
-   * 시작일 변경 처리
-   */
-  const handleStartDateChange = (event: DateTimePickerEvent, selectedDate?: Date): void => {
-    if (Platform.OS === 'android') {
-      setShowStartDatePicker(false);
-    }
-    if (event.type === 'set' && selectedDate) {
-      setStartDate(selectedDate);
-      // 종료일이 시작일보다 이전이면 초기화
-      if (endDate && selectedDate > endDate) {
-        setEndDate(null);
-        setHasEndDate(false);
-      }
-    }
-  };
-
-  /**
-   * 종료일 변경 처리
-   */
-  const handleEndDateChange = (event: DateTimePickerEvent, selectedDate?: Date): void => {
-    if (Platform.OS === 'android') {
-      setShowEndDatePicker(false);
-    }
-    if (event.type === 'set' && selectedDate) {
-      if (selectedDate < startDate) {
-        Alert.alert(t('alert.loadError'), t('alert.endDateError'), [
-          { text: t('common:button.confirm') },
-        ]);
-        return;
-      }
-      setEndDate(selectedDate);
-      setHasEndDate(true);
-    }
-  };
-
-  /**
-   * iOS 시작일 확인
-   */
-  const handleStartDateConfirm = (): void => {
-    setShowStartDatePicker(false);
-  };
-
-  /**
-   * iOS 종료일 확인
-   */
-  const handleEndDateConfirm = (): void => {
-    if (endDate && endDate < startDate) {
-      Alert.alert(t('alert.loadError'), t('alert.endDateError'), [
-        { text: t('common:button.confirm') },
-      ]);
-      setEndDate(null);
-      setHasEndDate(false);
-    }
-    setShowEndDatePicker(false);
-  };
 
   /**
    * 폼 유효성 검사
@@ -593,74 +469,14 @@ const EditMedicationScreen = ({ navigation, route }: Props) => {
           </View>
 
           {/* 재고 관리 (선택) */}
-          <View className="mb-6">
-            <View className="flex-row items-center justify-between mb-3">
-              <Text className="text-2xl font-bold text-gray-900">
-                {t('label.inventoryTracking')}
-              </Text>
-              <Switch
-                value={trackQuantity}
-                onValueChange={(value) => {
-                  setTrackQuantity(value);
-                  if (value && remainingQuantity === null) {
-                    setRemainingQuantity(30); // Default starting quantity
-                  }
-                }}
-                trackColor={{ false: '#D1D5DB', true: '#86EFAC' }}
-                thumbColor={trackQuantity ? '#22C55E' : '#9CA3AF'}
-                accessibilityLabel={t('accessibility.inventoryToggle')}
-                accessibilityRole="switch"
-              />
-            </View>
-
-            {trackQuantity && (
-              <View className="bg-white border-2 border-gray-300 rounded-xl p-5 gap-5">
-                {/* 남은 약 수량 */}
-                <QuantityInput
-                  value={remainingQuantity}
-                  onValueChange={setRemainingQuantity}
-                  variant="parent"
-                  label={t('label.remainingQuantity')}
-                  min={0}
-                  max={9999}
-                  step={10}
-                  allowNull={false}
-                />
-
-                {/* 1회 복용량 */}
-                <View className="mt-4">
-                  <Text className="text-xl font-semibold text-gray-700 mb-2">
-                    {t('label.quantityPerDose')}
-                  </Text>
-                  <View className="flex-row items-center gap-3">
-                    {[1, 2, 3].map((qty) => (
-                      <TouchableOpacity
-                        key={qty}
-                        className={`flex-1 py-4 rounded-xl items-center justify-center min-h-[64px] ${
-                          quantityPerDose === qty
-                            ? 'bg-success border-2 border-success'
-                            : 'bg-gray-100 border-2 border-gray-300'
-                        }`}
-                        onPress={() => setQuantityPerDose(qty)}
-                        accessibilityLabel={t('accessibility.quantityLabel', { count: qty })}
-                        accessibilityRole="radio"
-                        accessibilityState={{ selected: quantityPerDose === qty }}
-                      >
-                        <Text
-                          className={`text-2xl font-bold ${
-                            quantityPerDose === qty ? 'text-white' : 'text-gray-700'
-                          }`}
-                        >
-                          {qty}
-                          {t('unit.count')}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-              </View>
-            )}
-          </View>
+          <InventoryTrackingSection
+            trackQuantity={trackQuantity}
+            onTrackQuantityChange={setTrackQuantity}
+            remainingQuantity={remainingQuantity}
+            onRemainingQuantityChange={setRemainingQuantity}
+            quantityPerDose={quantityPerDose}
+            onQuantityPerDoseChange={setQuantityPerDose}
+          />
         </ScrollView>
 
         {/* 하단 버튼 */}
@@ -696,168 +512,46 @@ const EditMedicationScreen = ({ navigation, route }: Props) => {
       </KeyboardAvoidingView>
 
       {/* 복용 횟수 선택 모달 */}
-      <Modal
+      <FrequencyPickerModal
         visible={showFrequencyPicker}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowFrequencyPicker(false)}
-      >
-        <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-white rounded-t-3xl pb-8">
-            <View className="flex-row justify-between items-center px-5 py-4 border-b border-gray-200">
-              <Text className="text-2xl font-bold text-gray-900">{t('title.frequencySelect')}</Text>
-              <TouchableOpacity
-                className="px-4 py-2"
-                onPress={() => setShowFrequencyPicker(false)}
-                accessibilityLabel={t('accessibility.closeButton')}
-                accessibilityRole="button"
-              >
-                <Text className="text-xl text-gray-600">{t('common:button.close')}</Text>
-              </TouchableOpacity>
-            </View>
+        frequency={frequency}
+        onSelect={handleFrequencyChange}
+        onClose={() => setShowFrequencyPicker(false)}
+      />
 
-            {FREQUENCY_OPTIONS.map((option) => (
-              <TouchableOpacity
-                key={option.value}
-                className={`flex-row justify-between items-center px-5 py-5 border-b border-gray-200 min-h-[72px] ${
-                  frequency === option.value ? 'bg-green-100' : ''
-                }`}
-                onPress={() => handleFrequencyChange(option.value)}
-                accessibilityLabel={t(option.labelKey)}
-                accessibilityRole="radio"
-                accessibilityState={{ selected: frequency === option.value }}
-              >
-                <Text
-                  className={`text-2xl ${
-                    frequency === option.value ? 'font-bold text-green-700' : 'text-gray-900'
-                  }`}
-                >
-                  {t(option.labelKey)}
-                </Text>
-                {frequency === option.value && (
-                  <Text className="text-2xl font-bold text-success">OK</Text>
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </Modal>
+      {/* 시작일 DatePicker */}
+      <DatePickerModal
+        visible={showStartDatePicker}
+        value={startDate}
+        onChange={(date) => {
+          setStartDate(date);
+          if (endDate && date > endDate) {
+            setEndDate(null);
+            setHasEndDate(false);
+          }
+        }}
+        onClose={() => setShowStartDatePicker(false)}
+        title={t('title.startDateSelect')}
+      />
 
-      {/* 시작일 DatePicker - Android */}
-      {Platform.OS === 'android' && showStartDatePicker && (
-        <DateTimePicker
-          value={startDate}
-          mode="date"
-          display="spinner"
-          onChange={handleStartDateChange}
-        />
-      )}
-
-      {/* 종료일 DatePicker - Android */}
-      {Platform.OS === 'android' && showEndDatePicker && (
-        <DateTimePicker
-          value={endDate || new Date()}
-          mode="date"
-          display="spinner"
-          onChange={handleEndDateChange}
-          minimumDate={startDate}
-        />
-      )}
-
-      {/* 시작일 DatePicker - iOS Modal */}
-      {Platform.OS === 'ios' && (
-        <Modal
-          visible={showStartDatePicker}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setShowStartDatePicker(false)}
-        >
-          <View className="flex-1 bg-black/50 justify-end">
-            <View className="bg-white rounded-t-3xl pb-8">
-              <View className="flex-row justify-between items-center px-5 py-4 border-b border-gray-200">
-                <TouchableOpacity
-                  className="px-4 py-2 min-w-[60px]"
-                  onPress={() => setShowStartDatePicker(false)}
-                  accessibilityLabel={t('common:button.cancel')}
-                  accessibilityRole="button"
-                >
-                  <Text className="text-xl text-gray-600">{t('common:button.cancel')}</Text>
-                </TouchableOpacity>
-
-                <Text className="text-2xl font-bold text-gray-900">
-                  {t('title.startDateSelect')}
-                </Text>
-
-                <TouchableOpacity
-                  className="px-4 py-2 min-w-[60px]"
-                  onPress={handleStartDateConfirm}
-                  accessibilityLabel={t('common:button.confirm')}
-                  accessibilityRole="button"
-                >
-                  <Text className="text-xl font-semibold text-success">
-                    {t('common:button.confirm')}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <DateTimePicker
-                value={startDate}
-                mode="date"
-                display="spinner"
-                onChange={handleStartDateChange}
-                style={{ height: 200 }}
-              />
-            </View>
-          </View>
-        </Modal>
-      )}
-
-      {/* 종료일 DatePicker - iOS Modal */}
-      {Platform.OS === 'ios' && (
-        <Modal
-          visible={showEndDatePicker}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setShowEndDatePicker(false)}
-        >
-          <View className="flex-1 bg-black/50 justify-end">
-            <View className="bg-white rounded-t-3xl pb-8">
-              <View className="flex-row justify-between items-center px-5 py-4 border-b border-gray-200">
-                <TouchableOpacity
-                  className="px-4 py-2 min-w-[60px]"
-                  onPress={() => setShowEndDatePicker(false)}
-                  accessibilityLabel={t('common:button.cancel')}
-                  accessibilityRole="button"
-                >
-                  <Text className="text-xl text-gray-600">{t('common:button.cancel')}</Text>
-                </TouchableOpacity>
-
-                <Text className="text-2xl font-bold text-gray-900">{t('title.endDateSelect')}</Text>
-
-                <TouchableOpacity
-                  className="px-4 py-2 min-w-[60px]"
-                  onPress={handleEndDateConfirm}
-                  accessibilityLabel={t('common:button.confirm')}
-                  accessibilityRole="button"
-                >
-                  <Text className="text-xl font-semibold text-success">
-                    {t('common:button.confirm')}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <DateTimePicker
-                value={endDate || new Date()}
-                mode="date"
-                display="spinner"
-                onChange={handleEndDateChange}
-                minimumDate={startDate}
-                style={{ height: 200 }}
-              />
-            </View>
-          </View>
-        </Modal>
-      )}
+      {/* 종료일 DatePicker */}
+      <DatePickerModal
+        visible={showEndDatePicker}
+        value={endDate || new Date()}
+        onChange={(date) => {
+          if (date < startDate) {
+            Alert.alert(t('alert.loadError'), t('alert.endDateError'), [
+              { text: t('common:button.confirm') },
+            ]);
+            return;
+          }
+          setEndDate(date);
+          setHasEndDate(true);
+        }}
+        onClose={() => setShowEndDatePicker(false)}
+        title={t('title.endDateSelect')}
+        minimumDate={startDate}
+      />
     </SafeAreaView>
   );
 };
